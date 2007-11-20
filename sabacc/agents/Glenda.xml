@@ -1,0 +1,604 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SabaccAppXML version='0.5' type='2'>
+  <agent name='Glenda II' learningtype='2'>
+    <games>
+      <played>95840</played>
+      <won>33015</won>
+      <lost>62825</lost>
+      <bombouts>25598</bombouts>
+      <puresabacc>5216</puresabacc>
+    </games>
+    <bombthreshold value='4.97157049771e+22'/>
+    <probthreshold value='0.0528378995835'/>
+    <states>
+      <state number='0'>
+        <visited>3732</visited>
+        <value state='0'>-0.665859569202</value>
+        <value state='1'>4.05564071838</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='1'>
+        <visited>0</visited>
+        <value state='0'>0.0</value>
+        <value state='1'>0.0</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='2'>
+        <visited>0</visited>
+        <value state='0'>0.0</value>
+        <value state='1'>0.0</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='3'>
+        <visited>0</visited>
+        <value state='0'>0.0</value>
+        <value state='1'>0.0</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='4'>
+        <visited>0</visited>
+        <value state='0'>-2.73888396174</value>
+        <value state='1'>-5.49841941289</value>
+        <value state='2'>-4.80887789829</value>
+      </state>
+      <state number='5'>
+        <visited>0</visited>
+        <value state='0'>1.17315908092</value>
+        <value state='1'>0.0</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='6'>
+        <visited>0</visited>
+        <value state='0'>11.7455291208</value>
+        <value state='1'>0.0</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='7'>
+        <visited>0</visited>
+        <value state='0'>11.6325712805</value>
+        <value state='1'>0.0323731878125</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='8'>
+        <visited>0</visited>
+        <value state='0'>16.188628787</value>
+        <value state='1'>0.0</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='9'>
+        <visited>0</visited>
+        <value state='0'>-0.365728727674</value>
+        <value state='1'>-12.3723750013</value>
+        <value state='2'>-5.49192024556</value>
+      </state>
+      <state number='10'>
+        <visited>0</visited>
+        <value state='0'>-1.05939340726</value>
+        <value state='1'>-21.1930053766</value>
+        <value state='2'>-4.20093706419</value>
+      </state>
+      <state number='11'>
+        <visited>0</visited>
+        <value state='0'>6.50420906733</value>
+        <value state='1'>-9.71224150512</value>
+        <value state='2'>-3.27481251762</value>
+      </state>
+      <state number='12'>
+        <visited>0</visited>
+        <value state='0'>4.70807569208</value>
+        <value state='1'>-12.7169026453</value>
+        <value state='2'>-7.29527653439</value>
+      </state>
+      <state number='13'>
+        <visited>0</visited>
+        <value state='0'>6.0158164038</value>
+        <value state='1'>0.138519932625</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='14'>
+        <visited>0</visited>
+        <value state='0'>5.788106611</value>
+        <value state='1'>-8.90598408764</value>
+        <value state='2'>-3.2211961325</value>
+      </state>
+      <state number='15'>
+        <visited>0</visited>
+        <value state='0'>-0.0677076103358</value>
+        <value state='1'>-1.91896911381</value>
+        <value state='2'>-2.06853575795</value>
+      </state>
+      <state number='16'>
+        <visited>0</visited>
+        <value state='0'>-0.916175295257</value>
+        <value state='1'>18.7069145025</value>
+        <value state='2'>36.8421509673</value>
+      </state>
+      <state number='17'>
+        <visited>0</visited>
+        <value state='0'>-7.00554181412</value>
+        <value state='1'>-3.32970195739</value>
+        <value state='2'>-1.72018774125</value>
+      </state>
+      <state number='18'>
+        <visited>0</visited>
+        <value state='0'>0.257154228391</value>
+        <value state='1'>-2.05814605167</value>
+        <value state='2'>-2.07710869832</value>
+      </state>
+      <state number='19'>
+        <visited>0</visited>
+        <value state='0'>10.2802571832</value>
+        <value state='1'>0.896564134467</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='20'>
+        <visited>0</visited>
+        <value state='0'>-1.18472793896</value>
+        <value state='1'>-3.53478587454</value>
+        <value state='2'>-0.976098033494</value>
+      </state>
+      <state number='21'>
+        <visited>0</visited>
+        <value state='0'>-1.03775387335</value>
+        <value state='1'>-13.8232494311</value>
+        <value state='2'>-4.18153983069</value>
+      </state>
+      <state number='22'>
+        <visited>0</visited>
+        <value state='0'>-0.991844301675</value>
+        <value state='1'>42.9406988257</value>
+        <value state='2'>10.0947217807</value>
+      </state>
+      <state number='23'>
+        <visited>0</visited>
+        <value state='0'>-0.0566572503917</value>
+        <value state='1'>21.838483766</value>
+        <value state='2'>5.13810690872</value>
+      </state>
+      <state number='24'>
+        <visited>0</visited>
+        <value state='0'>0.0</value>
+        <value state='1'>63.9643364322</value>
+        <value state='2'>5.38080615016</value>
+      </state>
+      <state number='25'>
+        <visited>0</visited>
+        <value state='0'>0.0</value>
+        <value state='1'>43.2534673883</value>
+        <value state='2'>37.2130717862</value>
+      </state>
+      <state number='26'>
+        <visited>0</visited>
+        <value state='0'>0.0</value>
+        <value state='1'>61.5362014</value>
+        <value state='2'>75.4449205381</value>
+      </state>
+      <state number='27'>
+        <visited>0</visited>
+        <value state='0'>-0.249843097128</value>
+        <value state='1'>68.9070498363</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='28'>
+        <visited>0</visited>
+        <value state='0'>-0.185880349527</value>
+        <value state='1'>-2.04495375914</value>
+        <value state='2'>-4.01476225</value>
+      </state>
+      <state number='29'>
+        <visited>0</visited>
+        <value state='0'>2.62656466234</value>
+        <value state='1'>-6.01079263572</value>
+        <value state='2'>0.501359025494</value>
+      </state>
+      <state number='30'>
+        <visited>0</visited>
+        <value state='0'>-0.0820125</value>
+        <value state='1'>44.353309213</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='31'>
+        <visited>0</visited>
+        <value state='0'>0.659499409119</value>
+        <value state='1'>-5.20745550731</value>
+        <value state='2'>-3.87233622385</value>
+      </state>
+      <state number='32'>
+        <visited>0</visited>
+        <value state='0'>0.407965048914</value>
+        <value state='1'>12.4837958972</value>
+        <value state='2'>0.680713625055</value>
+      </state>
+      <state number='33'>
+        <visited>0</visited>
+        <value state='0'>0.948056664337</value>
+        <value state='1'>-1.92517732741</value>
+        <value state='2'>-2.17070482788</value>
+      </state>
+      <state number='34'>
+        <visited>0</visited>
+        <value state='0'>1.75297123341</value>
+        <value state='1'>0.0</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='35'>
+        <visited>0</visited>
+        <value state='0'>0.369600277591</value>
+        <value state='1'>44.9887756025</value>
+        <value state='2'>5.17597714051</value>
+      </state>
+      <state number='36'>
+        <visited>0</visited>
+        <value state='0'>1.4866673449</value>
+        <value state='1'>0.125016900453</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='37'>
+        <visited>0</visited>
+        <value state='0'>-0.0354004981385</value>
+        <value state='1'>0.0</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='38'>
+        <visited>0</visited>
+        <value state='0'>6.17067319049</value>
+        <value state='1'>0.0</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='39'>
+        <visited>0</visited>
+        <value state='0'>0.00447750070254</value>
+        <value state='1'>53.6623912887</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='40'>
+        <visited>0</visited>
+        <value state='0'>-0.018225</value>
+        <value state='1'>72.2954062609</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='41'>
+        <visited>0</visited>
+        <value state='0'>-0.000239663001415</value>
+        <value state='1'>30.9537238853</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='42'>
+        <visited>0</visited>
+        <value state='0'>-3.15244627698e-06</value>
+        <value state='1'>47.9097525038</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='43'>
+        <visited>0</visited>
+        <value state='0'>1.75904057279</value>
+        <value state='1'>0.0</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='44'>
+        <visited>0</visited>
+        <value state='0'>0.0</value>
+        <value state='1'>0.0</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='45'>
+        <visited>0</visited>
+        <value state='0'>0.210166214573</value>
+        <value state='1'>0.0</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='46'>
+        <visited>0</visited>
+        <value state='0'>10.9089186323</value>
+        <value state='1'>0.0</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='47'>
+        <visited>0</visited>
+        <value state='0'>0.7255695303</value>
+        <value state='1'>0.0</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='48'>
+        <visited>0</visited>
+        <value state='0'>-0.0785474007043</value>
+        <value state='1'>-0.0353463303169</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='49'>
+        <visited>0</visited>
+        <value state='0'>0.124439959092</value>
+        <value state='1'>0.0</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='50'>
+        <visited>0</visited>
+        <value state='0'>0.0</value>
+        <value state='1'>0.0</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='51'>
+        <visited>0</visited>
+        <value state='0'>-0.00336302507813</value>
+        <value state='1'>-0.162590684431</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='52'>
+        <visited>0</visited>
+        <value state='0'>5.57129580848</value>
+        <value state='1'>0.0</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='53'>
+        <visited>0</visited>
+        <value state='0'>-0.0814046510502</value>
+        <value state='1'>0.943602602458</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='54'>
+        <visited>0</visited>
+        <value state='0'>-0.0822300653938</value>
+        <value state='1'>0.721856359412</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='55'>
+        <visited>0</visited>
+        <value state='0'>0.0306257523929</value>
+        <value state='1'>-0.0874929810324</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='56'>
+        <visited>0</visited>
+        <value state='0'>-0.013267342294</value>
+        <value state='1'>5.57337214116</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='57'>
+        <visited>0</visited>
+        <value state='0'>13.9075003131</value>
+        <value state='1'>-0.0191463284883</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='58'>
+        <visited>0</visited>
+        <value state='0'>13.3405869184</value>
+        <value state='1'>1.05051399601</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='59'>
+        <visited>0</visited>
+        <value state='0'>-0.0801630019927</value>
+        <value state='1'>18.3903365481</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='60'>
+        <visited>0</visited>
+        <value state='0'>6.00032480622</value>
+        <value state='1'>0.0</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='61'>
+        <visited>0</visited>
+        <value state='0'>-0.0239538337761</value>
+        <value state='1'>5.56313155926</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='62'>
+        <visited>0</visited>
+        <value state='0'>14.9497971161</value>
+        <value state='1'>0.0</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='63'>
+        <visited>0</visited>
+        <value state='0'>11.4818717438</value>
+        <value state='1'>-0.0505020431271</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='64'>
+        <visited>0</visited>
+        <value state='0'>-0.0074733890625</value>
+        <value state='1'>16.9619338732</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='65'>
+        <visited>0</visited>
+        <value state='0'>-0.0074733890625</value>
+        <value state='1'>21.9122978452</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='66'>
+        <visited>0</visited>
+        <value state='0'>-0.00151336128516</value>
+        <value state='1'>0.477133975494</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='67'>
+        <visited>0</visited>
+        <value state='0'>5.70942636097</value>
+        <value state='1'>-0.140185907486</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='68'>
+        <visited>0</visited>
+        <value state='0'>-0.015857991029</value>
+        <value state='1'>6.83731945134</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='69'>
+        <visited>0</visited>
+        <value state='0'>0.0</value>
+        <value state='1'>11.1172271498</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='70'>
+        <visited>0</visited>
+        <value state='0'>0.0</value>
+        <value state='1'>13.8707105234</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='71'>
+        <visited>0</visited>
+        <value state='0'>0.0</value>
+        <value state='1'>45.9632885512</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='72'>
+        <visited>0</visited>
+        <value state='0'>0.0</value>
+        <value state='1'>70.2646269105</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='73'>
+        <visited>0</visited>
+        <value state='0'>0.0</value>
+        <value state='1'>18.7906813674</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='74'>
+        <visited>0</visited>
+        <value state='0'>0.0</value>
+        <value state='1'>0.0</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='75'>
+        <visited>0</visited>
+        <value state='0'>0.0</value>
+        <value state='1'>0.0</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='76'>
+        <visited>0</visited>
+        <value state='0'>0.0</value>
+        <value state='1'>0.0</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='77'>
+        <visited>0</visited>
+        <value state='0'>0.0</value>
+        <value state='1'>0.0</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='78'>
+        <visited>0</visited>
+        <value state='0'>0.0</value>
+        <value state='1'>0.0</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='79'>
+        <visited>0</visited>
+        <value state='0'>0.0</value>
+        <value state='1'>0.0</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='80'>
+        <visited>0</visited>
+        <value state='0'>0.0</value>
+        <value state='1'>0.0</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='81'>
+        <visited>0</visited>
+        <value state='0'>0.0</value>
+        <value state='1'>0.0</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='82'>
+        <visited>0</visited>
+        <value state='0'>0.0</value>
+        <value state='1'>0.0</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='83'>
+        <visited>0</visited>
+        <value state='0'>0.0</value>
+        <value state='1'>0.0</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='84'>
+        <visited>0</visited>
+        <value state='0'>0.0</value>
+        <value state='1'>0.0</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='85'>
+        <visited>0</visited>
+        <value state='0'>0.0</value>
+        <value state='1'>0.0</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='86'>
+        <visited>0</visited>
+        <value state='0'>0.0</value>
+        <value state='1'>0.0</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='87'>
+        <visited>0</visited>
+        <value state='0'>0.0</value>
+        <value state='1'>0.0</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='88'>
+        <visited>0</visited>
+        <value state='0'>0.0</value>
+        <value state='1'>0.0</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='89'>
+        <visited>0</visited>
+        <value state='0'>0.0</value>
+        <value state='1'>0.0</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='90'>
+        <visited>0</visited>
+        <value state='0'>0.0</value>
+        <value state='1'>0.0</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='91'>
+        <visited>0</visited>
+        <value state='0'>0.0</value>
+        <value state='1'>0.0</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='92'>
+        <visited>0</visited>
+        <value state='0'>0.0</value>
+        <value state='1'>0.0</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='93'>
+        <visited>0</visited>
+        <value state='0'>0.0</value>
+        <value state='1'>0.0</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='94'>
+        <visited>0</visited>
+        <value state='0'>0.0</value>
+        <value state='1'>0.0</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='95'>
+        <visited>0</visited>
+        <value state='0'>0.0</value>
+        <value state='1'>0.0</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='96'>
+        <visited>0</visited>
+        <value state='0'>0.0</value>
+        <value state='1'>0.0</value>
+        <value state='2'>0.0</value>
+      </state>
+      <state number='97'>
+        <visited>0</visited>
+        <value state='0'>0.0</value>
+        <value state='1'>0.0</value>
+        <value state='2'>0.0</value>
+      </state>
+    </states>
+  </agent>
+</SabaccAppXML>

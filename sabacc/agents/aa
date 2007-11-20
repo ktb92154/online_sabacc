@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SabaccAppXML version='0.5' type='1'>
+  <agent name='aa'>
+    <games>
+      <played>0</played>
+      <won>0</won>
+      <lost>0</lost>
+      <bombouts>0</bombouts>
+      <puresabacc>0</puresabacc>
+    </games>
+    <rules/>
+  </agent>
+</SabaccAppXML>
