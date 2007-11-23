@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SabaccAppXML version='0.5' type='1'>
+  <agent name='Richard'>
+    <games>
+      <played>0</played>
+      <won>0</won>
+      <lost>0</lost>
+      <bombouts>0</bombouts>
+      <puresabacc>0</puresabacc>
+    </games>
+    <rules>
+      <rule type='and' name='hit'>
+        <if function='more' score='-15'/>
+        <if function='less' score='15'/>
+        <action>0</action>
+      </rule>
+      <rule type='or' name='pure'>
+        <if function='=' score='23'/>
+        <if function='=' score='-23'/>
+        <action>2</action>
+      </rule>
+      <rule type='or' name='bomb'>
+        <if function='more' score='23'/>
+        <if function='less' score='-23'/>
+        <action>0</action>
+      </rule>
+      <rule type='default' name='default'>
+        <action>1</action>
+        <action>2</action>
+      </rule>
+    </rules>
+  </agent>
+</SabaccAppXML>

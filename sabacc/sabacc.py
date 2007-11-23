@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# sabaccApp.py
+# sabacc.py
 # Taken from SabaccApp version 0.5 (initial release)
 # This is the application caller, that imports all packages
 # and loads the initial window.

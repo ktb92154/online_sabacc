@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# SabaccAppTxt.py
+# SabaccTxt.py
 # Taken from SabaccApp version 0.5 (initial release)
 
 import sys, getopt
