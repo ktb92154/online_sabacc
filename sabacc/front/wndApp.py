@@ -114,6 +114,7 @@ class wndApp (object):
 					btnRule = gtk.RadioButton(label="Rule-based Agent")
 					typeLayout.add(btnRule)
 					btnRL = gtk.RadioButton(btnRule, "Learning Agent")
+					btnRL.set_sensitive(False)
 					typeLayout.add(btnRL)
 					options.attach(typeLayout, 1, 2, 1, 2)
 					cmbLearning = gtk.combo_box_new_text()

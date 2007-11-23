@@ -55,26 +55,7 @@ class Players (object):
 			
 			# create agent object
 			agent = RuleBasedAgent(xml, interface)
-		elif type == 2: # if type is learning agent
-			from XMLLearningAgent import XMLLearningAgent
-			# new xml object
-			xml = XMLLearningAgent(filename)
-			
-			# create relevant agent based on learning type
-			learning = xml.getLearningType()
-			if learning == 0: # if win/loss agent
-				from WinLossAgent import WinLossAgent
-				agent=WinLossAgent(xml, interface)
-			elif learning == 1: # if score agent
-				from ScoreAgent import ScoreAgent
-				agent=ScoreAgent(xml, interface)
-			elif learning == 2: # if gambling agent
-				from GamblingAgent import GamblingAgent
-				agent=GamblingAgent(xml, interface)
-			else:
-				# -5 indicates unknown type
-				return [-5, None]
-		else: # if type > 2
+		else: # if type is learningAgent or other
 			# -5 indicates unknown type
 			return [-5, None]
 		
