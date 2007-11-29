@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# wndTest.py
+# wndGame.py
 # Taken from SabaccApp version 0.5 (initial release)
 # This is the testing window, where any number of agents can be
 # loaded up to play a game.
@@ -32,15 +32,14 @@ try:
 except:
 	sys.exit(1)
 	
-class wndTest (gameInterface):
+class wndGame (gameInterface):
 	def __init__(self):
 		# Initialise variables
-		self.humanInGame = False
 		self.players = []
 		self.mainThread = threading.currentThread()
 		
 		gladefile = "front/sabaccapp.glade"
-		self.windowname = "wndTest"
+		self.windowname = "wndGame"
 		self.wTree = gtk.glade.XML(gladefile,self.windowname)
 		dic = {"on_btnHuman_clicked": self.btnHuman_click,
 			"on_btnComputer_clicked": self.btnComputer_click,
@@ -48,7 +47,7 @@ class wndTest (gameInterface):
 			"on_btnEndGame_clicked": self.btnEndGame_click}
 		self.wTree.signal_autoconnect(dic)
 		
-		self.window = self.wTree.get_widget("wndTest")
+		self.window = self.wTree.get_widget("wndGame")
 		
 		Game.setInterface(self)
 		
@@ -171,9 +170,9 @@ class wndTest (gameInterface):
 						self.writeError("Error: A player called "+name+" is already loaded!")
 						name=""
 				
-				if name != "":
+				'''if name != "":
 					btnHuman.set_sensitive(False)
-					self.humanInGame = True
+					self.humanInGame = True'''
 		else:
 			# Create dialog
 			message = "Please select the agent file"
@@ -276,9 +275,9 @@ class wndTest (gameInterface):
 		if len(Game.get_players()) < 2:
 			btnStart.set_sensitive(False)
 
-		if player.human:
+		'''if player.human:
 			btnHuman.set_sensitive(True)
-			self.humanInGame = False
+			self.humanInGame = False'''
 		
 		if gamestatus == 0:
 			# print to status bar
@@ -385,7 +384,7 @@ class wndTest (gameInterface):
 					break
 	
 # Make object 'static'
-_inst=wndTest()
+_inst=wndGame()
 write = _inst.write
 show = _inst.show
 addPlayer = _inst.addPlayer

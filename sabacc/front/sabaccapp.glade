@@ -1003,7 +1003,7 @@
   </child>
 </widget>
 
-<widget class="GtkWindow" id="wndTest">
+<widget class="GtkWindow" id="wndGame">
   <property name="title" translatable="yes">SabaccApp Testing Interface</property>
   <property name="type">GTK_WINDOW_TOPLEVEL</property>
   <property name="window_position">GTK_WIN_POS_NONE</property>
@@ -1017,7 +1017,7 @@
   <property name="gravity">GDK_GRAVITY_SOUTH</property>
   <property name="focus_on_map">True</property>
   <property name="urgency_hint">False</property>
-  <signal name="destroy" handler="on_wndTest_destroy" last_modification_time="Mon, 11 Dec 2006 17:14:42 GMT"/>
+  <signal name="destroy" handler="on_wndGame_destroy" last_modification_time="Mon, 11 Dec 2006 17:14:42 GMT"/>
 
   <child>
     <widget class="GtkVBox" id="mainLayout">

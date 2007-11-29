@@ -205,9 +205,9 @@ class wndApp (object):
 
 	def showTest(self, button):
 		button.set_sensitive(False)
-		import wndTest
-		reload(wndTest)
-		wndTest.show()
+		import wndGame
+		reload(wndGame)
+		wndGame.show()
 		
 	def btnRule_click(self, widget, cmbLearning):
 		if widget.get_active():

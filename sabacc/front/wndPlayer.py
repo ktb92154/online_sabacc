@@ -5,7 +5,7 @@
 import sys, threading, gobject
 
 # import locals
-import wndTest
+import wndGame
 from gtkPlayerInterface import gtkPlayerInterface
 from settings import CARDSET, CARDIMAGES
 
@@ -227,10 +227,10 @@ class wndPlayer (gtkPlayerInterface):
 				self.wait = False
 			else:
 				Game.set_removeNext(self.name)
-				wndTest.endWait()
-			wndTest.updatePlayers(len(Game.get_players())-1)
+				wndGame.endWait()
+			wndGame.updatePlayers(len(Game.get_players())-1)
 			
-		wndTest.removePlayer(self.name, self.active)
+		wndGame.removePlayer(self.name, self.active)
 		
 	def show(self):
 		self.window.show()
@@ -250,8 +250,8 @@ class wndPlayer (gtkPlayerInterface):
 			return self.chosen
 		else:
 			# show pots
-			wndTest.updatePots()
-			wndTest.updatePlayers()
+			wndGame.updatePots()
+			wndGame.updatePlayers()
 			
 			self.setStatus(1)
 			callable = Game.get_callable()
@@ -283,8 +283,8 @@ class wndPlayer (gtkPlayerInterface):
 			return self.chosen
 		else:
 			# show pots
-			wndTest.updatePots()
-			wndTest.updatePlayers()
+			wndGame.updatePots()
+			wndGame.updatePlayers()
 			
 			self.setStatus(1)
 			callable = Game.get_callable()
