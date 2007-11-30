@@ -92,7 +92,7 @@ class Game (object):
 			# -1 indicates player is not in game
 			return -1
 		
-	def startGame(self):
+	def startGame(self, ante=0):
 		if not self.gameInProgress:
 			self.logtext = []
 				
@@ -115,6 +115,22 @@ class Game (object):
 				firstPlayer = self.players[0]
 				self.players.remove(firstPlayer)
 				self.players.append(firstPlayer)
+				
+				# Collect Ante
+				i=0
+				while True:
+					player=self.players[i]
+					# player can't afford game so is kicked out
+					if player.credits < ante*2:
+						self.removePlayer(player.name)
+						self.interface.write(player.name + " could not afford the buy into the game")
+					else: # place ante into hand and sabacc pots
+						player.credits -= ante*2
+						self.handPot += ante
+						self.sabaccPot += ante
+						i+=1
+					if i==len(self.players):
+						break
 				
 				# Deal two cards to each player
 				for i in range(len(self.players)):

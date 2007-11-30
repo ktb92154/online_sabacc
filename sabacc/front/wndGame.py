@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # wndGame.py
-# Taken from SabaccApp version 0.5 (initial release)
+# Taken from wndTest.py, SabaccApp version 0.5 (initial release)
 # This is the testing window, where any number of agents can be
 # loaded up to play a game.
 
@@ -37,6 +37,7 @@ class wndGame (gameInterface):
 		# Initialise variables
 		self.players = []
 		self.mainThread = threading.currentThread()
+		self.lastante=5
 		
 		gladefile = "front/sabaccapp.glade"
 		self.windowname = "wndGame"
@@ -73,14 +74,27 @@ class wndGame (gameInterface):
 		self.addPlayer(False)
 		
 	def btnStart_click(self, button):
-		button.set_sensitive(False)
+		# Set up dialog
+		message = "Please enter a buy-in price:"
+		d = gtk.MessageDialog(self.window, gtk.DIALOG_MODAL,
+		gtk.MESSAGE_QUESTION, gtk.BUTTONS_OK_CANCEL, message)
+		adj=gtk.Adjustment(self.lastante, 0, 500, 1, 1, 1)
+		textEntry = gtk.SpinButton(adj)
+		d.vbox.add(textEntry)
+		textEntry.show()
+		resp=d.run()
+		d.destroy()
 		
-		for player in self.players:
-			player.setStatus(1)
+		if resp == gtk.RESPONSE_OK:
+			self.lastante=int(textEntry.get_text())
+			button.set_sensitive(False)
 		
-		t = threading.Thread(target=self.playGame, name="playGame")
-		t.setDaemon(True)
-		t.start()
+			for player in self.players:
+				player.setStatus(1)
+		
+			t = threading.Thread(target=self.playGame, name="playGame")
+			t.setDaemon(True)
+			t.start()
 		
 		
 	def btnEndGame_click(self,widget):
@@ -169,10 +183,6 @@ class wndGame (gameInterface):
 					if status != 0: # name already taken
 						self.writeError("Error: A player called "+name+" is already loaded!")
 						name=""
-				
-				'''if name != "":
-					btnHuman.set_sensitive(False)
-					self.humanInGame = True'''
 		else:
 			# Create dialog
 			message = "Please select the agent file"
@@ -274,10 +284,6 @@ class wndGame (gameInterface):
 		# 2 players min
 		if len(Game.get_players()) < 2:
 			btnStart.set_sensitive(False)
-
-		'''if player.human:
-			btnHuman.set_sensitive(True)
-			self.humanInGame = False'''
 		
 		if gamestatus == 0:
 			# print to status bar
@@ -342,7 +348,7 @@ class wndGame (gameInterface):
 			return -1
 	
 	def playGame(self):
-		Game.startGame()
+		Game.startGame(self.lastante)
 		self.updatePots()
 		
 		status = []

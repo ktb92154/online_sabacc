@@ -87,6 +87,10 @@ class wndPlayer (gtkPlayerInterface):
 		if type(showall) == str:
 			showall = False
 		
+		# bugfix for if player could not afford ante
+		if cards == []:
+			cards=[-1, -1]
+		
 		# hide computer's cards, but show number
 		if not (self.human or showall):
 			cards = cards[:] # copy of original
