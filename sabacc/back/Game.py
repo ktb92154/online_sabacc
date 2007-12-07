@@ -120,6 +120,10 @@ class Game (object):
 				i=0
 				while True:
 					player=self.players[i]
+					
+					# bug fix for showing correct cards
+					player.examineCards([])
+					
 					# player can't afford game so is kicked out
 					if player.credits < ante*2:
 						self.removePlayer(player.name)
@@ -131,6 +135,9 @@ class Game (object):
 						i+=1
 					if i==len(self.players):
 						break
+				
+				# Initial betting
+				self.bettingRound()
 				
 				# Deal two cards to each player
 				for i in range(len(self.players)):
@@ -160,7 +167,7 @@ class Game (object):
 				
 				# Repeat betting and drawing rounds until hand is called or a winner is declared
 				while self.gameInProgress:
-					if self.bettingRound(0) != 0: #if a player called during a betting round
+					if self.bettingRound() != 0: #if a player called during a betting round
 						break
 					if not self.gameInProgress: # if only 1 player remaining
 						visible = False
@@ -186,7 +193,7 @@ class Game (object):
 			# -2 indicates that a game is already in progress
 			return -2
 
-	def bettingRound(self, starter):
+	def bettingRound(self, starter=0):
 		# determine order of array
 		if starter == 0: # if normal order
 			betPlayers = self.players
