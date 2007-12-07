@@ -2,29 +2,29 @@
 <SabaccAppXML version='0.5' type='1'>
   <agent name='Richard'>
     <games>
-      <played>0</played>
-      <won>0</won>
-      <lost>0</lost>
-      <bombouts>0</bombouts>
+      <played>9</played>
+      <won>6</won>
+      <lost>3</lost>
+      <bombouts>3</bombouts>
       <puresabacc>0</puresabacc>
     </games>
     <rules>
-      <rule type='and' name='hit'>
-        <if function='more' score='-15'/>
-        <if function='less' score='15'/>
+      <rule name='hit' type='and'>
+        <if score='-15' function='more'/>
+        <if score='15' function='less'/>
         <action>0</action>
       </rule>
-      <rule type='or' name='pure'>
-        <if function='=' score='23'/>
-        <if function='=' score='-23'/>
+      <rule name='pure' type='or'>
+        <if score='23' function='='/>
+        <if score='-23' function='='/>
         <action>2</action>
       </rule>
-      <rule type='or' name='bomb'>
-        <if function='more' score='23'/>
-        <if function='less' score='-23'/>
+      <rule name='bomb' type='or'>
+        <if score='23' function='more'/>
+        <if score='-23' function='less'/>
         <action>0</action>
       </rule>
-      <rule type='default' name='default'>
+      <rule name='default' type='default'>
         <action>1</action>
         <action>2</action>
       </rule>

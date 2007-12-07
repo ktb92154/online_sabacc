@@ -262,10 +262,12 @@ class Game (object):
 						stillInGame = False
 						
 					elif bet == -2 and self.callable: # if player is calling the hand
-						legalMove = True
 						self.interface.write(name + " called the hand")
 						# Calling no longer allowed
 						self.callable = False
+						if thisMatch == 0: # so betting is not over when game is called
+							self.bettingRound(i)
+							legalMove = True # repeat betting otherwise
 						# 1 indicates the game has been called
 						status = 1
 					elif bet == thisMatch: # if player is matching
