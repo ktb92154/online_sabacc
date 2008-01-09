@@ -342,6 +342,7 @@ class wndGame (gameInterface):
 		# find player by name
 		for player in self.players:
 			if player.name == name:
+				# wndPlayer doesn't need name, but needs true or false
 				player.showCards(cards, True)
 				return 0
 		else:

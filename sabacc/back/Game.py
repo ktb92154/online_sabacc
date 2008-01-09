@@ -13,7 +13,7 @@ from Interfaces import gameInterface
 import random
 
 # Import settings
-from settings import MIN_PLAYERS, NUM_CARDS, POT_BUILDING_ROUNDS, IDLE_TIME, CARDVALUE
+from settings import MIN_PLAYERS, NUM_CARDS, POT_BUILDING_ROUNDS, IDLE_TIME, CARDVALUE, SUDDENDEMISE
 
 class Game (object):
 	def __init__(self):
@@ -94,8 +94,6 @@ class Game (object):
 		
 	def startGame(self, ante=0):
 		if not self.gameInProgress:
-			self.logtext = []
-				
 			if len(self.players) >= MIN_PLAYERS:
 				self.gameInProgress = True
 				self.idles = 0
@@ -151,14 +149,6 @@ class Game (object):
 						posScore += CARDVALUE[card]
 					if posScore < 0:
 						posScore = -posScore
-					
-					if posScore > 23 or posScore == 0:
-						log=3
-					else:
-						log=0
-					
-					self.logtext.append([self.players[i].name, log, posScore])
-				
 				
 				# variables used for pot-building phase
 				self.callable=False
@@ -244,11 +234,6 @@ class Game (object):
 						legalMove = True
 						self.removePlayer(name)
 						self.interface.write(name + " left the game")
-						
-						for p in self.logtext:
-							if p[0] == name:
-								p[1] = 2
-								break
 						
 						# remove player from all local lists
 						del alreadyBet[i]
@@ -336,30 +321,18 @@ class Game (object):
 					self.interface.write(name + " left the game")
 					stillInGame = False
 					
-					for p in self.logtext:
-						if p[0] == name:
-							p[1] = 2
-							break
-					
 				elif move == 0: # if player drawing
 					legalMove = True
 					self.idles = 0
 					self.hands[i].append(self.dealCard())
 					
 					# calculate player's new hand
-					handTotal = 0
-					for j in self.hands[i]: # for each card in the current player's hand
-						handTotal += CARDVALUE[j]
+					handTotal = self.getValue(self.hands[i])
 					
 					if handTotal < 0:
 						posTotal = -handTotal
 					else:
 						posTotal = handTotal
-					
-					for p in self.logtext:
-						if p[0] == name:
-							p[2] = posTotal
-							break
 					
 					if posTotal > 23: # if player bombed out
 						self.interface.write(name + " bombed out")
@@ -371,11 +344,6 @@ class Game (object):
 						player.modCredits(-self.handPot)
 						
 						stillInGame = False
-						
-						for p in self.logtext:
-							if p[0] == name:
-								p[1] = 3
-								break
 						
 					else: # if player still in game
 						self.interface.write(name + " drew a card")
@@ -436,11 +404,6 @@ class Game (object):
 					self.interface.write(player.name + " left the game")
 					self.interface.updatePlayers()
 					
-					for p in self.logtext:
-						if p[0] == player.name:
-							p[1] = 2
-							break
-					
 					break
 		
 		for player in self.players: # for every player
@@ -467,11 +430,6 @@ class Game (object):
 				self.sabaccPot+=self.handPot
 				player.modCredits(-self.handPot)
 				bomb = True
-				
-				for p in self.logtext:
-					if p[0] == thisName:
-						p[1] = 3
-						break
 				
 			elif thisHand == 5 and len(self.hands[i]) == 3: # check for possible Idiot's array
 				idiotCards=[False, False, False] # used to count number of idiot's array cards
@@ -541,23 +499,92 @@ class Game (object):
 				winners = poswinners
 			
 			if len(winners) > 1: #if still more than 1 winner
-				# calculate winner with least cards
-				leastCards = NUM_CARDS # maximum number of cards
-				leastCardsWinners = []
+				if SUDDENDEMISE == True: # 'sudden demise' rule
+					demise="A sudden demise was enacted between "
+					for x in winners:
+						name = self.players[x[0]].name
+						if x == winners[0]:
+							demise += name
+						elif x == winners[-1]:
+							demise += " and "+name
+						else:
+							demise += ", "+name
+					self.interface.write(demise)
+					
+					while (True): # repeat until only 1 or 0 winners
+						bestScore=0
+						cardsToShow=[] # takes form [cards, name]
+						for x in winners:
+							player = self.players[x[0]]
+							cards = self.hands[x[0]]
+							cards.append(self.dealCard())
+							cardsToShow.append([cards, player.name])
+							
+							# calculate player's new hand
+							handTotal = self.getValue(cards)
+						
+							if handTotal < 0:
+								posTotal = -handTotal
+							else:
+								posTotal = handTotal
+							
+							if posTotal > 23: # if player bombed out
+								posTotal = 0
+								self.interface.write(player.name+" bombed out")
+								
+							if posTotal > bestScore:
+								bestScore = posTotal
+						
+						self.interface.showAllCards(cardsToShow)
+						
+						if bestScore == 0: # everyone bombed out
+							winners=[]
+							break
+						
+						newwinners = [] # takes form [player, negative]
+						for x in winners:
+							handTotal = self.getValue(self.hands[x[0]])
+							if handTotal < 0:
+								neg = True
+								handTotal = -handTotal
+							else:
+								neg = False
+							if handTotal == bestScore:
+								newwinners.append([x[0],neg])
+						if len(newwinners) > 1:
+							# positive only
+							poswinners = []
+							for x in newwinners:
+								neg = x[1]
+								if not neg:
+									poswinners.append(x)
+							if len(poswinners) >= 1:
+								newwinners = poswinners
+						
+						winners = newwinners
+						
+						if len(winners) <= 1:
+							# escape from sudden demise loop
+							break
+					
+				else: # original multiple winners calculation
+					# calculate winner with least cards
+					leastCards = NUM_CARDS # maximum number of cards
+					leastCardsWinners = []
+					
+					for x in winners:
+						numCards = x[2]
+						# set correct value for leastCards
+						if numCards < leastCards:
+							leastCards = numCards
+					
+					# find players with least cards
+					for x in winners:
+						if x[2] == leastCards:
+							leastCardsWinners.append(x)
+					
+					winners = leastCardsWinners
 				
-				for x in winners:
-					numCards = x[2]
-					# set correct value for leastCards
-					if numCards < leastCards:
-						leastCards = numCards
-				
-				# find players with least cards
-				for x in winners:
-					if x[2] == leastCards:
-						leastCardsWinners.append(x)
-				
-				winners = leastCardsWinners
-			
 		# create new, simpler winner list
 		winner=[]
 		
@@ -597,11 +624,6 @@ class Game (object):
 					winnertext += " and "+self.players[i].name
 				else:
 					winnertext += ", "+self.players[i].name
-					
-				for player in self.logtext:
-					if player[0] == self.players[i].name:
-						player[1] = 1
-						break
 			
 			# tell player that game is over
 			self.players[i].gameOver(won, self.hands[i])	
@@ -611,9 +633,17 @@ class Game (object):
 				self.interface.write("The game was a draw.")
 			else:
 				self.interface.write("The game was won by "+winnertext+".")
+		else:
+			self.interface.write("No winners found")
 		
 		return 0
-		
+	
+	def getValue(self, cards):
+		handTotal = 0
+		for i in cards: # for each card in the given hand
+			handTotal += CARDVALUE[i]
+		return handTotal
+	
 	def reset(self):
 		if not self.gameInProgress:
 			# remove all players from game
@@ -654,9 +684,6 @@ class Game (object):
 		
 	def set_removeNext(self, removeNext):
 		self.removeNext = removeNext
-		
-	def getLog(self):
-		return self.logtext
 
 # Make object 'static'
 _inst=Game()
@@ -677,4 +704,3 @@ get_num_cards = _inst.get_num_cards
 get_gameInProgress = _inst.get_gameInProgress
 get_pots = _inst.get_pots
 set_removeNext = _inst.set_removeNext
-getLog = _inst.getLog

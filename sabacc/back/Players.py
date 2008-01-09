@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-# Players class version 0.2.
+# Players class
+# Taken from SabaccApp version 0.5 (initial release)
 # Written by Joel Cross
 
 # import settings

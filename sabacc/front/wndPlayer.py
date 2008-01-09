@@ -85,6 +85,7 @@ class wndPlayer (gtkPlayerInterface):
 	
 	def showCards(self, cards, showall=False):
 		if type(showall) == str:
+			# if called correctly from wndGame, showall should be boolean
 			showall = False
 		
 		# bugfix for if player could not afford ante
