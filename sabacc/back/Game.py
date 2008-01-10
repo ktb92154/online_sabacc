@@ -291,7 +291,7 @@ class Game (object):
 		return status
 		
 		
-	def drawingRound(self):
+	def drawingRound(self):##save bomb outs until end
 		i = 0 # counter
 		
 		final = 0
@@ -326,28 +326,8 @@ class Game (object):
 					self.idles = 0
 					self.hands[i].append(self.dealCard())
 					
-					# calculate player's new hand
-					handTotal = self.getValue(self.hands[i])
-					
-					if handTotal < 0:
-						posTotal = -handTotal
-					else:
-						posTotal = handTotal
-					
-					if posTotal > 23: # if player bombed out
-						self.interface.write(name + " bombed out")
-						self.interface.showCards(self.hands[i], name)
-						self.removePlayer(name)
-						
-						# bombing out penalty
-						self.sabaccPot+=self.handPot
-						player.modCredits(-self.handPot)
-						
-						stillInGame = False
-						
-					else: # if player still in game
-						self.interface.write(name + " drew a card")
-						self.interface.showNumCards(len(self.hands[i]), name)
+					self.interface.write(name + " drew a card")
+					self.interface.showNumCards(len(self.hands[i]), name)
 				elif move == 1: # if player is sticking
 					legalMove = True
 					self.idles += 1
