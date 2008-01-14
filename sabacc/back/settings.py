@@ -14,6 +14,13 @@ POT_BUILDING_ROUNDS = 4
 IDLE_TIME = 10
 SUDDENDEMISE=True
 
+# Sabacc Shift Settings
+SABACCSHIFT_ON=True
+SABACCSHIFT_TIME_MIN=0.01	# time before shift
+SABACCSHIFT_TIME_MAX=60
+SABACCSHIFT_NUM_MIN=1	# number of cards to shift
+SABACCSHIFT_NUM_MAX=5
+
 # LearningAgent values
 NUM_STATES = 51
 NUM_MP_STATES = 98 # multiplayer states

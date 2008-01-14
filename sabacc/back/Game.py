@@ -9,11 +9,14 @@ import Players
 # Simple interface
 from Interfaces import gameInterface
 
-# Random class for shuffling
-import random
+# External imports
+import random, threading
 
 # Import settings
-from settings import MIN_PLAYERS, NUM_CARDS, POT_BUILDING_ROUNDS, IDLE_TIME, CARDVALUE, SUDDENDEMISE
+from settings import MIN_PLAYERS, NUM_CARDS, POT_BUILDING_ROUNDS,\
+	IDLE_TIME, CARDVALUE, SUDDENDEMISE, SABACCSHIFT_ON,\
+	SABACCSHIFT_TIME_MIN, SABACCSHIFT_TIME_MAX, SABACCSHIFT_NUM_MIN,\
+	SABACCSHIFT_NUM_MAX
 
 class Game (object):
 	def __init__(self):
@@ -26,6 +29,7 @@ class Game (object):
 		self.sabaccPot = 0
 		self.removeNext = None
 		self.idles = 0
+		self.shiftTimer = None
 		# set interface to default
 		self.setInterface()
 		
@@ -94,6 +98,12 @@ class Game (object):
 		
 	def startGame(self, ante=0):
 		if not self.gameInProgress:
+			# initialise Sabacc Shift timer
+			if SABACCSHIFT_ON:
+				timer = round(random.uniform(SABACCSHIFT_TIME_MIN,  SABACCSHIFT_TIME_MAX),2)
+				self.shiftTimer = threading.Timer(timer, self.shift)
+				self.shiftTimer.start()
+			
 			if len(self.players) >= MIN_PLAYERS:
 				self.gameInProgress = True
 				self.idles = 0
@@ -291,7 +301,7 @@ class Game (object):
 		return status
 		
 		
-	def drawingRound(self):##save bomb outs until end
+	def drawingRound(self):
 		i = 0 # counter
 		
 		final = 0
@@ -368,6 +378,9 @@ class Game (object):
 		
 	def endGame(self, visible):
 		self.gameInProgress = False
+		
+		if self.shiftTimer != None:
+			self.shiftTimer.cancel()
 		
 		handValues=[] # takes form [value, numcards, idiot] for each player
 		bestScore=0
@@ -623,6 +636,52 @@ class Game (object):
 		for i in cards: # for each card in the given hand
 			handTotal += CARDVALUE[i]
 		return handTotal
+	
+	def shift(self):
+		random.seed()
+		self.interface.write("A Sabacc Shift occurred!")
+		num=random.randint(SABACCSHIFT_NUM_MIN, SABACCSHIFT_NUM_MAX)
+		
+		# More likely to be shifted if you have more cards
+		cards = []
+		
+		for hand in self.hands:
+			cards += hand
+		
+		if num > len(cards):
+			num = len(cards)
+		
+		for i in range(num):
+			# Pick a card to shift
+			shiftcard = random.randint(0, len(cards)-1)
+			newcard = random.randint(0, NUM_CARDS-1)
+			
+			# Card must be swapped with another card,
+			# otherwise chaos will ensue
+			for j in range(len(cards)):
+				if cards[j] == newcard: # Another player holds the new card
+					cards[j] = cards[shiftcard]
+					cards[shiftcard] = newcard
+					break
+			else:
+				for j in range(len(self.deck)):
+					if self.deck[j] == newcard:
+						self.deck[j] = cards[shiftcard]
+						cards[shiftcard] = newcard
+						break
+		
+		# Replace players' cards
+		for i in range(len(self.hands)):
+			newhand=cards[:len(self.hands[i])]
+			cards = cards[len(self.hands[i]):]
+			if newhand != self.hands[i]:
+				self.hands[i] = newhand
+				self.players[i].shift(newhand)
+		
+		# Start new timer
+		timer = round(random.uniform(SABACCSHIFT_TIME_MIN,  SABACCSHIFT_TIME_MAX),2)
+		self.shiftTimer = threading.Timer(timer, self.shift)
+		self.shiftTimer.start()
 	
 	def reset(self):
 		if not self.gameInProgress:

@@ -49,6 +49,10 @@ class playerInterface(nullInterface):
 	def gameStatus(self, won, cards, credits=None):
 		self.writeError("Warning: nullInterface and HumanAgent objects are incompatible!")
 		return 0
+		
+	def shift(self, cards):
+		# for use during a Sabacc shift
+		return self.showCards(cards)
 
 # Extended Interface class. This class prints out all information to the screen.
 class txtInterface (gameInterface, playerInterface):

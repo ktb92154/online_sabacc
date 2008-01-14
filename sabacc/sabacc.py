@@ -16,7 +16,10 @@ def main():
 	wndApp.window.show()
 	gtk.gdk.threads_init()
 	gtk.gdk.threads_enter()
-	gtk.main()
+	try:
+		gtk.main()
+	except KeyboardInterrupt:
+		sys.exit(1)
 	gtk.gdk.threads_leave()
 	sys.exit()
 	

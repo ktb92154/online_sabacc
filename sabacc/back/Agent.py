@@ -48,3 +48,9 @@ class Agent (object):
 	def examineCards(self, cards):
 		self.interface.showCards(cards)
 		return 0
+		
+	def shift(self, cards):
+		# Performs same effect as self.examineCards for use in a
+		# Sabacc Shift
+		self.interface.shift(cards)
+		return 0
