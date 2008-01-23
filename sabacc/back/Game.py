@@ -27,7 +27,7 @@ class Game (object):
 		self.callable = False
 		self.handPot = 0
 		self.sabaccPot = 0
-		self.removeNext = None
+		self.removes = []
 		self.idles = 0
 		self.shiftTimer = None
 		# set interface to default
@@ -234,8 +234,8 @@ class Game (object):
 					# ask player for bet
 					thisMatch = mustMatch-alreadyBet[i] # player-specific mustMatch
 					
-					if self.removeNext == name:
-						self.removeNext = None
+					if name in self.removes:
+						self.removes.remove(name)
 						bet = -1
 					else:
 						bet = player.bet(betHands[i], thisMatch)
@@ -313,8 +313,8 @@ class Game (object):
 			
 			#perform move
 			while not legalMove:
-				if self.removeNext == name:
-					self.removeNext = None
+				if name in self.removes:
+					self.removes.remove(name)
 					move = -1
 				elif self.idles >= IDLE_TIME and self.callable:
 					# force the game to be called
@@ -389,11 +389,11 @@ class Game (object):
 		i = 0
 		
 		# remove any players who should have already left
-		if self.removeNext != None:
+		if len(self.removes) >= 1:
 			for player in self.players:
-				if player.name == self.removeNext:
+				if player.name in self.removes:
 					self.removePlayer(player.name)
-					self.removeNext = None
+					self.removes.remove(player.name)
 					self.interface.write(player.name + " left the game")
 					self.interface.updatePlayers()
 					
@@ -722,7 +722,8 @@ class Game (object):
 		return [self.handPot, self.sabaccPot]
 		
 	def set_removeNext(self, removeNext):
-		self.removeNext = removeNext
+		# Players that have left the game
+		self.removes.append(removeNext)
 
 # Make object 'static'
 _inst=Game()

@@ -31,6 +31,8 @@ class wndPlayer (gtkPlayerInterface):
 		# set variables
 		self.name = playername
 		self.human = human
+		self.thisPlay = False	# used with multiple humans to tell which
+						# one is active at a time
 		
 		gladefile = "front/sabaccapp.glade"
 		self.windowname = "wndPlayer"
@@ -81,6 +83,7 @@ class wndPlayer (gtkPlayerInterface):
 		# Sort out card layout
 		self.cardLayout = self.wTree.get_widget("cardLayout")
 		self.cards = []
+		self.viscards = []
 		self.showCards([-1, -1])
 	
 	def showCards(self, cards, showall=False):
@@ -92,16 +95,33 @@ class wndPlayer (gtkPlayerInterface):
 		if cards == []:
 			cards=[-1, -1]
 		
-		# hide computer's cards, but show number
-		if not (self.human or showall):
+		if self.thisPlay:
+			showall = True
+		
+		# do we show or not?
+		if showall:
+			show = True
+		elif self.human:
+			if wndGame.promptHumans():
+				show = False
+			else:
+				show = True
+		else:
+			show = False
+		
+		self.cards = cards
+		
+		# hide computer's (and other human's) cards, but show number
+		if not show:
 			cards = cards[:] # copy of original
 			for i in range(len(cards)):
 				cards[i] = -1
 		
-		if cards == self.cards:
+		# only show cards if a change has happened
+		if cards == self.viscards:
 			return
 		else:
-			self.cards = cards[:]
+			self.viscards = cards[:]
 		
 		smallcards = False
 		
@@ -225,14 +245,14 @@ class wndPlayer (gtkPlayerInterface):
 		self.lblCredits.set_text(str(credits))
 	
 	def windowClosing(self, window):
-		ac=(self.active and self.human)
 		if self.active:
-			if self.human:
+			if self.wait:
 				self.chosen = -1
 				self.wait = False
 			else:
 				Game.set_removeNext(self.name)
 				wndGame.endWait()
+			
 			wndGame.updatePlayers(len(Game.get_players())-1)
 			
 		wndGame.removePlayer(self.name, self.active)
@@ -252,8 +272,17 @@ class wndPlayer (gtkPlayerInterface):
 			while self.wait:
 				pass
 			
-			return self.chosen
+			chosen = self.chosen
+			self.chosen = None
+			
+			if chosen == -3: # cancel
+				chosen = 1
+			return chosen
 		else:
+			# Protect from other humans
+			if wndGame.promptHumans() == True:
+				self.newTurn()
+			
 			# show pots
 			wndGame.updatePots()
 			wndGame.updatePlayers()
@@ -285,14 +314,24 @@ class wndPlayer (gtkPlayerInterface):
 			while self.wait:
 				pass
 			
-			return self.chosen
+			chosen = self.chosen
+			self.chosen = None
+			
+			if chosen == -3: # cancel
+				chosen = mustMatch
+			return chosen
 		else:
+			# Protect from other humans
+			if wndGame.promptHumans() == True:
+				self.newTurn()
+				
 			# show pots
 			wndGame.updatePots()
 			wndGame.updatePlayers()
 			
 			self.setStatus(1)
 			callable = Game.get_callable()
+			
 			spbBet = self.wTree.get_widget("spbBet")
 			btnBet = self.wTree.get_widget("btnMove1")
 			btnFold = self.wTree.get_widget("btnMove2")
@@ -313,39 +352,43 @@ class wndPlayer (gtkPlayerInterface):
 				self.buttonSignals[2] = btnCall.connect("clicked", self.makeMove, -2)
 	
 	def gameStatus(self, won, cards, credits=None):
-		thread = threading.currentThread()
-		if thread != self.mainThread:
-			self.wait=True
-			gobject.idle_add(self.gameStatus, won, cards, credits)
-			while self.wait:
-				pass
-			
-		else:
-			self.showCards(cards)
-			self.setCredits(credits)
-			
-			title = "Game over"
-			if won:
-				text = "Congratulations. You have won!"
-			else:
-				text = "Sorry. You didn't win this time."
+		if wndGame.showMsgs():
+			thread = threading.currentThread()
+			if thread != self.mainThread:
+				self.wait=True
+				gobject.idle_add(self.gameStatus, won, cards, credits)
+				while self.wait:
+					pass
 				
-			dialog = gtk.Dialog(title, self.window, gtk.DIALOG_MODAL,
-				(gtk.STOCK_OK, gtk.RESPONSE_ACCEPT))
-			dialog.connect("response", self.dialog_destroy)
-			hbox = gtk.HBox()
-			icon = gtk.Image()
-			icon.set_from_stock(gtk.STOCK_DIALOG_INFO, gtk.ICON_SIZE_DIALOG)
-			label = gtk.Label(text)
-			hbox.add(icon)
-			hbox.add(label)
-			dialog.vbox.pack_start(hbox, True, True, 0)
-			dialog.show_all()
+			else:
+				self.setCredits(credits)
+				
+				title = "Game over"
+				if won:
+					text = "Congratulations. You have won!"
+				else:
+					text = "Sorry. You didn't win this time."
+					
+				dialog = gtk.Dialog(title, self.window, gtk.DIALOG_MODAL,
+					(gtk.STOCK_OK, gtk.RESPONSE_ACCEPT))
+				dialog.connect("response", self.dialog_destroy)
+				hbox = gtk.HBox()
+				icon = gtk.Image()
+				icon.set_from_stock(gtk.STOCK_DIALOG_INFO, gtk.ICON_SIZE_DIALOG)
+				label = gtk.Label(text)
+				hbox.add(icon)
+				hbox.add(label)
+				dialog.vbox.pack_start(hbox, True, True, 0)
+				dialog.show_all()
 		return 0
 		
 	def makeMove(self, button, chosen):
+		# Protect from other humans
+		if wndGame.promptHumans() == True:
+			self.thisPlay = False
+			self.showCards(self.cards)
+			
 		self.chosen = chosen
-		
 		buttons=[]
 		
 		buttons.append(self.wTree.get_widget("btnMove1"))
@@ -368,3 +411,20 @@ class wndPlayer (gtkPlayerInterface):
 		bet = int(spinner.get_value())
 		self.setCredits(self.agent.credits-bet)
 		self.makeMove(None, bet)
+		
+	def newTurn(self):
+	# when promptHumans is on, newTurn will show the player his cards
+		title = "New Turn"
+		text = self.name+"'s turn..."
+			
+		dialog = gtk.Dialog(title, self.window, gtk.DIALOG_MODAL,
+			(gtk.STOCK_OK, gtk.RESPONSE_OK)) # RESPONSE_ACCEPT causes an infinite loop
+		dialog.connect("response", self.dialog_destroy)
+		hbox = gtk.HBox()
+		icon = gtk.Image()
+		icon.set_from_stock(gtk.STOCK_DIALOG_INFO, gtk.ICON_SIZE_DIALOG)
+		label = gtk.Label(text)
+		hbox.add(icon)
+		hbox.add(label)
+		dialog.vbox.pack_start(hbox, True, True, 0)
+		dialog.show_all()

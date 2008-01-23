@@ -38,6 +38,8 @@ class wndGame (gameInterface):
 		self.players = []
 		self.mainThread = threading.currentThread()
 		self.lastante=5
+		self.humans=0
+		self.showMsgs = True # bugfix for messages
 		
 		gladefile = "front/sabaccapp.glade"
 		self.windowname = "wndGame"
@@ -102,6 +104,7 @@ class wndGame (gameInterface):
 		btnTest = wndApp.wTree.get_widget("btnTest")
 		btnTest.set_sensitive(True)
 		self.window.destroy()
+		self.showMsgs = False
 
 	def write(self, text):
 		now = datetime.today().strftime("(%H:%M:%S) ")
@@ -158,7 +161,6 @@ class wndGame (gameInterface):
 		dialog.destroy()
 		
 	def addPlayer(self, human):
-		btnHuman = self.wTree.get_widget("btnHuman")
 		btnStart = self.wTree.get_widget("btnStart")
 
 		if human:
@@ -183,6 +185,8 @@ class wndGame (gameInterface):
 					if status != 0: # name already taken
 						self.writeError("Error: A player called "+name+" is already loaded!")
 						name=""
+					else:
+						self.humans += 1
 		else:
 			# Create dialog
 			message = "Please select the agent file"
@@ -258,7 +262,6 @@ class wndGame (gameInterface):
 			self.write(status)
 		
 	def removePlayer(self, name, active=False):
-		btnHuman = self.wTree.get_widget("btnHuman")
 		btnComputer = self.wTree.get_widget("btnComputer")
 		btnStart = self.wTree.get_widget("btnStart")
 		
@@ -284,6 +287,9 @@ class wndGame (gameInterface):
 		# 2 players min
 		if len(Game.get_players()) < 2:
 			btnStart.set_sensitive(False)
+		
+		if player.human:
+			self.humans -= 1
 		
 		if gamestatus == 0:
 			# print to status bar
@@ -378,20 +384,30 @@ class wndGame (gameInterface):
 			self.writeError(msg[0], msg[1])
 		
 		btnStart = self.wTree.get_widget("btnStart")
-		try:
+		if len(Game.get_players()) >= 2:
 			btnStart.set_sensitive(True)
-		except AttributeError:
-			pass
 	
 	def endWait(self):
 		if len(self.players) == 2:
 			for player in self.players:
 				if player.wait:
-					player.makeMove(None, 1)
+					player.makeMove(None, -3) # changes to a stick or minimum bet
 					break
+	
+	def promptHumans(self):
+	# Should we hide the humans from one another, or not?
+		if self.humans >= 2:
+			answer=True
+		else:
+			answer=False
+		
+		return answer
 	
 # Make object 'static'
 _inst=wndGame()
+def showMsgs():
+	return _inst.showMsgs
+
 write = _inst.write
 show = _inst.show
 addPlayer = _inst.addPlayer
@@ -399,3 +415,4 @@ removePlayer = _inst.removePlayer
 endWait = _inst.endWait
 updatePlayers = _inst.updatePlayers
 updatePots = _inst.updatePots
+promptHumans = _inst.promptHumans

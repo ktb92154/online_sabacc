@@ -53,7 +53,11 @@ class gtkPlayerInterface (playerInterface):
 			
 			
 	def dialog_destroy(self, dialog, response):
-		self.wait = False
+		if response == gtk.RESPONSE_ACCEPT: # error dialogs
+			self.wait = False
+		elif response == gtk.RESPONSE_OK: # 'next turn' dialogs
+			self.thisPlay = True
+			self.showCards(self.cards)
 		dialog.destroy()
 		
 	def make_inactive(self):

@@ -58,7 +58,7 @@
 	  <property name="visible">True</property>
 	  <property name="can_default">True</property>
 	  <property name="can_focus">True</property>
-	  <property name="label" translatable="yes">Show Testing Interface</property>
+	  <property name="label" translatable="yes">Play the Game</property>
 	  <property name="use_underline">True</property>
 	  <property name="relief">GTK_RELIEF_NORMAL</property>
 	  <property name="focus_on_click">True</property>
@@ -1267,7 +1267,7 @@
 	      <signal name="clicked" handler="on_btnEndGame_clicked" last_modification_time="Mon, 11 Dec 2006 17:15:22 GMT"/>
 
 	      <child>
-		<widget class="GtkAlignment" id="alignment13">
+		<widget class="GtkAlignment" id="alignment15">
 		  <property name="visible">True</property>
 		  <property name="xalign">0.5</property>
 		  <property name="yalign">0.5</property>
@@ -1279,13 +1279,13 @@
 		  <property name="right_padding">0</property>
 
 		  <child>
-		    <widget class="GtkHBox" id="hbox12">
+		    <widget class="GtkHBox" id="hbox17">
 		      <property name="visible">True</property>
 		      <property name="homogeneous">False</property>
 		      <property name="spacing">2</property>
 
 		      <child>
-			<widget class="GtkImage" id="image11">
+			<widget class="GtkImage" id="image14">
 			  <property name="visible">True</property>
 			  <property name="stock">gtk-stop</property>
 			  <property name="icon_size">4</property>
@@ -1302,9 +1302,9 @@
 		      </child>
 
 		      <child>
-			<widget class="GtkLabel" id="label31">
+			<widget class="GtkLabel" id="label38">
 			  <property name="visible">True</property>
-			  <property name="label" translatable="yes">Leave Testing Interface</property>
+			  <property name="label" translatable="yes">Quit Game</property>
 			  <property name="use_underline">True</property>
 			  <property name="use_markup">False</property>
 			  <property name="justify">GTK_JUSTIFY_LEFT</property>
