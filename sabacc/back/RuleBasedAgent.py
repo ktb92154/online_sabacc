@@ -12,7 +12,7 @@ import Game
 import random
 
 # import settings
-from settings import CARDVALUE
+from settings import CARDVALUE, MIN_BET, MAX_BET
 
 class RuleBasedAgent (AgentFromXML):
 	def __init__(self, XMLFile, interface=None):		
@@ -22,7 +22,11 @@ class RuleBasedAgent (AgentFromXML):
 		# Empty rule set
 		self.rules = []
 		
+		self.raised = False
+		
 	def move(self, cards):
+		self.raised = False
+		
 		# Get value of hand
 		value=0
 		
@@ -102,13 +106,69 @@ class RuleBasedAgent (AgentFromXML):
 		return action
 		
 	def bet(self, cards, mustMatch):
-		# Betting disabled, so return mustMatch or -1, depending on number of credits
+		# Get value of hand
+		value=0
+		
+		for i in cards: # for each card in hand
+			# add to value
+			value+=CARDVALUE[i]
+		
+		if value < 0:
+			value = -value
+		
+		# Simple betting. Does not lie. Either pure, good, average, bad or out (0, 1, 2, 3 or 4)
+		if value == 23:
+			score = 0 # pure
+		elif value >= 18 and value <= 22:
+			score = 1 # good
+		elif value >= 10 and value <= 17:
+			score = 2 # average
+		elif value <= 9 or (value >= 24 and value <= 25):
+			score = 3 # bad
+		else:
+			score = 4 # out
+		
+		if score in [0, 1]: # pure and good
+			if not self.raised:
+				bet = random.randint(MIN_BET, MAX_BET)
+				if score == 1: # pure sabacc
+					bet *= 5
+			else:
+				bet = 0
+		
+		elif score == 2: # average
+			# Bet 1/3 of the time
+			if not self.raised and random.randint(0,2) == 1:
+				bet = random.randint(MIN_BET, MAX_BET)
+			else:
+				bet = 0
+		elif score == 3: # bad
+			bet = 0
+		else: # out
+			if mustMatch == 0:
+				bet = 0
+			else:
+				bet = -1
+			
+		# Calculate final
 		if self.credits < mustMatch and mustMatch != 0: # if agent can't match
 			# leave game
-			return -1
+			final = -1
+		elif bet == -1:
+			final = -1
 		else:
-			# Otherwise return minimum possible
-			return mustMatch
+			final = bet + mustMatch
+		
+		# Don't bet more than you have!
+		if final > self.credits:
+			final = self.credits
+		
+		# Have we raised?
+		if final > mustMatch:
+			self.raised = True
+			
+		return final
+		
 	def loadFromXML(self):
 		# call parent class
 		type = AgentFromXML.loadFromXML(self)

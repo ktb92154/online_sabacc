@@ -21,6 +21,10 @@ SABACCSHIFT_TIME_MAX=60
 SABACCSHIFT_NUM_MIN=1	# number of cards to shift
 SABACCSHIFT_NUM_MAX=5
 
+# Agent betting
+MIN_BET = 2
+MAX_BET = 20
+
 # LearningAgent values
 NUM_STATES = 51
 NUM_MP_STATES = 98 # multiplayer states

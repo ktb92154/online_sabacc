@@ -386,8 +386,6 @@ class Game (object):
 		bestScore=0
 		cardsToShow = []
 		
-		i = 0
-		
 		# remove any players who should have already left
 		if len(self.removes) >= 1:
 			for player in self.players:
@@ -399,7 +397,15 @@ class Game (object):
 					
 					break
 		
-		for player in self.players: # for every player
+		# if only one player, he wins by default
+		if len(self.players) == 1:
+			winbydefault = True
+		else:
+			winbydefault = False
+		
+		i = 0
+		while True: # for every player
+			player = self.players[i]
 			thisName=player.name
 			thisHand=self.hands[i]
 			if visible:
@@ -415,16 +421,17 @@ class Game (object):
 			for card in self.hands[i]: # each card in current hand
 				thisHand += CARDVALUE[card] # add value of current card to total
 			
-			if thisHand > 23 or thisHand < -23 or thisHand == 0: # if player bombed out
-				thisHand = 0 # set score to 0
-				self.interface.write(thisName + " bombed out")
-						
-				# bombing out penalty
-				self.sabaccPot+=self.handPot
-				player.modCredits(-self.handPot)
-				bomb = True
-				
-			elif thisHand == 5 and len(self.hands[i]) == 3: # check for possible Idiot's array
+			if not winbydefault:
+				if thisHand > 23 or thisHand < -23 or thisHand == 0: # if player bombed out
+					thisHand = 0 # set score to 0
+					self.interface.write(thisName + " bombed out")
+					
+					# bombing out penalty
+					self.sabaccPot+=self.handPot
+					player.modCredits(-self.handPot)
+					bomb = True
+			
+			if thisHand == 5 and len(self.hands[i]) == 3: # check for possible Idiot's array
 				idiotCards=[False, False, False] # used to count number of idiot's array cards
 				for card in self.hands[i]: #each card in current hand
 					if CARDVALUE[card] == 0:
@@ -433,27 +440,30 @@ class Game (object):
 						idiotCards[1] = True
 					elif CARDVALUE[card] == 3:
 						idiotCards[2] = True
-					
+				
 				if idiotCards == [True, True, True]: # idiot's array!
 					idiot=True
 					thisHand=23
 			
-			# add hand values to list
-			handValues.append([thisHand, numCards, idiot])
-			
-			# make score positive
-			if thisHand < 0:
-				thisHand = -thisHand
-			
-			# rough winner estimation
-			if thisHand > bestScore:
-				bestScore=thisHand
-				
 			if bomb:
 				self.interface.showCards(self.hands[i], thisName)
 				self.removePlayer(thisName)
 			else:
+				# add hand values to list
+				handValues.append([thisHand, numCards, idiot])
+				
+				# make score positive
+				if thisHand < 0:
+					thisHand = -thisHand
+				
+				# rough winner estimation
+				if thisHand > bestScore:
+					bestScore=thisHand
+					
 				i += 1
+			
+			if i==len(self.players): # end of loop
+				break
 		
 		# show all visible cards
 		self.interface.showAllCards(cardsToShow)
@@ -490,6 +500,17 @@ class Game (object):
 			if len(poswinners) > 0: # if 1 or more positive winner
 				# remove all negative winners
 				winners = poswinners
+			
+			if len(winners) > 1 and SUDDENDEMISE == True: # 'sudden demise' rule
+				# Seperate Idiot's arrays from Pure Sabaccs
+				if bestScore == 23:
+					idiots = []
+					for x in winners:
+						if x[2] == 0:
+							idiots.append(x)
+							
+					if len(idiots) > 0:
+						winners = idiots
 			
 			if len(winners) > 1: #if still more than 1 winner
 				if SUDDENDEMISE == True: # 'sudden demise' rule
