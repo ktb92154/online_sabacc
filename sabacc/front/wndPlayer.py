@@ -1,8 +1,27 @@
-#!/usr/bin/env python
-# This is the agent window, showing one particular agent's status in the game.
-# Taken from SabaccApp version 0.5 (initial release)
+# Sabacc -- an interesting card game similar to Blackjack.
+# Copyright (C) 2007-2008 Joel Cross.
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-import sys, threading, gobject
+"""
+wndPlayer.py (taken from version 0.6beta1)
+This module contains the wndPlayer class.
+"""
+
+import sys, threading, gobject, os.path, gtk
+import gtk.glade
 
 # import locals
 import wndGame
@@ -10,21 +29,15 @@ from gtkPlayerInterface import gtkPlayerInterface
 from settings import CARDSET, CARDIMAGES
 
 # import from back end
-from back.settings import CARDNAMES, CARDVALUE
-from back import Players, Game
-
-try:
-	import pygtk
-	pygtk.require('2.0')
-except:
-	pass
-try:
-	import gtk
-	import gtk.glade
-except:
-	sys.exit(1)
+from sabacc.back.settings import CARDNAMES, CARDVALUE
+from sabacc.back import Players, Game
 	
 class wndPlayer (gtkPlayerInterface):
+	"""
+	This class contains the agent window, showing one particular
+	agent's status in the game. It also acts as a playerInterface for
+	any human player.
+	"""
 	def __init__(self, playername, human):
 		gtkPlayerInterface.__init__(self)
 		
@@ -34,7 +47,7 @@ class wndPlayer (gtkPlayerInterface):
 		self.thisPlay = False	# used with multiple humans to tell which
 						# one is active at a time
 		
-		gladefile = "front/sabaccapp.glade"
+		from __init__ import gladefile
 		self.windowname = "wndPlayer"
 		self.wTree = gtk.glade.XML(gladefile,self.windowname)
 		dic = {"on_wndPlayer_destroy": self.windowClosing}
@@ -151,13 +164,22 @@ class wndPlayer (gtkPlayerInterface):
 		idiot = [False, False, False]
 		unknown = False
 		
+		from __init__ import basedir, sharedir
+		
+		cardsdir = os.path.join(basedir, "cardsets", CARDSET)
+		if not os.path.exists(cardsdir):
+			cardsdir = os.path.join(sharedir, "sabacc", "cardsets", CARDSET)
+			if not os.path.exists(cardsdir):
+				sys.stderr.write("Warning: Cardset "+CARDSET+" not found!\n")
+		
 		for row in range(rows):
 			for col in range(columns):
 				if not smallcards and row % 2 == 1: # odd rows
 					break
 				try:
 					im = gtk.Image()
-					filename = "cardsets/"+CARDSET+"/"+CARDIMAGES[cards[i]]
+					
+					filename = os.path.join(cardsdir, CARDIMAGES[cards[i]])
 					if smallcards:
 						im.set_from_pixbuf(gtk.gdk.pixbuf_new_from_file(
 							filename).scale_simple(62, 89,

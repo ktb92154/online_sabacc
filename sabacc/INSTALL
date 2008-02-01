@@ -1,0 +1,30 @@
+Installing Sabacc
+=================
+
+To install Sabacc, change to the directory where you unpacked the
+source tarball, then type (as root):
+
+python setup.py install
+
+Alternatively, you can run Sabacc from the extracted tarball archive. 
+Simply type ./bin/sabacc from the correct directory. Please note that if 
+a different version of Sabacc is already installed on your system, 
+running Sabacc in this way may cause problems. In this case it is always 
+best to install Sabacc using the setup.py script.
+
+If you are a user of Debian/Ubuntu or Microsoft Windows, you might want 
+to consider installing the relevant .deb or .exe version of Sabacc 
+instead. These are both available from http://sabacc.sourceforge.net and 
+make the process of installing and running Sabacc relatively 
+hassle-free.
+
+
+Requirements
+============
+
+You will need the following software installed to run Sabacc:
+
+  - Python (>= 2.4) - http://www.python.org/
+  - GTK+ (>= 2.8) - http://www.gtk.org/
+  - PyGTK (>= 2.8) - http://www.pygtk.org/
+  - PyXML (=0.8.4) - http://pyxml.sourceforge.net/

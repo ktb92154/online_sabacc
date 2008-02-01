@@ -1,38 +1,44 @@
-#!/usr/bin/env python
-# wndGame.py
-# Taken from wndTest.py, SabaccApp version 0.5 (initial release)
-# This is the testing window, where any number of agents can be
-# loaded up to play a game.
+# Sabacc -- an interesting card game similar to Blackjack.
+# Copyright (C) 2007-2008 Joel Cross.
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+
+"""
+wndGame.py (taken from version 0.6beta1)
+This module contains the wndGame class and methods to
+call it without having to instantiate it first.
+"""
 
 # Import locals
 from wndPlayer import wndPlayer
 import wndApp
 
 # import from back end
-from back import Game, Players
-from back.Interfaces import gameInterface
+from sabacc.back import Game, Players
+from sabacc.back.Interfaces import gameInterface
 
 # Import from libraries
-import sys
-import threading
+import sys, threading, time, gobject, os.path, gtk
+import gtk.glade
 from datetime import datetime
-import time
-import gobject
-import os.path
-import time
-
-try:
-	import pygtk
-	pygtk.require('2.0')
-except:
-	pass
-try:
-	import gtk
-	import gtk.glade
-except:
-	sys.exit(1)
 	
 class wndGame (gameInterface):
+	"""
+	This class contains the testing window, where any number
+	of agents can be loaded up (using wndPlayer) to play a game.
+	"""
 	def __init__(self):
 		# Initialise variables
 		self.players = []
@@ -41,7 +47,7 @@ class wndGame (gameInterface):
 		self.humans=0
 		self.showMsgs = True # bugfix for messages
 		
-		gladefile = "front/sabaccapp.glade"
+		from __init__ import gladefile
 		self.windowname = "wndGame"
 		self.wTree = gtk.glade.XML(gladefile,self.windowname)
 		dic = {"on_btnHuman_clicked": self.btnHuman_click,
@@ -128,8 +134,9 @@ class wndGame (gameInterface):
 		#Move window to bottom of screen and resize
 		width, height = self.window.get_size()
 		newwidth=gtk.gdk.screen_width()
-		self.window.resize(newwidth, height+100)
-		self.window.move(0, gtk.gdk.screen_height() - height)
+		newheight = height+100
+		self.window.resize(newwidth, newheight)
+		self.window.move(0, gtk.gdk.screen_height() - newheight)
 		
 		#Show window
 		self.window.show()
@@ -194,6 +201,11 @@ class wndGame (gameInterface):
 			buttons=(gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT,
 			gtk.STOCK_OK, gtk.RESPONSE_ACCEPT))
 			
+			from __init__ import basedir, sharedir
+			agentdir = os.path.join(basedir, "agents")
+			if not os.path.exists(agentdir):
+				agentdir = os.path.join(sharedir, "sabacc", "agents")
+			
 			# Create filters
 			xmlfilter = gtk.FileFilter()
 			xmlfilter.add_pattern("*.xml")
@@ -204,7 +216,7 @@ class wndGame (gameInterface):
 			d.add_filter(xmlfilter)
 			d.set_filter(xmlfilter)
 			d.add_filter(anyfilter)
-			d.set_current_folder(os.path.abspath("agents"))
+			d.set_current_folder(os.path.abspath(agentdir))
 			
 			# Show dialog
 			resp=d.run()
@@ -328,12 +340,14 @@ class wndGame (gameInterface):
 		
 		if error != None:
 			self.loadedName = ""
-			self.loading.destroy()
-			self.writeError(error[0], error[1])
+			# Workaround for GUI threading problem on Windows
+			gobject.idle_add(self.loading.destroy)
+			gobject.idle_add(self.writeError,error[0], error[1])
 		else:
 			self.loadedName = name
 			try:
-				self.loading.destroy()
+				# Workaround for GUI threading problem on Windows
+				gobject.idle_add(self.loading.destroy)
 			except AttributeError: # loading window already gone
 				pass
 		

@@ -1,7 +1,24 @@
-#!/usr/bin/env python
-# AgentFromXML class
-# Taken from SabaccApp version 0.5 (initial release)
-# Written by Joel Cross
+# Sabacc -- an interesting card game similar to Blackjack.
+# Copyright (C) 2007-2008 Joel Cross.
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+
+"""
+AgentFromXML.py (taken from version 0.6beta1)
+This module contains the AgentFromXML class.
+"""
 
 # import base class
 from Agent import Agent
@@ -10,6 +27,10 @@ from Agent import Agent
 from settings import SABAX_VERSION, CARDVALUE
 
 class AgentFromXML (Agent):
+	"""
+	This is an abstract class for every type of agent that is
+	loaded from an XML file.
+	"""
 	def __init__(self, XMLFile, interface=None):
 		self.XMLFile = XMLFile
 		

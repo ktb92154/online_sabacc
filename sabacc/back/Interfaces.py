@@ -1,14 +1,35 @@
-#!/usr/bin/env python
-# Interface classes
-# Taken from SabaccApp version 0.5 (initial release)
-# Written by Joel Cross
+# Sabacc -- an interesting card game similar to Blackjack.
+# Copyright (C) 2007-2008 Joel Cross.
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+
+"""
+Interfaces.py (taken from version 0.6beta1)
+This module contains three null interfaces and a text-based
+interface for HumanAgent objects.
+"""
 
 import sys
 
 from settings import CARDNAMES, CARDVALUE
 
-# Null Interface class. This class only displays errors.
 class nullInterface(object):
+	"""
+	This is an abstract class containing the basic methods
+	shared by all interfaces.
+	"""
 	def showCards(self, cards, name):
 		return 0
 		
@@ -19,8 +40,11 @@ class nullInterface(object):
 		sys.stderr.write(text + "\n")
 		return 0
 
-# Null Game Interface class. This is an extension of the Null Interface class for games.
 class gameInterface(nullInterface):
+	"""
+	This is an abstract class which must be extended for
+	any interface designed for the Game class.
+	"""
 	def showAllCards(self, players):
 		for i in players:
 			cards, name = i
@@ -33,8 +57,11 @@ class gameInterface(nullInterface):
 	def write(self, text):
 		return 0
 		
-# Null Player Interface class. This is an extension of the Null Interface class for players.
 class playerInterface(nullInterface):
+	"""
+	This is an abstract class which must be extended for
+	any interface designed for players.
+	"""
 	def showCards(self, cards, showall=False):
 		return 0
 	
@@ -54,8 +81,10 @@ class playerInterface(nullInterface):
 		# for use during a Sabacc shift
 		return self.showCards(cards)
 
-# Extended Interface class. This class prints out all information to the screen.
 class txtInterface (gameInterface, playerInterface):
+	"""
+	This is a simple text-based interface.
+	"""
 	def showCards(self, cards, showall=False):
 		if type(showall) == str:
 			name = showall

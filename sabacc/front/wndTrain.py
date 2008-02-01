@@ -1,40 +1,52 @@
-#!/usr/bin/env python
-# wndTrain.py
-# Taken from SabaccApp version 0.5 (initial release)
-# This is the training window, where one particular agent may
-# be trained against any other agents.
+# Sabacc -- an interesting card game similar to Blackjack.
+# Copyright (C) 2007-2008 Joel Cross.
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+
+"""
+wndTrain.py (taken from version 0.6beta1)
+This module contains the wndTrain class.
+"""
 
 # import locals
 import wndApp
 from gtkPlayerInterface import gtkPlayerInterface
 
 # import from back end
-from back import Players, Game
-from back.settings import NUM_MP_STATES, NUM_ACTIONS
-from back.XMLRuleAgent import Rule, Condition
+from sabacc.back import Players, Game
+from sabacc.back.settings import NUM_MP_STATES, NUM_ACTIONS
+from sabacc.back.XMLRuleAgent import Rule, Condition
 
-import sys
-import os.path
-import threading
-
-try:
-	import pygtk
-	pygtk.require('2.0')
-except:
-	pass
-try:
-	import gtk
-	import gtk.glade
-except:
-	sys.exit(1)
+import sys, os.path, threading, gtk, gobject
+import gtk.glade
 
 loaded_for_training = []
 
 class wndTrain (gtkPlayerInterface):
+	"""
+	This class contains the training window, where one particular
+	agent may be trained against any other agents.
+	
+	Since the removal of the LearningAgent class, this class has
+	become mostly obsolete, and is due to be replaced by a more
+	functional 'agent status' class.
+	"""
 	def __init__(self, agent):
 		gtkPlayerInterface.__init__(self)
 		
-		gladefile = "front/sabaccapp.glade"
+		from __init__ import gladefile
 		self.windowname = "wndTrain"
 		self.wTree = gtk.glade.XML(gladefile,self.windowname)
 		dic = {"on_wndTrain_delete": self.windowClosing,
@@ -88,9 +100,10 @@ class wndTrain (gtkPlayerInterface):
 			
 		if agent != None:
 			if agent.loadFromXML() == -2: # file badly formatted
-				self.writeError("Error loading file " +filename+".", "File error", wndApp.window)
-				self.window.destroy()
-				self.loading.destroy()
+				# Workaround for GUI threading problem on Windows
+				gobject.idle_add(self.writeError,"Error loading file " +filename+".", "File error", wndApp.window)
+				gobject.idle_add(self.window.destroy)
+				gobject.idle_add(self.loading.destroy)
 				name = ""
 			else:
 				# add player to back end list
@@ -99,9 +112,10 @@ class wndTrain (gtkPlayerInterface):
 				name = agent.name
 				
 				if status != 0: # name already taken
-					self.writeError("Error: A player called "+name+" is already loaded!", "Agent already loaded", wndApp.window)
-					self.window.destroy()
-					self.loading.destroy()
+					# Workaround for GUI threading problem on Windows
+					gobject.idle_add(self.writeError,"Error: A player called "+name+" is already loaded!", "Agent already loaded", wndApp.window)
+					gobject.idle_add(self.window.destroy)
+					gobject.idle_add(self.loading.destroy)
 					name = ""
 			
 			if name != "":
@@ -122,9 +136,10 @@ class wndTrain (gtkPlayerInterface):
 				errors=["Error: Unknown agent type.", "Type error"]
 			
 			if errors != None:
-				self.window.destroy()
-				self.loading.destroy()
-				self.writeError(errors[0], errors[1], wndApp.window)
+				# Workaround for GUI threading problem on Windows
+				gobject.idle_add(self.window.destroy)
+				gobject.idle_add(self.loading.destroy)
+				gobject.idle_add(self.writeError,errors[0], errors[1], wndApp.window)
 				name = ""
 			else:
 				for x in Players.loaded:
@@ -135,7 +150,8 @@ class wndTrain (gtkPlayerInterface):
 					name = ""
 		
 		if self.showwin:
-			self.loading.destroy()
+			# Workaround for GUI threading problem on Windows
+			gobject.idle_add(self.loading.destroy)
 			if name != "":
 				loaded_for_training.append(self.agent)
 				self.name = name
@@ -146,7 +162,7 @@ class wndTrain (gtkPlayerInterface):
 				
 				# set agent variables
 				self.setVars()
-				self.window.show()
+				gobject.idle_add(self.window.show)
 		elif name != "":
 			Players.unload(name)
 		
@@ -271,7 +287,7 @@ class wndTrain (gtkPlayerInterface):
 			Game.endGame(False)
 		
 		for agent in Game.get_players():
-			agent.interface.leaveGame()
+			agent.interface.leaveGame()##
 		
 		Game.reset()
 	
@@ -1017,13 +1033,9 @@ class wndTrain (gtkPlayerInterface):
 	def playGame(self, runs):
 		players = Game.get_players()
 		
-		logfile = open("sabaccapp.log", "a")
-		
 		playertext = "\t"
 		for player in players:
 			playertext += player.name+"\tScore\t"
-		
-		logfile.write("Begin"+playertext+str(runs)+" runs\n")
 		
 		for i in range(runs):
 			if not self.active:
@@ -1036,20 +1048,10 @@ class wndTrain (gtkPlayerInterface):
 			# play a game
 			Game.startGame()
 			
-			logentry = str(i)+"\t"
-			for player in players:
-				for p in Game.getLog():
-					if p[0] == player.name:
-						logentry += str(p[1])+"\t"
-						logentry += str(p[2])
-						break
-				if player != players[-1]:
-					logentry += "\t"
-			
-			logfile.write(logentry+"\n")
-		
-		logfile.write("\n")
-		logfile.close()
+			# add losers back into game
+			for agent in players:
+				if agent not in Game.get_players():
+					Game.addPlayer(agent.name, True)
 		
 		self.errors = False
 		

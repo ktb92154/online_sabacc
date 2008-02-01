@@ -1,27 +1,36 @@
-#!/usr/bin/env python
-# wndApp.py
-# Taken from SabaccApp version 0.5 (initial release)
-# This is the main window of the application, from which the training
-# and testing windows can be shown or the application can be quit.
+# Sabacc -- an interesting card game similar to Blackjack.
+# Copyright (C) 2007-2008 Joel Cross.
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-import sys
-import os
-import os.path
+"""
+wndApp.py (taken from version 0.6beta1)
+This module contains the wndApp class and methods to
+call it without having to instantiate it first.
+"""
 
-try:
-	import pygtk
-	pygtk.require('2.0')
-except:
-	pass
-try:
-	import gtk
-	import gtk.glade
-except:
-	sys.exit(1)
+import gtk, sys, os.path, gtk.glade
 
 class wndApp (object):
+	"""
+	This class contains the main window of the application, from
+	which the training and testing windows can be shown or the
+	application can be quit.
+	"""
 	def __init__(self):
-		gladefile = "front/sabaccapp.glade"
+		from __init__ import gladefile
 		self.windowname = "wndApp"
 		self.wTree = gtk.glade.XML(gladefile,self.windowname)
 		dic = {"kill_me": gtk.main_quit,
@@ -54,6 +63,11 @@ class wndApp (object):
 		gtk.STOCK_OK, gtk.RESPONSE_ACCEPT))
 		d.set_do_overwrite_confirmation(True)
 		
+		from __init__ import basedir, sharedir
+		agentdir = os.path.join(basedir, "agents")
+		if not os.path.exists(agentdir):
+			agentdir = os.path.join(sharedir, "sabacc", "agents")
+		
 		# Create filters
 		xmlfilter = gtk.FileFilter()
 		xmlfilter.add_pattern("*.xml")
@@ -64,7 +78,7 @@ class wndApp (object):
 		d.add_filter(xmlfilter)
 		d.set_filter(xmlfilter)
 		d.add_filter(anyfilter)
-		d.set_current_folder(os.path.abspath("agents"))
+		d.set_current_folder(agentdir)
 		
 		# Show dialog
 		resp=d.run()
@@ -79,15 +93,15 @@ class wndApp (object):
 				wndTrain(file)
 			else:
 				# if file already exists, delete it
-				ioerror = False
+				error = 0
 				
 				if os.path.exists(file):
 					try:
 						os.remove(file)
 					except:
-						ioerror=True
+						error=-2
 				
-				if not ioerror:
+				if error == 0:
 					# show 'create' dialog
 					title = "Create agent"
 					message = "Please choose your agent's characteristics:"
@@ -163,34 +177,22 @@ class wndApp (object):
 					createdialog.destroy()
 					
 					if resp == gtk.RESPONSE_ACCEPT:
-						if learning:
-							from back.XMLLearningAgent import XMLLearningAgent
-							xml = XMLLearningAgent(file)
-							createstatus = xml.createFile(name, learningtype)
-							if learningtype == 0:
-								from back.WinLossAgent import WinLossAgent
-								agent = WinLossAgent(xml)
-							elif learningtype == 1:
-								from back.ScoreAgent import ScoreAgent
-								agent = ScoreAgent(xml)
-							else:
-								from back.GamblingAgent import GamblingAgent
-								agent = GamblingAgent(xml)
-						else:
-							from back.XMLRuleAgent import XMLRuleAgent
-							from back.RuleBasedAgent import RuleBasedAgent
-							xml = XMLRuleAgent(file)
-							createstatus = xml.createFile(name)
-							agent = RuleBasedAgent(xml)
+						from sabacc.back.XMLRuleAgent import XMLRuleAgent
+						from sabacc.back.RuleBasedAgent import RuleBasedAgent
+						xml = XMLRuleAgent(file)
+						error = xml.createFile(name)
+						agent = RuleBasedAgent(xml)
 						
-						if createstatus == -2:
-							ioerror = True
-						else:
+						if error == 0:
 							wndTrain(agent)
 						
-					if ioerror:
-						title = "I/O Error"
-						text = "An I/O error has occurred!"
+					if error != 0:
+						if error == -1:
+							title = "File not found"
+							text = "Error: The template file could not be found!"
+						elif error == -2:
+							title = "I/O Error"
+							text = "An I/O error has occurred!"
 						dialog = gtk.Dialog(title, self.window, gtk.DIALOG_MODAL,
 							(gtk.STOCK_OK, gtk.RESPONSE_ACCEPT))
 						hbox = gtk.HBox()
@@ -202,6 +204,7 @@ class wndApp (object):
 						dialog.vbox.pack_start(hbox, True, True, 0)
 						dialog.show_all()
 						dialog.run()
+						dialog.destroy()
 
 	def showTest(self, button):
 		button.set_sensitive(False)

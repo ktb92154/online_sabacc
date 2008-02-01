@@ -1,7 +1,24 @@
-#!/usr/bin/env python
-# Agent class
-# Taken from SabaccApp version 0.5 (initial release)
-# Written by Joel Cross
+# Sabacc -- an interesting card game similar to Blackjack.
+# Copyright (C) 2007-2008 Joel Cross.
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+
+"""
+Agent.py (taken from version 0.6beta1)
+This module contains the Agent class.
+"""
 
 # import settings
 from settings import INITIAL_CREDITS
@@ -9,6 +26,10 @@ from settings import INITIAL_CREDITS
 from Interfaces import playerInterface
 
 class Agent (object):
+	"""
+	This is an abstract class, which can be extended
+	for different types of agent (player) in the game.
+	"""
 	def __init__(self, name, interface=None):
 		# Set variables
 		self.name = name

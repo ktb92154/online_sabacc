@@ -1,0 +1,12 @@
+include bin/sabacc.desktop
+include MANIFEST.in
+include AUTHORS
+include COPYING
+include INSTALL
+include NEWS
+include README
+include man/sabacc.6
+include glade/sabacc.*
+include cardsets/swag/*.png
+include agents/*.xml
+include templates/agent.xml

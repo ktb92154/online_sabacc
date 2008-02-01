@@ -1,7 +1,25 @@
-#!/usr/bin/env python
-# Game class
-# Taken from SabaccApp version 0.5 (initial release)
-# Written by Joel Cross
+# Sabacc -- an interesting card game similar to Blackjack.
+# Copyright (C) 2007-2008 Joel Cross.
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+
+"""
+Game.py (taken from version 0.6beta1)
+This module contains the Game class and methods to
+call it without having to instantiate it first.
+"""
 
 # Players class to deal with loading of agents
 import Players
@@ -19,6 +37,10 @@ from settings import MIN_PLAYERS, NUM_CARDS, POT_BUILDING_ROUNDS,\
 	SABACCSHIFT_NUM_MAX
 
 class Game (object):
+	"""
+	This class contains all the rules of the game and
+	methods for playing the game and adding players etc.
+	"""
 	def __init__(self):
 		self.players = []
 		self.deck = []
@@ -405,7 +427,10 @@ class Game (object):
 		
 		i = 0
 		while True: # for every player
-			player = self.players[i]
+			try:
+				player = self.players[i]
+			except IndexError: #no players left in game
+				break
 			thisName=player.name
 			thisHand=self.hands[i]
 			if visible:
