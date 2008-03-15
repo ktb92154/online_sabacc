@@ -28,7 +28,7 @@ import os.path
 
 def main():
 	PYTHON_VERSION = sys.version_info[:2]
-
+	
 	# Some version dependencies.
 	PYTHON_REQUIRED = (2, 5)
 	PYGTK_REQUIRED = '2.0'
@@ -57,9 +57,18 @@ def main():
 		sys.stderr.write("pyxml\n")
 		raise SystemExit, "Error: PyXML %s required" % PYXML_REQUIRED
 	
-	try: # If Sabacc is installed system-wide, this finds it automatically.
-		from sabacc.front import wndApp
-	except ImportError: # Locate the Sabacc package.
+	# Add blank argument if necessary
+	if len(sys.argv) == 1:
+		sys.argv.append("")
+	
+	if sys.argv[1] != "local":
+		try: # If Sabacc is installed system-wide, this finds it automatically.
+			from sabacc.front import wndApp
+		except ImportError: # Locate the Sabacc package.
+			sys.argv[1] = "local"
+	
+	# Use local source files
+	if sys.argv[1] == "local":
 		currentdir = os.path.dirname(os.path.abspath(sys.argv[0]))
 		basedir = os.path.abspath(os.path.join(currentdir, '..','..'))
 		# The package path should be relative to the base directory.

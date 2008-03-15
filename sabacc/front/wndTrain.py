@@ -287,7 +287,7 @@ class wndTrain (gtkPlayerInterface):
 			Game.endGame(False)
 		
 		for agent in Game.get_players():
-			agent.interface.leaveGame()##
+			agent.interface.leaveGame()
 		
 		Game.reset()
 	

@@ -51,7 +51,8 @@ If running Sabacc from the source directory (ie. having not installed
 it first) you may need to rename the sabacc-0.6beta1 directory to simply 
 'sabacc'. Also, if Sabacc is already installed, running the Sabacc 
 script from the source directory will call the previously installed 
-version of Sabacc.
+version of Sabacc. To force Sabacc to use local source files, call 
+sabacc with the word 'local' as an argument.
 
 Copyright Information
 =====================

@@ -166,6 +166,19 @@ class Game (object):
 					if i==len(self.players):
 						break
 				
+				# If only 1 player left, do not start game
+				if len(self.players) == 1:
+					self.players[0].modCredits(self.handPot * 2)
+					
+					# Reset pots
+					self.sabaccPot -= self.handPot
+					self.handPot = 0
+					
+					# End game manually
+					self.gameInProgress = False
+					self.endGame(False)
+					return 0
+				
 				# Initial betting
 				self.bettingRound()
 				
