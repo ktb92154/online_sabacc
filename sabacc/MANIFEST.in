@@ -10,3 +10,4 @@ include glade/sabacc.*
 include cardsets/swag/*.png
 include agents/*.xml
 include templates/agent.xml
+include pixmaps/*

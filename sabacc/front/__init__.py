@@ -21,3 +21,14 @@ if os.path.exists(sharedir):
     gladefile = os.path.join(sharedir, 'sabacc', 'glade', name)
 else:  # Root of source distribution.
     gladefile = os.path.join(basedir, 'glade', name)
+
+# Find icon file
+if sys.platform == 'win32':  # Win32 should use the ICO icon.
+    iconpath = 'sabacc.ico'
+else:  # All other platforms should use the PNG icon.
+    iconpath = 'sabacc.png'
+    
+if os.path.exists(sharedir):
+	iconpath = os.path.join(sharedir, 'pixmaps', iconpath)
+else:
+	iconpath = os.path.join(basedir, 'pixmaps', iconpath)

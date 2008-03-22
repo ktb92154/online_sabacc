@@ -46,7 +46,8 @@ class wndTrain (gtkPlayerInterface):
 	def __init__(self, agent):
 		gtkPlayerInterface.__init__(self)
 		
-		from __init__ import gladefile
+		from __init__ import gladefile, iconpath
+		
 		self.windowname = "wndTrain"
 		self.wTree = gtk.glade.XML(gladefile,self.windowname)
 		dic = {"on_wndTrain_delete": self.windowClosing,
@@ -70,6 +71,7 @@ class wndTrain (gtkPlayerInterface):
 		self.puresabacc = self.wTree.get_widget("lblPureSabacc")
 		
 		self.window = self.wTree.get_widget("wndTrain")
+		self.window.set_icon_from_file(iconpath)
 		self.modified = False
 		
 		self.showwin = True
@@ -218,6 +220,7 @@ class wndTrain (gtkPlayerInterface):
 			label = gtk.Label(text)
 			dialog.vbox.pack_start(label, False, False, 0)
 			sc = gtk.ScrolledWindow()
+			sc.set_icon_from_file(iconpath)
 			sc.set_policy(gtk.POLICY_NEVER, gtk.POLICY_ALWAYS)
 			data = gtk.ListStore(str)
 			for agent in loaded_for_training:
@@ -299,6 +302,7 @@ class wndTrain (gtkPlayerInterface):
 			learning = True
 		
 		datawindow = gtk.Window()
+		datawindow.set_icon_from_file(iconpath)
 		datawindow.set_title("Agent Data")
 		datawindow.set_modal(True)
 		datawindow.set_transient_for(self.window)
@@ -337,6 +341,7 @@ class wndTrain (gtkPlayerInterface):
 			mainLayout.pack_start(probLayout, False, False, 0)
 		
 		sc = gtk.ScrolledWindow()
+		sc.set_icon_from_file(iconpath)
 		sc.set_policy(gtk.POLICY_NEVER, gtk.POLICY_ALWAYS)
 		
 		if learning:
@@ -617,6 +622,7 @@ class wndTrain (gtkPlayerInterface):
 		
 		if name != "":
 			rulewindow = gtk.Window()
+			rulewindow.set_icon_from_file(iconpath)
 			rulewindow.set_title("Rule Data")
 			rulewindow.set_modal(True)
 			rulewindow.set_transient_for(window)
@@ -648,6 +654,7 @@ class wndTrain (gtkPlayerInterface):
 				mainLayout.pack_start(typeLayout, False, False, 0)
 			
 			sc = gtk.ScrolledWindow()
+			sc.set_icon_from_file(iconpath)
 			sc.set_policy(gtk.POLICY_NEVER, gtk.POLICY_ALWAYS)
 			scrolledlayout = gtk.HBox()
 			

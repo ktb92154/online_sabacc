@@ -47,7 +47,8 @@ class wndGame (gameInterface):
 		self.humans=0
 		self.showMsgs = True # bugfix for messages
 		
-		from __init__ import gladefile
+		from __init__ import gladefile, iconpath
+		
 		self.windowname = "wndGame"
 		self.wTree = gtk.glade.XML(gladefile,self.windowname)
 		dic = {"on_btnHuman_clicked": self.btnHuman_click,
@@ -57,6 +58,7 @@ class wndGame (gameInterface):
 		self.wTree.signal_autoconnect(dic)
 		
 		self.window = self.wTree.get_widget("wndGame")
+		self.window.set_icon_from_file(iconpath)
 		
 		Game.setInterface(self)
 		

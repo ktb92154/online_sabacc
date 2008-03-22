@@ -30,7 +30,8 @@ class wndApp (object):
 	application can be quit.
 	"""
 	def __init__(self):
-		from __init__ import gladefile
+		from __init__ import gladefile, iconpath
+		
 		self.windowname = "wndApp"
 		self.wTree = gtk.glade.XML(gladefile,self.windowname)
 		dic = {"kill_me": gtk.main_quit,
@@ -41,6 +42,7 @@ class wndApp (object):
 		self.wTree.signal_autoconnect(dic)
 		
 		self.window = self.wTree.get_widget("wndApp")
+		self.window.set_icon_from_file(iconpath)
 		
 	def btnTrainNew_click(self,widget):
 		self.showTrain(False)

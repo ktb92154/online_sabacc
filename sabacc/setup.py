@@ -27,10 +27,12 @@ setup(
                   ('share/sabacc/glade', ['glade/sabacc.glade']),
                   ('share/sabacc/cardsets/swag', glob.glob('cardsets/swag/*.png')),
                   ('share/sabacc/agents', glob.glob('agents/*.xml')),
-                  ('share/sabacc/templates', ['templates/agent.xml']), ],
-	# Py2exe below this line
-	windows = [{'script' : 'bin/sabacc'}],
-    options = {'py2exe': {'packages' : 'encodings',
-                          'includes' : 'cairo, pango, pangocairo, atk, gobject, gtk.glade, _xmlplus, _xmlplus.sax.drivers2.drv_pyexpat' } },
+                  ('share/sabacc/templates', ['templates/agent.xml']),
+                  ('share/pixmaps', ['pixmaps/sabacc.png']) ],
+        # Py2exe below this line
+        windows = [{'script' : 'bin/sabacc',
+                'icon_resources': [(1, 'pixmaps/sabacc.ico')] }],
+        options = {'py2exe': {'packages' : 'encodings',
+                'includes' : 'cairo, pango, pangocairo, atk, gobject, gtk.glade, _xmlplus, _xmlplus.sax.drivers2.drv_pyexpat' } },
 )
 

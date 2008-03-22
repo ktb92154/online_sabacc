@@ -47,7 +47,8 @@ class wndPlayer (gtkPlayerInterface):
 		self.thisPlay = False	# used with multiple humans to tell which
 						# one is active at a time
 		
-		from __init__ import gladefile
+		from __init__ import gladefile, iconpath
+		
 		self.windowname = "wndPlayer"
 		self.wTree = gtk.glade.XML(gladefile,self.windowname)
 		dic = {"on_wndPlayer_destroy": self.windowClosing}
@@ -56,6 +57,7 @@ class wndPlayer (gtkPlayerInterface):
 		# Name of window
 		self.window = self.wTree.get_widget("wndPlayer")
 		self.window.set_title(playername)
+		self.window.set_icon_from_file(iconpath)
 		
 		# Get agent object
 		for agent in Players.loaded:
