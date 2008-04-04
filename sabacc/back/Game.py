@@ -686,6 +686,9 @@ class Game (object):
 			else:
 				self.interface.write("The game was won by "+winnertext+".")
 		else:
+			# Move Hand pot into Sabacc pot
+			self.sabaccPot += self.handPot
+			self.handPot = 0
 			self.interface.write("No winners found")
 		
 		return 0
