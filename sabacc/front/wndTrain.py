@@ -74,11 +74,6 @@ class wndTrain (gtkPlayerInterface):
 		self.window.set_icon_from_file(iconpath)
 		self.modified = False
 		
-		self.showwin = True
-		t = threading.Thread(target=self.loadData, args=[agent], name="loadData")
-		t.setDaemon(True)
-		t.start()
-		
 		title = "Loading..."
 		text = "Please wait. Loading data..."
 		dialog = gtk.Dialog(title, wndApp.window, gtk.DIALOG_MODAL,
@@ -87,11 +82,17 @@ class wndTrain (gtkPlayerInterface):
 		dialog.vbox.pack_start(label, True, True, 0)
 		dialog.show_all()
 		self.loading = dialog
+		
+		self.showwin = True
+		t = threading.Thread(target=self.loadData, args=[agent], name="loadData")
+		t.setDaemon(True)
+		t.start()
+		
 		resp = dialog.run()
 		
 		if resp == gtk.RESPONSE_DELETE_EVENT: # 'cancel' clicked
-			dialog.destroy()
 			self.showwin = False
+			dialog.destroy()
 		
 	def loadData(self, agent):
 		if type(agent) == str:

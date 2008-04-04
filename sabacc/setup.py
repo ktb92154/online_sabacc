@@ -28,7 +28,7 @@ setup(
                   ('share/sabacc/cardsets/swag', glob.glob('cardsets/swag/*.png')),
                   ('share/sabacc/agents', glob.glob('agents/*.xml')),
                   ('share/sabacc/templates', ['templates/agent.xml']),
-                  ('share/pixmaps', ['pixmaps/sabacc.png']) ],
+                  ('share/pixmaps', ['pixmaps/sabacc.png', 'pixmaps/sabacc.ico']) ],
         # Py2exe below this line
         windows = [{'script' : 'bin/sabacc',
                 'icon_resources': [(1, 'pixmaps/sabacc.ico')] }],
