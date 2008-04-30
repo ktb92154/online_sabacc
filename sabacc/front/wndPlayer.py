@@ -74,7 +74,7 @@ class wndPlayer (gtkPlayerInterface):
 		
 		if human:
 			spbBet.show()
-			button1.set_label("Bet")
+			button1.set_label("End betting")
 			button2.set_label("Leave game")
 			button3.set_label("Call the hand")
 		else:
@@ -363,11 +363,18 @@ class wndPlayer (gtkPlayerInterface):
 			spbBet.set_sensitive(True)
 			adj = spbBet.get_adjustment()
 			adj.set_all(mustMatch, mustMatch, self.agent.credits, 1, 1, 1)
+			
+			if int(spbBet.get_value()) > 0:
+				bettext = "Bet"
+			else:
+				bettext = "End betting"
+			
+			spbBet.connect("value-changed", self.betChanged)
 			spbBet.show()
-			btnBet.set_label("Bet")
+			btnBet.set_label(bettext)
 			self.buttonSignals[0] = btnBet.connect("clicked", self.makeBet)
 			btnBet.set_sensitive(True)
-			btnFold.set_label("Leave Game")
+			btnFold.set_label("Leave game")
 			self.buttonSignals[1] = btnFold.connect("clicked", self.makeMove, -1)
 			btnFold.set_sensitive(True)
 			
@@ -435,6 +442,15 @@ class wndPlayer (gtkPlayerInterface):
 		bet = int(spinner.get_value())
 		self.setCredits(self.agent.credits-bet)
 		self.makeMove(None, bet)
+	
+	def betChanged(self, spinner):
+		if int(spinner.get_value()) > 0:
+			bettext = "Bet"
+		else:
+			bettext = "End betting"
+		
+		btnBet = self.wTree.get_widget("btnMove1")
+		btnBet.set_label(bettext)
 		
 	def newTurn(self):
 	# when promptHumans is on, newTurn will show the player his cards

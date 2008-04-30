@@ -303,7 +303,7 @@ class wndTrain (gtkPlayerInterface):
 			learning = True
 		
 		datawindow = gtk.Window()
-		datawindow.set_icon_from_file(iconpath)##
+		datawindow.set_icon_from_file(iconpath)
 		datawindow.set_title("Agent Data")
 		datawindow.set_modal(True)
 		datawindow.set_transient_for(self.window)
