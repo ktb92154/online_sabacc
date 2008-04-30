@@ -9,28 +9,27 @@
       <puresabacc>0</puresabacc>
     </games>
     <rules>
-      <rule type='and' name='hit'>
-        <if function='more' score='-15'/>
-        <if function='less' score='15'/>
+      <rule name='hit' type='and'>
+        <if score='-15' function='more'/>
+        <if score='15' function='less'/>
         <action>0</action>
       </rule>
-      <rule type='or' name='pure'>
-        <if function='=' score='23'/>
-        <if function='=' score='-23'/>
+      <rule name='pure' type='or'>
+        <if score='23' function='='/>
+        <if score='-23' function='='/>
         <action>2</action>
       </rule>
-      <rule type='or' name='bomb'>
-        <if function='more' score='23'/>
-        <if function='less' score='-23'/>
+      <rule name='bomb' type='or'>
+        <if score='23' function='more'/>
+        <if score='-23' function='less'/>
         <action>0</action>
       </rule>
-      <rule type='default' name='default'>
-        <action>1</action>
+      <rule name='default' type='default'>
         <action>2</action>
       </rule>
-      <rule type='or' name='over'>
-        <if function='more' score='30'/>
-        <if function='less' score='30'/>
+      <rule name='over' type='or'>
+        <if score='30' function='more'/>
+        <if score='30' function='less'/>
         <action>1</action>
       </rule>
     </rules>

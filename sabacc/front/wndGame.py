@@ -136,6 +136,11 @@ class wndGame (gameInterface):
 		#Move window to bottom of screen and resize
 		width, height = self.window.get_size()
 		newwidth=gtk.gdk.screen_width()
+		
+		# Dirty hack to make sure screen isn't too wide on Windows dual-display
+		if newwidth >= gtk.gdk.screen_height() * 2:
+			newwidth /= 2
+		
 		newheight = height+100
 		self.window.resize(newwidth, newheight)
 		self.window.move(0, gtk.gdk.screen_height() - newheight)
