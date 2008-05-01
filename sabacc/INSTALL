@@ -7,10 +7,7 @@ source tarball, then type (as root):
 python setup.py install
 
 Alternatively, you can run Sabacc from the extracted tarball archive. 
-Simply type ./bin/sabacc from the correct directory. Please note that if 
-a different version of Sabacc is already installed on your system, 
-running Sabacc in this way may cause problems. In this case it is always 
-best to install Sabacc using the setup.py script.
+Simply type 'python ./bin/sabacc local' from the correct directory.
 
 If you are a user of Debian/Ubuntu or Microsoft Windows, you might want 
 to consider installing the relevant .deb or .exe version of Sabacc 
