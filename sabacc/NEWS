@@ -1,3 +1,30 @@
+=================
+0.6 (01 May 2008)
+=================
+
+New Features
+------------
+
+  - An icon has been added to the application.
+  
+  - 'Bet' button is now renamed to 'End betting' when the bet
+    counter is set to 0.
+	
+Bug Fixes
+---------
+
+  - The only player able to afford the initial ante will no
+	longer have to buy in to the game.
+	
+  - Various problems with 'New Agent' button fixed.
+  
+  - When no winner is declared the unwon winnings will now
+    be moved into the Sabacc pot.
+
+  - Win32 'dual display' mode no longer causes problems.
+  
+  - Computer agents are now much more likely to call the hand.
+
 ======================
 0.6beta1 (01 Feb 2008)
 ======================

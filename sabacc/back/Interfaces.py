@@ -16,7 +16,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 """
-Interfaces.py (taken from version 0.6beta1)
+Interfaces.py (taken from version 0.6 'Ackbar')
 This module contains three null interfaces and a text-based
 interface for HumanAgent objects.
 """

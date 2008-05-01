@@ -16,7 +16,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 """
-XMLRuleAgent.py (taken from version 0.6beta1)
+XMLRuleAgent.py (taken from version 0.6 'Ackbar')
 This module contains the XMLRuleAgent class.
 """
 
