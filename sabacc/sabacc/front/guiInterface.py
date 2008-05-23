@@ -16,34 +16,11 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 """
-HumanAgent.py (taken from version 0.6 'Ackbar')
-This module contains the HumanAgent class.
+guiInterface.py (rewrite of front.* from 0.6 'Ackbar')
+This module contains the GTK graphical interface and application.
 """
 
-# import base class
-from Agent import Agent
-
-class HumanAgent (Agent):
-	"""
-	This is a dummy class whose methods all point
-	to various methods in its interface.
-	"""
-	def move(self, cards):
-		move = self.interface.getMove(cards)
-		return move
-		
-	def bet(self, cards, mustMatch):
-		bet = self.interface.getBet(cards, mustMatch)
-		return bet
-		
-	def gameOver(self, won, cards):
-		self.interface.gameStatus(won, cards, self.credits)
-		return 0
-		
-	#! 1.0 compatability hack!
-	def modCredits(self, credits):
-		# Modify credits by given amount
-		self.credits+=credits
-		self.interface.credits = self.credits
-		
-		return 0
+def start_app():
+	'''Dummy class - simply calls the old front-end'''
+	from front import wndApp
+	wndApp.window.show()

@@ -2,7 +2,7 @@
 
 import glob
 from distutils.core import setup
-from __init__ import __version__, __license__
+from sabacc import __version__, __license__
 
 try:
 	import py2exe

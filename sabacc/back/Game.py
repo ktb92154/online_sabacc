@@ -55,6 +55,9 @@ class Game (object):
 		# set interface to default
 		self.setInterface()
 		
+		#! 1.0 compatability hack!
+		self.pause_between_moves = False
+		
 	def setInterface(self, interface=None):
 		# Default interface
 		if interface==None:
@@ -159,7 +162,7 @@ class Game (object):
 						self.removePlayer(player.name)
 						self.interface.write(player.name + " could not afford the buy into the game")
 					else: # place ante into hand and sabacc pots
-						player.credits -= ante*2
+						player.modCredits(-ante*2)
 						self.handPot += ante
 						self.sabaccPot += ante
 						i+=1

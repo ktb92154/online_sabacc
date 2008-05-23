@@ -1,91 +1,19 @@
-# Sabacc -- an interesting card game similar to Blackjack.
-# Copyright (C) 2007-2008 Joel Cross.
-#
-# This program is free software; you can redistribute it and/or
-# modify it under the terms of the GNU General Public License
-# as published by the Free Software Foundation; either version 2
-# of the License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+# Interfaces.py from Sabacc 0.6
+#! This package has been rewritten as sabacc.front.nullInterface and
+#! sabacc.front.txtInterface. Please use those packages instead of this one!
 
-"""
-Interfaces.py (taken from version 0.6 'Ackbar')
-This module contains three null interfaces and a text-based
-interface for HumanAgent objects.
-"""
+from sabacc.front.nullInterface import nullInterface, gameInterface, playerInterface
 
-import sys
-
-from settings import CARDNAMES, CARDVALUE
-
-class nullInterface(object):
-	"""
-	This is an abstract class containing the basic methods
-	shared by all interfaces.
-	"""
-	def showCards(self, cards, name):
-		return 0
-		
-	def showNumCards(self, numcards, name):
-		return 0
-		
-	def writeError(self, text):
-		sys.stderr.write(text + "\n")
-		return 0
-
-class gameInterface(nullInterface):
-	"""
-	This is an abstract class which must be extended for
-	any interface designed for the Game class.
-	"""
-	def showAllCards(self, players):
-		for i in players:
-			cards, name = i
-			status = self.showCards(cards, name)
-			
-			if status != 0:
-				return status
-		return 0
-	
-	def write(self, text):
-		return 0
-		
-class playerInterface(nullInterface):
-	"""
-	This is an abstract class which must be extended for
-	any interface designed for players.
-	"""
-	def showCards(self, cards, showall=False):
-		return 0
-	
-	def getMove(self, cards):
-		self.writeError("Warning: nullInterface and HumanAgent objects are incompatible!")
-		return -1
-	
-	def getBet(self, cards, mustMatch):
-		self.writeError("Warning: nullInterface and HumanAgent objects are incompatible!")
-		return -1
-	
-	def gameStatus(self, won, cards, credits=None):
-		self.writeError("Warning: nullInterface and HumanAgent objects are incompatible!")
-		return 0
-		
-	def shift(self, cards):
-		# for use during a Sabacc shift
-		return self.showCards(cards)
-
+#! txtInterface has been retained, as it is not compatible with new versions of the class
 class txtInterface (gameInterface, playerInterface):
 	"""
 	This is a simple text-based interface.
 	"""
+	replaced_error = '''Please note: This class has been replaced by the gameInterface
+	and playerInterface classes in the sabacc.front.txtInterface package.
+	Please use these instead.\n'''
 	def showCards(self, cards, showall=False):
+		sys.stderr.write(txtInterface.replaced_error)
 		if type(showall) == str:
 			name = showall
 			showall = False
@@ -108,13 +36,16 @@ class txtInterface (gameInterface, playerInterface):
 		return 0
 	
 	def showNumCards(self, numcards, name):
+		sys.stderr.write(txtInterface.replaced_error)
 		print name + " has " + str(numcards) + " cards."
 	
 	def write(self, text):
+		sys.stderr.write(txtInterface.replaced_error)
 		print text
 		return 0
 		
 	def getMove(self, cards):
+		sys.stderr.write(txtInterface.replaced_error)
 		prompt = "\n> "
 		query = """Which move do you want to make?
 Please choose from the following:
@@ -144,6 +75,7 @@ Please choose from the following:
 		return answer
 
 	def getBet(self, cards, mustMatch):
+		sys.stderr.write(txtInterface.replaced_error)
 		prompt = "\n> "
 		query = """Please enter the amount that you wish to bet.
 You must bet at least """ + str(mustMatch) + """ credits.
@@ -169,6 +101,7 @@ Entering -1 will cause you to fold."""
 		return answer
 		
 	def gameStatus(self, won, cards, credits=None):
+		sys.stderr.write(txtInterface.replaced_error)
 		if won: # if player won
 			message="Congratulations. You have won!"
 		else:

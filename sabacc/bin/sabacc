@@ -25,6 +25,7 @@ and loads the initial window.
 
 import sys
 import os.path
+from getopt import getopt, GetoptError
 
 def main():
 	PYTHON_VERSION = sys.version_info[:2]
@@ -33,20 +34,44 @@ def main():
 	PYTHON_REQUIRED = (2, 5)
 	PYGTK_REQUIRED = '2.0'
 	PYXML_REQUIRED = '0.8.4'
-
+	
+	# Get arguments
+	try:
+		optlist, args = getopt(sys.argv[1:], '', ['local', 'no-gui'])
+	except GetoptError:
+		# print usage message and exit
+		usage="\nUsage: "+sys.argv[0]+''' [OPTIONS]
+	--local		Force Sabacc to use local Python packages.
+	--no-gui	Do not use the GTK graphical user interface. Instead
+			use a text-based interface. This is the default for
+			those environments where PyGTK is not installed or is
+			not the correct version.
+'''
+		sys.stderr.write(usage+"\n")
+		sys.exit(2)
+	local = nogui = False
+	
+	for option in optlist:
+		# determine methods from arguments
+		if option[0] == '--local':
+			local = True
+		elif option[0] == '--no-gui':
+			nogui = True
+	
 	# Check version requirements.
-
 	if PYTHON_VERSION < PYTHON_REQUIRED:
 		sys.stderr.write("python\n")
 		raise SystemExit, "Error: Python %d.%d+ required" % PYTHON_REQUIRED
 		
-	try:
-		import pygtk
-		pygtk.require(PYGTK_REQUIRED)
-		import gtk
-	except ImportError, AssertionError: # PyGTK not found or wrong version
-		sys.stderr.write("pygtk\n")
-		raise SystemExit, "Error: PyGTK %s+ required" % PYGTK_REQUIRED
+	if nogui == False:
+		try:
+			import pygtk
+			pygtk.require(PYGTK_REQUIRED)
+			import gtk
+		except ImportError, AssertionError: # PyGTK not found or wrong version
+			sys.stderr.write("pygtk\n")
+			print "PyGTK %s+ is required for the graphical interface, but it was not found. Using 'no-gui' option..." % PYGTK_REQUIRED
+			nogui=True
 	
 	try:
 		from xml import __version__
@@ -57,40 +82,47 @@ def main():
 		sys.stderr.write("pyxml\n")
 		raise SystemExit, "Error: PyXML %s required" % PYXML_REQUIRED
 	
-	# Add blank argument if necessary
-	if len(sys.argv) == 1:
-		sys.argv.append("")
-	
-	if sys.argv[1] != "local":
+	if not local:
 		try: # If Sabacc is installed system-wide, this finds it automatically.
-			from sabacc.front import wndApp
+			import sabacc.front
 		except ImportError: # Locate the Sabacc package.
-			sys.argv[1] = "local"
+			local = True
 	
 	# Use local source files
-	if sys.argv[1] == "local":
+	else:
 		currentdir = os.path.dirname(os.path.abspath(sys.argv[0]))
-		basedir = os.path.abspath(os.path.join(currentdir, '..','..'))
+		basedir = os.path.abspath(os.path.join(currentdir, '..'))
+		
 		# The package path should be relative to the base directory.
 		if os.path.exists(os.path.join(basedir, 'lib', 'python')):
 			pythonpath = os.path.join(basedir, 'lib', 'python')
 		else:
 			pythonpath = basedir
-		sys.path.insert(0, pythonpath)  # Place PyBridge package in PYTHONPATH.
+		sys.path.insert(0, pythonpath)  # Place Sabacc package in PYTHONPATH.
 		try:
-			from sabacc.front import wndApp
+			import sabacc.front
 		except ImportError:
 			raise SystemExit, "Fatal error: could not locate Sabacc installation."
 	
-	wndApp.window.show()
-	gtk.gdk.threads_init()
-	gtk.gdk.threads_enter()
-	try:
-		gtk.main()
-	except KeyboardInterrupt:
-		pass#sys.exit(1)
-	gtk.gdk.threads_leave()
-	#sys.exit()
+	if nogui: # use text-based interface
+		from sabacc.front import txtInterface
+		try:
+			txtInterface.start_app()
+		except KeyboardInterrupt:
+			raise SystemExit, "CTRL-C pressed. Exiting..."
+		
+	else: # use GTK GUI
+		from sabacc.front import guiInterface
+		guiInterface.start_app()
+		gtk.gdk.threads_init()
+		gtk.gdk.threads_enter()
+		try:
+			gtk.main()
+		except KeyboardInterrupt:
+			sys.exit(1)
+		gtk.gdk.threads_leave()
+	
+	sys.exit()
 	
 if __name__ == "__main__":
 	main()
