@@ -34,13 +34,11 @@ class gameInterface (nullInterface.gameInterface):
 	def update_display(self):
 		'''Writes useful information and the contents of the
 		display variable to the screen.'''
-		from back import Game#!
-		players = len(Game.get_players())
-		hand_pot, sabacc_pot = Game.get_pots()
+		from sabacc.back.Game import players_in_game, hand_pot, sabacc_pot
 		
 		print "===Sabacc===\n"
 		print "Players in Game: %(players)s\tHand pot: %(hand)s\tSabacc pot: %(sabacc)s\n" \
-			%{'players': players, 'hand': hand_pot, 'sabacc': sabacc_pot}
+			%{'players': players_in_game, 'hand': hand_pot, 'sabacc': sabacc_pot}
 		
 		# Print out text
 		for text in gameInterface.display:
@@ -120,10 +118,10 @@ Please choose from the following:
 		validoptions = 'stick draw exit help ?'.split()
 		validoptions.append('')
 		
-		from back import Game#!
+		from sabacc.back.Game import callable
 		
 		# Is game callable? If so, add that as an option.
-		if Game.get_callable():
+		if callable:
 			options1 += calloptions
 		validoptions.append('call')
 		
@@ -185,10 +183,10 @@ Entering 'help' will display this message.
 	
 		validoptions = 'exit help ?'.split()
 		
-		from back import Game#!
+		from sabacc.back.Game import callable
 		
 		# Is game callable? If so, add that as an option.
-		if Game.get_callable():
+		if callable:
 			options1 += calloptions
 		validoptions.append('call')
 		
@@ -277,10 +275,10 @@ Entering 'help' will display this message.
 		'''Prepare the screen for the next turn,
 		or show correct details after a Shift.'''
 		clear_screen()
-		from back import Game#!
-		Game._inst.interface.update_display()
+		from sabacc.back import Game
+		Game.interface.update_display()
 		
-		if Game._inst.pause_between_moves:
+		if humans_in_game >= 2:
 			if pause:
 				continue_text = self.name + "'s turn. Press enter to continue...\n"
 				self.current_text = continue_text
@@ -406,20 +404,20 @@ def play_menu():
 				is_human = (answer == 'add_human')
 				
 				if add_player_menu(is_human):
-					from back import Game#!
-					num_players = len(Game.get_players())
-					if num_players != 1:
+					from sabacc.back.Game import players_in_game
+					
+					if players_in_game != 1:
 						player_s = 's'
 					else:
 						player_s = ''
-					query = 'Player successfully added. ' + str(num_players) + ' player' + player_s + ' now in game.\n'
+					query = 'Player successfully added. ' + str(players_in_game) + ' player' + player_s + ' now in game.\n'
 					
 					# Add options if necessary
-					if num_players == 1:
+					if players_in_game == 1:
 						validoptions.append('remove')
 						# Instructions + add + remove + help/quit
 						options = optionslist[0] + optionslist[1] + optionslist[2] + optionslist[4]
-					elif num_players == 2:
+					elif players_in_game == 2:
 						validoptions.append('start')
 						# Instructions + add + remove + start + help/quit
 						options = optionslist[0] + optionslist[1] + optionslist[2] + optionslist[3] + optionslist[4]
@@ -427,20 +425,20 @@ def play_menu():
 					query = 'Player not added!\n'
 			elif answer == "remove":
 				if remove_player_menu():
-					from back import Game#!
-					num_players = len(Game.get_players())
-					if num_players != 1:
+					from sabacc.back.Game import players_in_game
+					
+					if players_in_game != 1:
 						player_s = 's'
 					else:
 						player_s = ''
-					query = 'Player successfully removed. ' + str(num_players) + ' player' + player_s + ' now in game.\n'
+					query = 'Player successfully removed. ' + str(players_in_game) + ' player' + player_s + ' now in game.\n'
 					
 					# Remove options if necessary
-					if num_players == 1:
+					if players_in_game == 1:
 						validoptions.remove('start')
 						# Instructions + add + remove + help/quit
 						options = optionslist[0] + optionslist[1] + optionslist[2] + optionslist[4]
-					elif num_players == 0:
+					elif players_in_game == 0:
 						validoptions.remove('remove')
 						# Instructions + add + help/quit
 						options = optionslist[0] + optionslist[1] + optionslist[4]
@@ -452,23 +450,23 @@ def play_menu():
 				else:
 					query = ''
 			elif answer == "show":
-				from back import Game#!
-				sabacc_pot = Game.get_pots()[1]
-				players = []
-				for player in Game.get_players():
-					players.append(player.name)
+				from sabacc.back.Game import sabacc_pot, names
 					
-				if len(players) == 0:
+				if len(names) == 0:
 					print 'There are no players in the game.'
-				elif len(players) == 1:
-					print 'Player %s is in the game.' %players[0]
+				elif len(names) == 1:
+					print 'Player %s is in the game.' %names[0]
 				else:
-					print 'Players %s are in the game.' %players
+					print 'Players %s are in the game.' %names
 				
 				print 'There are %s credits in the Sabacc pot.' %sabacc_pot
 				
 				query = 'What do you want to do now?\n'
 			else: # quit
+				from sabacc.back.Game import reset
+				
+				if not reset():
+					raise SystemExit('Error resetting game variables! Quitting...\n')
 				break
 			fullquery = query+options+prompt
 
@@ -494,28 +492,16 @@ def add_player_menu(is_human):
 			answer = get_filename()
 		
 		if answer != "":
-			from back import Players#!
-			errors = False
-			if is_human:
-				if Players.addHuman(answer, playerInterface(answer)) != 0:
-					sys.stderr.write("Error: A player called %s is already loaded!\n" % answer)
-					errors = True
-				else:
-					name = answer
-					global humans_in_game
-					humans_in_game += 1
-			else:
-				status, name = Players.addXML(answer)
-				if status != 0:
-					sys.stderr.write("Error importing player! The player's name may be already taken.\n")
-					errors = True
+			from sabacc.back.Game import add_player
 			
-			if not errors:
-				from back import Game#!
-				if Game.addPlayer(name) != 0:
-					sys.stderr.write("Unknown error with adding players!\n")
-					return False
-					
+			if is_human:
+				interface = player_interface(answer)
+			else:
+				interface = None
+			
+			if add_player(answer, interface, is_human):
+				global humans_in_game
+				humans_in_game += is_human
 				return True
 	
 def remove_player_menu():
@@ -523,9 +509,10 @@ def remove_player_menu():
 	
 	query = "Please enter the name of the player to remove.\n"
 	query += "Players in game:\n"
-	from back import Game#!
-	for player in Game.get_players():
-		query += "\t%s\n" %player.name
+	
+	from sabacc.back.Game import names
+	for name in names:
+		query += "\t%s\n" %name
 	
 	query += "\nOr press CTRL-C to abort."
 	prompt = "> "
@@ -543,31 +530,23 @@ def remove_player_menu():
 			return False
 		
 		if answer != "":
-			from back import Game#!
-			errorcode = Game.removePlayer(answer)
-			if errorcode == -1:
-				sys.stderr.write("Player %s not in list!\n" %answer)
-			elif errorcode == -2:
-				sys.stderr.write("Unknown error with removing players!\n")
-				return False
+			from sabacc.back.Game import names, loaded, remove_player
+			
+			# Get player object
+			if answer in names:
+				player = loaded[names.index(answer)][0]
 			else:
-				from back import Players#!
-				#! Rewritten method from other class - incredibly bad practice
-				#! but we have no other choice until we rewrite Players
-				pl = Players._inst
-				for x in pl.loaded:
-					if x.name == answer:
-						from back.HumanAgent import HumanAgent
-						pl.loaded.remove(x)
-						if type(x) == HumanAgent:
-							global humans_in_game
-							humans_in_game -= 1
-							break
-				else: # if agent not found in list
-					sys.stderr.write("Unknown error with removing players!\n")
-					return False
+				player = None
+			
+			if remove_player(answer):
+				from back.HumanAgent import HumanAgent #!
+				if type(player) == HumanAgent:
+					global humans_in_game
+					humans_in_game -= 1
 				
 				return True
+			else:
+				print "Player %s not removed!" %answer
 def start_game_menu():
 	'''Prompts user for initial ante, then starts the game.'''
 	
@@ -593,27 +572,14 @@ def start_game_menu():
 		
 		if type(answer) == int:
 			global humans_in_game
+			from sabacc.back import Game
 			
-			from back import Game#!
-			Game.setInterface(gameInterface())
-			Game._inst.pause_between_moves = (humans_in_game >= 2)
+			Game.interface=gameInterface()
 			
-			players = Game.get_players()
-			
-			if Game.startGame(answer) != 0:
-				sys.stderr.write("Unknown error with starting game!\n")
+			if Game.start_game(answer):
+				return True
+			else:
 				return False
-			
-			#! Add missing players back into game
-			new_players = Game.get_players()
-			
-			if len(new_players) < len(players):
-				for player in players:
-					if player not in new_players:
-						print "Adding player %s back into the game..." %player.name
-						Game.addPlayer(player.name)
-				
-			return True
 
 def agent_menu():
 	'''Prompts the user whether to create a new agent or view/modify an existing one.'''
@@ -883,21 +849,24 @@ def load_agent_menu():
 	if not agent_file:
 		return False
 	
-	from back import Players#!
-	status, name = Players.addXML(agent_file)
+	from back.XMLRuleAgent import XMLRuleAgent#!
 	
-	if status != 0:
-		sys.stderr.write('Error loading XML file!\n')
+	agent_xml = XMLRuleAgent(filename)
+	
+	if not agent_xml.exists():
+		sys.stderr.write('Error: The selected XML file does not exist!\n')
 		return False
 	
-	for agent in Players._inst.loaded:
-		if agent.name == name:
-			final = modify_agent(agent)
-			Players.unload(name)
-			return final
-	else:
-		sys.stderr.write('Error loading XML file!\n')
+	from back.RuleBasedAgent import RuleBasedAgent#!
+	agent = RuleBasedAgent(agent_xml)
+	
+	# load agent's details
+	if not agent.loadFromXML():
+		sys.stderr.write('Error loading data from XML!\n')
 		return False
+	
+	final = modify_agent(agent)
+	return final
 		
 def modify_agent(agent, new_file=False):
 	'''Show details of an XML agent and allow them to be
