@@ -24,12 +24,16 @@ reset=Game.reset
 bettingRound = Game.betting_round
 drawingRound = Game.drawing_round
 dealCard = Game.deal_card
+shift = Game.start_shift
 
 def get_callable():
 	return Game.callable
 	
 def get_players():
-	return Game.loaded[:]
+	final = []
+	for player_tuple in Game.loaded:
+		final.append(player_tuple[0])
+	return final
 	
 def get_num_cards():
 	numcards = []

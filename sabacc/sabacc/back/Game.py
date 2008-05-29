@@ -66,7 +66,7 @@ def add_player(name, interface=None, human=True):
 			agent = RuleBasedAgent(agent_xml, interface)
 			
 			# load agent's details
-			if not agent.loadFromXML():
+			if agent.loadFromXML() != 0: #!
 				sys.stderr.write('Error loading data from XML!\n')
 				return False
 		else:
@@ -87,6 +87,8 @@ def remove_player(name):
 	'''Removes the given player from the game, alerting them if necessary.
 	If a game is running, the player will be added at the end of the game,
 	otherwise the player will be unloaded and will remain out of the game.'''
+	global game_in_progress, players_in_game
+	
 	if name in names:
 		index = names.index(name)
 		agent, hand, in_game = loaded[index]
@@ -95,8 +97,8 @@ def remove_player(name):
 			if agent.gameOver(False, hand) != 0: #!
 				sys.stderr.write('Error reporting game outcome to player %s!\n' %name)
 				return False
-			in_game = False
 			players_in_game -= 1
+			loaded[index] = (agent, hand, False)
 		else:
 			# unload player
 			del loaded[index]
@@ -115,6 +117,8 @@ def start_game(ante=0):
 	'''Start the game if possible, then run through betting and drawing
 	rounds until the game is called or runs out of players, then call the
 	end_game method.'''
+	global game_in_progress, shift_timer
+	
 	if game_in_progress:
 		sys.stderr.write('Error: A game is already in progress!\n')
 		return False
@@ -131,7 +135,6 @@ def start_game(ante=0):
 		from random import uniform
 		from threading import Timer
 		time_until_shift = round(uniform(SABACCSHIFT_TIME_MIN,  SABACCSHIFT_TIME_MAX),2)
-		global shift_timer
 		shift_timer = Timer(time_until_shift, start_shift)
 		shift_timer.start()
 	
@@ -141,7 +144,8 @@ def start_game(ante=0):
 	
 	# reset deck and hands
 	for player_tuple in loaded:
-		player_tuple[1] = []
+		player, hand, in_game = player_tuple
+		loaded[loaded.index(player_tuple)] = (player, [], True)
 	
 	from back.settings import NUM_CARDS#!
 	for card in range(NUM_CARDS):
@@ -161,6 +165,7 @@ def start_game(ante=0):
 			interface.write("%s could not afford the buy into the game") %player.name
 			in_game = False
 		else: # place ante into hand and sabacc pots
+			global hand_pot, sabacc_pot
 			player.modCredits(-ante*2)#!
 			hand_pot += ante
 			sabacc_pot += ante
@@ -182,9 +187,11 @@ def start_game(ante=0):
 	
 	# Deal two cards to each player
 	for player, hand, in_game in loaded:
-		card = deal_card()
-		if card:
-			hands.append(card)
+		card1 = deal_card()
+		card2 = deal_card()
+		if card1 and card2:
+			hand.append(card1)
+			hand.append(card2)
 		else:
 			return False
 		
@@ -212,7 +219,7 @@ def start_game(ante=0):
 			show_all_cards = False
 			break
 		
-		from settings import POT_BUILDING_ROUNDS#!
+		from back.settings import POT_BUILDING_ROUNDS#!
 		if current_round < POT_BUILDING_ROUNDS: # if pot-building phase in progress
 			current_round += 1
 		else:
@@ -247,6 +254,8 @@ def betting_round(starting_player=0):
 		
 		index = 0
 		
+		global hand_pot, callable
+		
 		for player, hand, in_game in loaded_copy:
 			legal_move = False
 			
@@ -268,7 +277,7 @@ def betting_round(starting_player=0):
 					
 					# Calling no longer allowed
 					callable = False
-					if this_match == 0:
+					if this_player_must_match == 0:
 						# if betting is over, repeat the round.
 						# Otherwise the round will repeat anyway
 						betting_round(index)
@@ -280,7 +289,7 @@ def betting_round(starting_player=0):
 					legal_move = True
 					hand_pot += bet
 					if bet > 0: # if player bet more than 0, tell the user
-						interface.write("%s matched the bet", player.name)
+						interface.write("%s matched the bet" %player.name)
 						already_bet[index] += bet
 						player.modCredits(-bet)#!
 				
@@ -290,7 +299,7 @@ def betting_round(starting_player=0):
 					already_bet[index] += bet
 					raised_by = bet - this_player_must_match
 					must_match = already_bet[index]
-					interface.write("%s raised the bet by %i" % player.name, raised_by)
+					interface.write("%s raised the bet by %i" % (player.name, raised_by))
 					player.modCredits(-bet)#!
 			
 			# lower lowest_bet if necessary
@@ -314,6 +323,8 @@ def drawing_round():
 	'''Perform one round of drawing, starting with player 0.'''
 	
 	from settings import moves
+	global callable
+	
 	called = False
 	index = 0
 	
@@ -344,10 +355,9 @@ def drawing_round():
 				idle_moves = 0
 				card = deal_card()
 				if card:
-					hands.append(card)
-				
-				interface.write("%s drew a card" %player.name)
-				interface.show_num_cards(len(hand), player.name)
+					hand.append(card)
+					interface.write("%s drew a card" %player.name)
+					interface.show_num_cards(len(hand), player.name)
 				
 			elif move == moves['stick']:
 				legal_move = True
@@ -393,6 +403,8 @@ def end_game(show_all_cards):
 	best_score = 0 # best recorded score so far
 	cards_to_show = [] # takes form (player, hand) for all relevant players
 	
+	global players_in_game, hand_pot, sabacc_pot, game_in_progress
+	
 	# if only one player, he wins by default
 	if players_in_game == 1:
 		win_by_default = True
@@ -402,7 +414,7 @@ def end_game(show_all_cards):
 	for player, hand, in_game in loaded:
 		if in_game:
 			if show_all_cards:
-				cards_to_show.append(player, hand)
+				cards_to_show.append((player, hand))
 			
 			# calculate hand
 			hand_value = get_value(hand)
@@ -420,7 +432,7 @@ def end_game(show_all_cards):
 				# did player bomb out?
 				if hand_value > 23 or hand_value < -23 or hand_value == 0: 
 					hand_type = hand_types['bomb']
-					interface.write("%s bombed out", player.name)
+					interface.write("%s bombed out" %player.name)
 					
 					# bombing out penalty
 					sabacc_pot += hand_pot
@@ -450,7 +462,7 @@ def end_game(show_all_cards):
 				in_game = False
 			else:
 				# add hand values to list
-				hand_values.append((player.name, hand_value, len(cards), hand_type))
+				hand_values.append((player.name, hand_value, len(hand), hand_type))
 				
 				# make score positive for purposes of winner estimation
 				if hand_type == hand_types['negative']:
@@ -605,8 +617,8 @@ def end_game(show_all_cards):
 		winnings = hand_pot / len(winners)
 		hand_pot % len(winners)
 		
-		hand_value = winners[0][3]
-		hand_type = winners[0][4]
+		hand_value = winners[0][1]
+		hand_type = winners[0][3]
 	else: # avoid divide-by-zero
 		winnings = 0
 		hand_value = hand_type = None
@@ -628,20 +640,20 @@ def end_game(show_all_cards):
 				player.modCredits(winnings)#!
 				
 				if player.name == winner_names[0]:
-					winnertext += player.name
+					text += player.name
 				elif player.name == winner_names[-1]:
-					winnertext += " and %s." %player.name
+					text += " and %s." %player.name
 				else:
-					winnertext += ", %s" %player.name
+					text += ", %s" %player.name
 			
 			# tell player that game is over
 			player.gameOver(won, hand)#!
 	
 	if len(winners) >= 1:
-		if len(winners) == len(hands) and len(winners) > 1:
+		if len(winners) == len(loaded) and len(winners) > 1:
 			interface.write("The game was a draw.")
 		else:
-			interface.write("The game was won by %s." %winnertext)
+			interface.write("The game was won by %s." %text)
 	
 	else: # Looks like nobody won. The house wins today.
 		sabacc_pot += hand_pot
@@ -651,9 +663,7 @@ def end_game(show_all_cards):
 	# Add all 'out' players back into the game
 	for player, hand, in_play in loaded:
 		if not in_play:
-			in_play = True
 			interface.write("%s re-entered the game" %player.name)
-			global players_in_game
 			players_in_game += 1
 	
 	# Change the order of players ready for the next round
@@ -673,7 +683,7 @@ def get_value(cards):
 	
 	return hand_total
 
-def shift():
+def start_shift():
 	'''Randomly swaps certain cards for others, then resets
 	the timer for the next shift.'''
 	
@@ -702,7 +712,7 @@ def shift():
 	for count in range(num_to_shift):
 		# Pick a card to shift
 		orig_pos = randint(0, len(cards_in_play)-1)
-		new_card = random.randint(0, NUM_CARDS-1)
+		new_card = randint(0, NUM_CARDS-1)
 		
 		# Card must be swapped with another card,
 		# otherwise chaos will ensue
@@ -734,10 +744,10 @@ def shift():
 		
 		from threading import Timer
 		global shift_timer
-		shift_timer = Timer(time_until_shift, shift)
+		shift_timer = Timer(time_until_shift, start_shift)
 		shift_timer.start()
 
-def reset(s):
+def reset():
 	'''Resets all game variables to their original settings'''
 	
 	if game_in_progress:

@@ -26,6 +26,7 @@ from back.settings import CARDNAMES, CARDVALUE#!
 ## Plus, case-insensitive names for win32.
 ## And (single player) play needs more work
 ## Should show number of cards belonging to others
+## Should XML agents be saved afterwards?
 class gameInterface (nullInterface.gameInterface):
 	"""
 	This is a simple text-based game interface.
@@ -477,7 +478,7 @@ def add_player_menu(is_human):
 		query = "What is your name? (CTRL-C to abort) "
 	
 	while True:
-		answer = None
+		answer = ''
 		if is_human:
 			try:
 				answer=raw_input(query)
@@ -490,12 +491,15 @@ def add_player_menu(is_human):
 		else:
 			# Get filename from other method
 			answer = get_filename()
+			
+			if not answer: # CTRL-C or other error
+				return False
 		
 		if answer != "":
 			from sabacc.back.Game import add_player
 			
 			if is_human:
-				interface = player_interface(answer)
+				interface = playerInterface(answer)
 			else:
 				interface = None
 			
@@ -824,10 +828,11 @@ def new_agent_menu():
 				
 				filename = mkstemp('.xml', 'sabacc_', text=True)[1]
 				agent_xml = XMLRuleAgent(filename)
+				from os import remove
 				
 				if agent_xml.createFile(name) != 0:
 					sys.stderr.write("Error creating temporary file!\n")
-					os.remove(filename)
+					remove(filename)
 					return False
 				
 				#! 'type' is currently pointless, until new XML is built
@@ -837,7 +842,6 @@ def new_agent_menu():
 				agent.loadFromXML()#!
 				
 				final = modify_agent(agent, new_file=True)
-				from os import remove
 				remove(filename) # delete temp file
 				
 				return final
@@ -851,7 +855,7 @@ def load_agent_menu():
 	
 	from back.XMLRuleAgent import XMLRuleAgent#!
 	
-	agent_xml = XMLRuleAgent(filename)
+	agent_xml = XMLRuleAgent(agent_file)
 	
 	if not agent_xml.exists():
 		sys.stderr.write('Error: The selected XML file does not exist!\n')
@@ -861,7 +865,7 @@ def load_agent_menu():
 	agent = RuleBasedAgent(agent_xml)
 	
 	# load agent's details
-	if not agent.loadFromXML():
+	if agent.loadFromXML() != 0:
 		sys.stderr.write('Error loading data from XML!\n')
 		return False
 	
