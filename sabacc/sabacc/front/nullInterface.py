@@ -20,6 +20,8 @@ nullInterface.py (rewrite of back.Interfaces.{null,game,player}Interface from 0.
 This module contains three null interfaces for extending by other classes.
 """
 
+import sys
+
 class nullInterface(object):
 	"""
 	This is an abstract class containing the basic methods

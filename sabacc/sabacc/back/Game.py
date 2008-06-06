@@ -46,30 +46,21 @@ def add_player(name, interface=None, human=True):
 	already_in_game = False
 	if human:
 		if name not in names:
-			from back.HumanAgent import HumanAgent#!
+			from Agents import HumanAgent
 			agent = HumanAgent(name, interface)
 		else:
 			already_in_game = True
 	else:
 		filename = name
-		from back.XMLRuleAgent import XMLRuleAgent#!
-		agent_xml = XMLRuleAgent(filename)
 		
-		if not agent_xml.exists():
-			sys.stderr.write('Error: The selected XML file does not exist!\n')
+		from Agents import RuleBasedAgent
+		agent = RuleBasedAgent(filename, interface)
+		
+		if not agent.loaded:
 			return False
 		
-		name = agent_xml.getName()
-		
-		if name not in names:
-			from back.RuleBasedAgent import RuleBasedAgent#!
-			agent = RuleBasedAgent(agent_xml, interface)
-			
-			# load agent's details
-			if agent.loadFromXML() != 0: #!
-				sys.stderr.write('Error loading data from XML!\n')
-				return False
-		else:
+		name = agent.name
+		if name in names:
 			already_in_game = True
 	
 	if already_in_game:
@@ -94,9 +85,7 @@ def remove_player(name):
 		agent, hand, in_game = loaded[index]
 		
 		if game_in_progress:
-			if agent.gameOver(False, hand) != 0: #!
-				sys.stderr.write('Error reporting game outcome to player %s!\n' %name)
-				return False
+			agent.game_over(won=False, cards=hand)
 			players_in_game -= 1
 			loaded[index] = (agent, hand, False)
 		else:
@@ -157,7 +146,7 @@ def start_game(ante=0):
 	# Collect Ante
 	for player, hand, in_game in loaded:
 		# make sure player doesn't see his previous set of cards
-		player.examineCards([])#!
+		player.examine_cards([])
 		
 		# player can't afford game so is kicked out
 		if player.credits < ante*2:
@@ -166,14 +155,14 @@ def start_game(ante=0):
 			in_game = False
 		else: # place ante into hand and sabacc pots
 			global hand_pot, sabacc_pot
-			player.modCredits(-ante*2)#!
+			player.credits -= ante*2
 			hand_pot += ante
 			sabacc_pot += ante
 	
 	# If only 1 player left, do not start game
 	if not game_in_progress:
 		# Refund credits and reset pots
-		loaded[0][0].modCredits(hand_pot * 2)#!
+		loaded[0][0].credits += hand_pot*2
 		
 		sabacc_pot -= hand_pot
 		hand_pot = 0
@@ -195,7 +184,7 @@ def start_game(ante=0):
 		else:
 			return False
 		
-		player.examineCards(hand)#!
+		player.examine_cards(hand)
 	
 	# variables used for pot-building phase
 	global callable
@@ -291,7 +280,7 @@ def betting_round(starting_player=0):
 					if bet > 0: # if player bet more than 0, tell the user
 						interface.write("%s matched the bet" %player.name)
 						already_bet[index] += bet
-						player.modCredits(-bet)#!
+						player.credits -= bet
 				
 				elif bet > this_player_must_match: #if player is raising
 					legal_move = True
@@ -300,7 +289,7 @@ def betting_round(starting_player=0):
 					raised_by = bet - this_player_must_match
 					must_match = already_bet[index]
 					interface.write("%s raised the bet by %i" % (player.name, raised_by))
-					player.modCredits(-bet)#!
+					player.credits -= bet
 			
 			# lower lowest_bet if necessary
 			if in_game and already_bet[index] < lowest_bet:
@@ -372,7 +361,7 @@ def drawing_round():
 				called = True
 		
 		if in_game:
-			player.examineCards(hand)#!
+			player.examine_cards(hand)
 		index += 1
 		
 		if called or not game_in_progress:
@@ -436,7 +425,7 @@ def end_game(show_all_cards):
 					
 					# bombing out penalty
 					sabacc_pot += hand_pot
-					player.modCredits(-hand_pot)#!
+					player.credits -= hand_pot
 			
 			# check for possible Idiot's array
 			if hand_value == 5 and len(hand) == 3:
@@ -637,7 +626,7 @@ def end_game(show_all_cards):
 			if player.name in winner_names:
 				won = True
 				# award winnings
-				player.modCredits(winnings)#!
+				player.credits += winnings
 				
 				if player.name == winner_names[0]:
 					text += player.name
@@ -647,7 +636,7 @@ def end_game(show_all_cards):
 					text += ", %s" %player.name
 			
 			# tell player that game is over
-			player.gameOver(won, hand)#!
+			player.game_over(won, hand)
 	
 	if len(winners) >= 1:
 		if len(winners) == len(loaded) and len(winners) > 1:

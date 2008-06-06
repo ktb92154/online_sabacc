@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<sabacc version='1'>
+  <agent ruleset='balanced' name='Example'>
+    <stats>
+      <stat name='games'>0</stat>
+      <stat name='wins'>0</stat>
+      <stat name='losses'>0</stat>
+      <stat name='bomb_outs'>0</stat>
+      <stat name='pure_sabaccs'>0</stat>
+    </stats>
+  </agent>
+</sabacc>

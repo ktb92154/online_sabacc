@@ -79,7 +79,6 @@ def main():
 			raise AssertionError
 		del(__version__)
 	except ImportError, AssertionError: # PyXML not found or wrong version
-		sys.stderr.write("pyxml\n")
 		raise SystemExit, "Error: PyXML %s required" % PYXML_REQUIRED
 	
 	if not local:
@@ -89,7 +88,7 @@ def main():
 			local = True
 	
 	# Use local source files
-	else:
+	if local: # not 'else'!!
 		currentdir = os.path.dirname(os.path.abspath(sys.argv[0]))
 		basedir = os.path.abspath(os.path.join(currentdir, '..'))
 		

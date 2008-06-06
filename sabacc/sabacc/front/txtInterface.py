@@ -64,7 +64,6 @@ class playerInterface (nullInterface.playerInterface):
 		self.name = name
 		self.cards = None
 		self.current_text = None
-		self.credits = 0 #!Develop a better system?
 	
 	def show_cards(self, cards, name=None, show_all=False):
 		'''Shows the given cards to the user.'''
@@ -290,12 +289,24 @@ Entering 'help' will display this message.
 		
 		# Show cards and number of credits
 		if show_cards:
+			agent = self._get_agent()
 			print self.cards
-			print 'You have %s credits.' %self.credits
+			print 'You have %s credits.' %agent.credits
 		
 		if self.current_text:
 			# Not 'print', as this leaves a gap afterwards
 			sys.stdout.write(self.current_text)
+	
+	def _get_agent(self):
+		'''If the agent is loaded in the game, returns it.'''
+		
+		from sabacc.back import Game
+		
+		if self.name not in Game.names:
+			return
+		
+		index = Game.names.index(self.name)
+		return Game.loaded[index][0]
 	
 	#! Old function names
 	showCards = show_cards
@@ -543,7 +554,7 @@ def remove_player_menu():
 				player = None
 			
 			if remove_player(answer):
-				from back.HumanAgent import HumanAgent #!
+				from sabacc.back.Agents import HumanAgent
 				if type(player) == HumanAgent:
 					global humans_in_game
 					humans_in_game -= 1
@@ -795,7 +806,7 @@ def new_agent_menu():
 	
 	query = "Please enter a name, or press CTRL-C to abort: "
 	
-	rulesets = 'bold cautious balanced'.split()
+	from settings import rulesets
 	name = None
 	ruleset = None
 	
@@ -807,7 +818,8 @@ def new_agent_menu():
 			answer=raw_input(query)
 			print
 		except EOFError:
-			pass
+			print
+			answer = ''
 		except KeyboardInterrupt:
 			print
 			return False
@@ -824,24 +836,24 @@ def new_agent_menu():
 				
 			if ruleset:
 				from tempfile import mkstemp
-				from back.XMLRuleAgent import XMLRuleAgent#!
+				from sabacc.back import xml_tools
 				
 				filename = mkstemp('.xml', 'sabacc_', text=True)[1]
-				agent_xml = XMLRuleAgent(filename)
+				
 				from os import remove
 				
-				if agent_xml.createFile(name) != 0:
+				if not xml_tools.create_agent(filename, name, ruleset):
 					sys.stderr.write("Error creating temporary file!\n")
 					remove(filename)
 					return False
 				
-				#! 'type' is currently pointless, until new XML is built
+				from sabacc.back.Agents import RuleBasedAgent
+				agent = RuleBasedAgent(filename)
 				
-				from back.RuleBasedAgent import RuleBasedAgent#!
-				agent = RuleBasedAgent(agent_xml)
-				agent.loadFromXML()#!
-				
-				final = modify_agent(agent, new_file=True)
+				if agent.loaded:
+					final = modify_agent(agent, new_file=True)
+				else:
+					final = False
 				remove(filename) # delete temp file
 				
 				return final
@@ -853,20 +865,10 @@ def load_agent_menu():
 	if not agent_file:
 		return False
 	
-	from back.XMLRuleAgent import XMLRuleAgent#!
+	from sabacc.back.Agents import RuleBasedAgent
+	agent = RuleBasedAgent(agent_file)
 	
-	agent_xml = XMLRuleAgent(agent_file)
-	
-	if not agent_xml.exists():
-		sys.stderr.write('Error: The selected XML file does not exist!\n')
-		return False
-	
-	from back.RuleBasedAgent import RuleBasedAgent#!
-	agent = RuleBasedAgent(agent_xml)
-	
-	# load agent's details
-	if agent.loadFromXML() != 0:
-		sys.stderr.write('Error loading data from XML!\n')
+	if not agent.loaded:
 		return False
 	
 	final = modify_agent(agent)
@@ -876,26 +878,19 @@ def modify_agent(agent, new_file=False):
 	'''Show details of an XML agent and allow them to be
 	modified and the file saved.'''
 	
-	query = '''Editing agent %(name)s. Agent type is unknown.
-General status of agent %(name)s:
-	Wins: %(wins)s
-	Losses: %(losses)s
-	Pure Sabaccs: %(sabacc)s
-	Bomb Outs: %(bomb)s\n''' %{'name': agent.name, \
-	'wins': agent.won, 'losses': agent.lost, \
-	'sabacc': agent.pureSabacc, 'bomb': agent.bombouts} #!
+	stats = agent.stats.copy()
 	
 	options1 = """\nPlease choose from the following:
-	type:	Change agent type"""
+	ruleset:	Change agent ruleset"""
 	oprevert = """
-	revert:	Revert to saved version of agent"""
+	revert:		Revert to saved version of agent"""
 	opsave = """
-	save:	Save this agent"""
+	save:		Save this agent"""
 	options2 = """
-	help:	Display this screen
-	quit:	Return to the agent menu
+	help:		Display this screen
+	quit:		Return to the agent menu
 """
-	validoptions = 'type help quit ?'.split()
+	validoptions = 'ruleset help quit ?'.split()
 	
 	if new_file:
 		validoptions.append('save')
@@ -904,9 +899,18 @@ General status of agent %(name)s:
 		options = options1 + options2
 	
 	prompt = "> "
-	fullquery = query+options+prompt
 	
 	while True:
+		stats.update(name=agent.name, ruleset=agent.ruleset)
+		
+		query = '''Editing agent '%(name)s'. Agent rule set is '%(ruleset)s'.
+General status of agent %(name)s:
+	Wins: %(wins)i
+	Losses: %(losses)i
+	Pure Sabaccs: %(pure_sabaccs)i
+	Bomb Outs: %(bomb_outs)i\n''' %stats
+		fullquery = query+options+prompt
+		
 		errors = False
 		answer = None
 		try:
@@ -924,17 +928,22 @@ General status of agent %(name)s:
 		elif answer in 'help ?'.split():
 			fullquery = options+prompt
 		else:
-			if answer == 'type':
-				print "Not yet implemented!"#!
+			if answer == 'ruleset':
+				new_ruleset = modify_agent_ruleset(agent.ruleset)
 				
-				if 'save' not in validoptions: # if there are no changes
-					validoptions.append('revert')
-					validoptions.append('save')
-					options = options1 + oprevert + opsave + options2
+				if new_ruleset and new_ruleset != agent.ruleset:
+					agent.ruleset = new_ruleset
+					
+					# Add option to save if it wasn't there already
+					if  'save' not in validoptions:
+						validoptions.append('revert')
+						validoptions.append('save')
+						options = options1 + oprevert + opsave + options2
+			
 			elif answer in ['revert', 'save']:
 				if answer == 'save':
 					if new_file:
-						orig_filename = agent.XMLFile.filename
+						orig_filename = agent.filename
 						filename = get_filename(save=True)
 						
 						if not filename:
@@ -943,19 +952,17 @@ General status of agent %(name)s:
 							from shutil import copy
 							try:
 								copy(orig_filename, filename)
-								agent.XMLFile.filename = filename
+								agent.filename = filename
 								
 								new_file = False
 							except IOError:
 								sys.stderr.write('Error writing file to XML!\n')
 								errors = True
 						
-					if not errors and agent.saveToXML() != 0:
-						sys.stderr.write('Error writing file to XML!\n')
+					if not errors and not agent.save_to_xml():
 						errors = True
 				else: # revert
-					if agent.loadFromXML() != 0:
-						sys.stderr.write('Error loading data from XML!\n')
+					if not agent.load_from_xml():
 						errors = True
 				
 				if not errors:
@@ -971,6 +978,33 @@ General status of agent %(name)s:
 				
 			else: # quit
 				break
-			fullquery = query+options+prompt
 	
 	return False
+
+def modify_agent_ruleset(ruleset):
+	'''Prompt for new rule set, then return.'''
+	
+	from settings import rulesets
+	query = '''Your current rule set is '%s'.
+Please choose a new one or press CTRL-C to abort:
+(This may be one of %s) ''' %(ruleset, rulesets)
+	
+	while True:
+		answer = None
+		errors = False
+		
+		try:
+			answer=raw_input(query)
+			print
+		except EOFError:
+			print
+			answer = ''
+		except KeyboardInterrupt:
+			print
+			return
+		
+		if answer != "":
+			if answer in rulesets:
+				return answer
+			else:
+				sys.stderr.write("Error: '%s' is not a valid option!\n" % answer)

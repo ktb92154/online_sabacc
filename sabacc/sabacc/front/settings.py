@@ -5,3 +5,4 @@
 from front import basedir#!
 import os.path
 agent_dir = os.path.join(basedir, 'agents')
+rulesets = 'bold cautious balanced'.split()
