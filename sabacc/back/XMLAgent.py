@@ -39,9 +39,6 @@ class XMLAgent (object):
 		return xml_tools.get_name(self.filename)
 	
 	def getElement(self, elem):
-		# ["played", "won", "lost", "bombouts", "puresabacc"]
-		# (games=0, wins=0, losses=0, bomb_outs=0, pure_sabaccs=0)
-		
 		if elem == 'played':
 			elem = 'games'
 		elif elem == 'won':
