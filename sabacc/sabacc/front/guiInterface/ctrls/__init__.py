@@ -15,12 +15,4 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-"""
-guiInterface.py (rewrite of front.* from 0.6 'Ackbar')
-This module contains the GTK graphical interface and application.
-"""
 
-def start_app():
-	'''Dummy class - simply calls the old front-end'''
-	from front import wndApp
-	wndApp.window.show()

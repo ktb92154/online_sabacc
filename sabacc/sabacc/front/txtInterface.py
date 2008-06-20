@@ -60,17 +60,13 @@ class playerInterface (nullInterface.playerInterface):
 	"""
 	This is a simple text-based player interface.
 	"""
-	def __init__(self, name=None):#!name should not be optional!
+	def __init__(self, name):
 		self.name = name
 		self.cards = None
 		self.current_text = None
 	
 	def show_cards(self, cards, name=None, show_all=False):
 		'''Shows the given cards to the user.'''
-		#! May be passed bad arguments
-		if type(name) == bool:
-			show_all = name
-			name = None
 		
 		# user friendly cards array
 		user_cards = []
@@ -307,13 +303,6 @@ Entering 'help' will display this message.
 		
 		index = Game.names.index(self.name)
 		return Game.loaded[index][0]
-	
-	#! Old function names
-	showCards = show_cards
-	showNumCards = show_num_cards
-	getMove = get_move
-	getBet = get_bet
-	gameStatus = game_status
 
 '''
 Begin Application

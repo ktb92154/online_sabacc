@@ -40,11 +40,6 @@ class nullInterface(object):
 	def write_error(self, text):
 		'''This method writes the given message to the stderr.'''
 		sys.stderr.write(text + "\n")
-		
-	#! Old function names
-	showCards = show_cards
-	showNumCards = show_num_cards
-	writeError = write_error
 
 class gameInterface(nullInterface):
 	"""
@@ -54,23 +49,21 @@ class gameInterface(nullInterface):
 	def show_all_cards(self, player_cards):
 		'''Takes in a list of tuples of cards and player names, then
 		passes these to show_cards.'''
-		for cards, name in player_cards:
-			self.show_cards(cards, name=name)
+		
+		for name, cards in player_cards:
+			self.show_cards(cards, name=name, show_all=True)
 	
 	def write(self, text):
 		'''This method does nothing, but may be extended to display
 		the given message.'''
 		pass
-		
-	#! Old function names
-	showAllCards = show_all_cards
-		
+
 class playerInterface(nullInterface):
 	"""
 	This is an abstract class which must be extended for
 	any interface designed for players.
 	"""
-	def __init__(self, name=None):#!name should not be optional!
+	def __init__(self, name):
 		self.name = name
 		self.null_error = 'Warning: Interface for player %s is not correctly set up!' %name
 	
@@ -94,8 +87,3 @@ class playerInterface(nullInterface):
 		'''This method is used during a Sabacc shift. For now,
 		it simply calls show_cards.'''
 		return self.show_cards(cards)
-		
-	#! Old function names
-	getMove = get_move
-	getBet = get_bet
-	gameStatus = game_status

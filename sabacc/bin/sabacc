@@ -28,6 +28,7 @@ import os.path
 from getopt import getopt, GetoptError
 
 def main():
+	from exceptions import AssertionError
 	PYTHON_VERSION = sys.version_info[:2]
 	
 	# Some version dependencies.
@@ -75,10 +76,11 @@ def main():
 	
 	try:
 		from xml import __version__
+		
 		if __version__ != PYXML_REQUIRED:
-			raise AssertionError
+			raise SystemExit, "Error: PyXML %s required - version %s found." %(PYXML_REQUIRED, __version__)
 		del(__version__)
-	except ImportError, AssertionError: # PyXML not found or wrong version
+	except ImportError: # PyXML not found or wrong version
 		raise SystemExit, "Error: PyXML %s required" % PYXML_REQUIRED
 	
 	if not local:
@@ -105,21 +107,16 @@ def main():
 	
 	if nogui: # use text-based interface
 		from sabacc.front import txtInterface
-		try:
-			txtInterface.start_app()
-		except KeyboardInterrupt:
-			raise SystemExit, "CTRL-C pressed. Exiting..."
-		
+		interface = txtInterface
+	
 	else: # use GTK GUI
 		from sabacc.front import guiInterface
-		guiInterface.start_app()
-		gtk.gdk.threads_init()
-		gtk.gdk.threads_enter()
-		try:
-			gtk.main()
-		except KeyboardInterrupt:
-			sys.exit(1)
-		gtk.gdk.threads_leave()
+		interface = guiInterface
+	
+	try:
+		interface.start_app()
+	except KeyboardInterrupt:
+		raise SystemExit, "CTRL-C pressed. Exiting..."
 	
 	sys.exit()
 	

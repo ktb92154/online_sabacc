@@ -36,25 +36,25 @@ interface = None # Interface with the user
 idle_moves = 0 # Number of idle moves taken - Used for automatically declaring a draw.
 game_in_progress = False
 
-def add_player(name, interface=None, human=True):
+def add_player(name, player_interface=None, human=True):
 	'''Creates an agent with the specified name (or from the specified
 	filename) and adds to the game.'''
 	if game_in_progress:
-		sys.stderr.write('Error: A game is already in progress!\n')
+		interface.write_error('Error: A game is already in progress!')
 		return False
 	
 	already_in_game = False
 	if human:
 		if name not in names:
 			from Agents import HumanAgent
-			agent = HumanAgent(name, interface)
+			agent = HumanAgent(name, player_interface)
 		else:
 			already_in_game = True
 	else:
 		filename = name
 		
 		from Agents import RuleBasedAgent
-		agent = RuleBasedAgent(filename, interface)
+		agent = RuleBasedAgent(filename, player_interface)
 		
 		if not agent.loaded:
 			return False
@@ -64,7 +64,7 @@ def add_player(name, interface=None, human=True):
 			already_in_game = True
 	
 	if already_in_game:
-		sys.stderr.write("Error: A player with the name '%s' is already in the game.\n" %name)
+		interface.write_error("Error: A player with the name '%s' is already in the game." %name)
 		return False
 	else:
 		# add agent to list of agents
@@ -72,7 +72,7 @@ def add_player(name, interface=None, human=True):
 		loaded.append((agent, [], True)) # ([], True) means empty hand and player is in the game
 		global players_in_game
 		players_in_game += 1
-		return True
+		return agent
 
 def remove_player(name):
 	'''Removes the given player from the game, alerting them if necessary.
@@ -83,10 +83,10 @@ def remove_player(name):
 	if name in names:
 		index = names.index(name)
 		agent, hand, in_game = loaded[index]
+		players_in_game -= 1
 		
 		if game_in_progress:
 			agent.game_over(won=False, cards=hand)
-			players_in_game -= 1
 			loaded[index] = (agent, hand, False)
 		else:
 			# unload player
@@ -99,7 +99,7 @@ def remove_player(name):
 		
 		return True
 	else: 
-		sys.stderr.write("Error: Player '%s' not found!\n" %name)
+		interface.write_error("Error: Player '%s' not found!" %name)
 		return False
 
 def start_game(ante=0):
@@ -109,11 +109,11 @@ def start_game(ante=0):
 	global game_in_progress, shift_timer
 	
 	if game_in_progress:
-		sys.stderr.write('Error: A game is already in progress!\n')
+		interface.write_error('Error: A game is already in progress!')
 		return False
 	from back.settings import MIN_PLAYERS#!
 	if len(loaded) < MIN_PLAYERS:
-		sys.stderr.write('Error: A minimum of %s players must be in the game!\n' %MIN_PLAYERS)
+		interface.write_error('Error: A minimum of %s players must be in the game!' %MIN_PLAYERS)
 		return False
 	
 	game_in_progress = True
@@ -125,6 +125,7 @@ def start_game(ante=0):
 		from threading import Timer
 		time_until_shift = round(uniform(SABACCSHIFT_TIME_MIN,  SABACCSHIFT_TIME_MAX),2)
 		shift_timer = Timer(time_until_shift, start_shift)
+		shift_timer.setDaemon(True)
 		shift_timer.start()
 	
 	global idle_moves, deck
@@ -143,6 +144,8 @@ def start_game(ante=0):
 	from random import shuffle
 	shuffle(deck)
 	
+	global hand_pot, sabacc_pot
+	
 	# Collect Ante
 	for player, hand, in_game in loaded:
 		# make sure player doesn't see his previous set of cards
@@ -150,11 +153,10 @@ def start_game(ante=0):
 		
 		# player can't afford game so is kicked out
 		if player.credits < ante*2:
+			interface.write("%s could not afford the buy into the game" %player.name)
 			remove_player(player.name)
-			interface.write("%s could not afford the buy into the game") %player.name
 			in_game = False
 		else: # place ante into hand and sabacc pots
-			global hand_pot, sabacc_pot
 			player.credits -= ante*2
 			hand_pot += ante
 			sabacc_pot += ante
@@ -191,6 +193,11 @@ def start_game(ante=0):
 	callable = False
 	show_all_cards = True
 	current_round = 0
+	
+	# Make sure no-one left the game early
+	if players_in_game <= 1:
+		show_all_cards = False
+		game_in_progress = False
 	
 	# Repeat betting and drawing rounds until hand is called or a winner is declared
 	while game_in_progress:
@@ -366,7 +373,6 @@ def drawing_round():
 		
 		if called or not game_in_progress:
 			break
-	
 	return called
 
 def deal_card():
@@ -377,7 +383,7 @@ def deal_card():
 		return deck.pop(0)
 		
 	else: # if deck is empty
-		sys.stderr.write('Error: The deck is empty!\n')
+		interface.write_error('Error: The deck is empty!')
 		return False
 
 def end_game(show_all_cards):
@@ -390,7 +396,7 @@ def end_game(show_all_cards):
 	hand_types = dict(positive=0, negative=1, idiot=2, bomb=3)
 	hand_values = [] # takes form (player name, value, num cards, hand type) for each player
 	best_score = 0 # best recorded score so far
-	cards_to_show = [] # takes form (player, hand) for all relevant players
+	cards_to_show = [] # takes form (name, cards) for all relevant players
 	
 	global players_in_game, hand_pot, sabacc_pot, game_in_progress
 	
@@ -403,14 +409,10 @@ def end_game(show_all_cards):
 	for player, hand, in_game in loaded:
 		if in_game:
 			if show_all_cards:
-				cards_to_show.append((player, hand))
+				cards_to_show.append((player.name, hand))
 			
 			# calculate hand
 			hand_value = get_value(hand)
-			
-			if hand_value == False:
-				sys.stderr.write('Error calculating value of hand for player %s!\n' %player.name)
-				hand_value = 0
 			
 			if hand_value < 0:
 				hand_type = hand_types['negative']
@@ -508,7 +510,7 @@ def end_game(show_all_cards):
 			# Keep drawing cards until all competition has been eliminated
 			while True:
 				best_score = 0
-				cards_to_show = [] # takes form (cards, name)
+				cards_to_show = [] # takes form (name, cards)
 				
 				for player_name, hand_value, num_cards, hand_type in winners:
 					player_index = names.index(player_name)
@@ -522,7 +524,7 @@ def end_game(show_all_cards):
 						card_error = True
 						break
 						
-					cards_to_show.append((hand, player_name))
+					cards_to_show.append((player_name, hand))
 					
 					# calculate player's new hand
 					hand_value = get_value(hand)
@@ -604,7 +606,7 @@ def end_game(show_all_cards):
 		# calculate winnings - if still more than 1 winner
 		# then pot will be split
 		winnings = hand_pot / len(winners)
-		hand_pot % len(winners)
+		hand_pot %= len(winners)
 		
 		hand_value = winners[0][1]
 		hand_type = winners[0][3]
@@ -649,6 +651,16 @@ def end_game(show_all_cards):
 		hand_pot = 0
 		interface.write("No winners found")
 	
+	# Has anyone actually given up? Get rid of them!
+	index = 0
+	while index < len(loaded):
+		player = loaded[index][0]
+		if player.quit_next_turn:
+			player.quit_next_turn = False
+			remove_player(player.name)
+		else:
+			index += 1
+	
 	# Add all 'out' players back into the game
 	for player, hand, in_play in loaded:
 		if not in_play:
@@ -657,8 +669,11 @@ def end_game(show_all_cards):
 	
 	# Change the order of players ready for the next round
 	first_player = loaded[0]
+	first_name = first_player[0].name
 	loaded.remove(first_player)
+	names.remove(first_name)
 	loaded.append(first_player)
+	names.append(first_name)
 	
 	return True
 
@@ -719,12 +734,15 @@ def start_shift():
 					break
 	
 	# Replace players' cards
-	for player, hand, in_play in loaded:
+	for player, hand, in_game in loaded:
 		if in_play:
 			new_hand = cards_in_play[:len(hand)]
 			cards_in_play = cards_in_play[len(hand):]
 			if new_hand != hand:
-				hand = new_hand
+				# Must be done this way, or it will not be recognised!
+				for index in range(len(hand)):
+					hand[index] = new_hand[index]
+				
 				player.shift(new_hand)
 	
 	# Start new timer
@@ -757,12 +775,3 @@ def reset():
 	idle_moves = 0
 	
 	return True
-
-#! Old function names
-addPlayer=add_player
-removePlayer=remove_player
-startGame=start_game
-endGame=end_game
-bettingRound = betting_round
-drawingRound = drawing_round
-dealCard = deal_card

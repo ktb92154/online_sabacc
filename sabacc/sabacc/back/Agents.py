@@ -33,37 +33,52 @@ class HumanAgent (object):
 		
 		if interface == None:
 			from sabacc.front.nullInterface import playerInterface
-			interface = playerInterface()
+			interface = playerInterface(name)
 		
 		self.interface = interface
+		self.quit_next_turn = False # player will leave game at next opportunity
 		
 		from back.settings import INITIAL_CREDITS #!
 		self.credits=INITIAL_CREDITS
 		
 	def move(self, cards):
 		'''Gets a move from the player and returns it.'''
-		return self.interface.get_move(cards)
+		
+		if self.quit_next_turn:
+			from settings import moves
+			move = moves['fold']
+		else:
+			move = self.interface.get_move(cards)
+			
+		return move
 		
 	def bet(self, cards, must_match):
 		'''Gets a bet from the player and returns it.'''
-		return self.interface.get_bet(cards, must_match)
+		if self.quit_next_turn:
+			from settings import moves
+			bet = moves['fold']
+		else:
+			bet = self.interface.get_bet(cards, must_match)
+			
+		return bet
 		
 	def game_over(self, won, cards):
 		'''Informs the user that the game is over and the result.'''
-		self.interface.game_status(won, cards, self.credits)
+		
+		if not self.quit_next_turn:
+			self.interface.game_status(won, cards, self.credits)
 		
 	def examine_cards(self, cards):
 		'''Shows the player his cards'''
-		self.interface.show_cards(cards)
+		
+		if not self.quit_next_turn:
+			self.interface.show_cards(cards)
 		
 	def shift(self, cards):
 		'''Shows the player his correct details after a Sabacc shift'''
-		self.interface.shift(cards)
-		return 0
-	
-	#! Old function names
-	gameOver = game_over
-	examineCards = examine_cards
+		
+		if not self.quit_next_turn:
+			self.interface.shift(cards)
 
 class RuleBasedAgent (HumanAgent):
 	"""
@@ -88,7 +103,7 @@ class RuleBasedAgent (HumanAgent):
 		'''Loads name, statistics and ruleset from XML file.'''
 		
 		from os.path import exists
-		import xml_tools#!
+		import xml_tools
 		
 		if not exists(self.filename):
 			self.interface.write_error('Error: The file %s could not be found!' %self.filename)
@@ -118,7 +133,7 @@ class RuleBasedAgent (HumanAgent):
 	def save_to_xml(self, stats=False):
 		'''Saves statistics and ruleset (if modified) to the XML file.'''
 		
-		import xml_tools#!
+		import xml_tools
 		
 		if stats:
 			# save game statistics
@@ -139,6 +154,10 @@ class RuleBasedAgent (HumanAgent):
 	def move(self, cards):
 		'''Uses ruleset to decide what move to make and returns it.
 		If there is an error, the move will always be 'fold'.'''
+		
+		if self.quit_next_turn:
+			from settings import moves
+			return moves['fold']
 		
 		self.raised = False
 		from back.settings import CARDVALUE#!
@@ -188,6 +207,10 @@ class RuleBasedAgent (HumanAgent):
 	
 	def bet(self, cards, must_match):
 		'''Calculates the bet based on  the value of the hand.'''
+		
+		if self.quit_next_turn:
+			from settings import moves
+			return moves['fold']
 		
 		from back.settings import CARDVALUE#!
 		
@@ -309,8 +332,3 @@ class RuleBasedAgent (HumanAgent):
 			self.stats['pure_sabaccs'] += 1
 		elif score == 0:
 			self.stats['bomb_outs'] += 1
-			
-	#! Old function names
-	gameOver = game_over
-	loadFromXML = load_from_xml
-	saveToXML = save_to_xml
