@@ -34,7 +34,7 @@ def main():
 	# Some version dependencies.
 	PYTHON_REQUIRED = (2, 5)
 	PYGTK_REQUIRED = '2.0'
-	PYXML_REQUIRED = '0.8.4'
+	ETREE_REQUIRED = '1.3.6'
 	
 	# Get arguments
 	try:
@@ -75,13 +75,13 @@ def main():
 			nogui=True
 	
 	try:
-		from xml import __version__
+		from lxml import etree
 		
-		if __version__ != PYXML_REQUIRED:
-			raise SystemExit, "Error: PyXML %s required - version %s found." %(PYXML_REQUIRED, __version__)
-		del(__version__)
-	except ImportError: # PyXML not found or wrong version
-		raise SystemExit, "Error: PyXML %s required" % PYXML_REQUIRED
+		if etree.__version__ != ETREE_REQUIRED:
+			raise SystemExit, "Error: lxml.etree %s required - version %s found." %(ETREE_REQUIRED, __version__)
+		
+	except ImportError: # lxml.etree not found or wrong version
+		raise SystemExit, "Error: lxml.etree %s required" % ETREE_REQUIRED
 	
 	if not local:
 		try: # If Sabacc is installed system-wide, this finds it automatically.

@@ -29,9 +29,8 @@ agent_file = None
 def create_agent(filename, agent_name, ruleset):
 	'''Creates a blank agent and saves to the given filename.'''
 	
-	from xml.dom.ext.reader import Sax2
+	from lxml import etree
 	from sabacc import __major_version__
-	reader = Sax2.Reader()
 	
 	# Generate template file
 	template_file = '''<?xml version='1.0' encoding='UTF-8'?>
@@ -48,7 +47,7 @@ def create_agent(filename, agent_name, ruleset):
 </sabacc>''' %(__major_version__, agent_name, ruleset)
 	global doc, agent_file
 	agent_file = filename
-	doc = reader.fromString(template_file)
+	doc = etree.fromstring(template_file)
 	
 	return save_file(filename)
 
@@ -64,19 +63,18 @@ def save_file(filename):
 		
 	# Write XML to file, then close
 	global doc
-	from xml.dom.ext import PrettyPrint
-	PrettyPrint(doc, file)
+	from lxml import etree
+	doc_str = etree.tostring(doc, pretty_print=True)
+	file.write(doc_str)
 	file.close()
 	return True
 
 def get_child(parent_node, child_name):
 	'''Searches the children of the specified node for one
 	with the given name.'''
-	from xml.dom import Node
 	
-	for node in parent_node.childNodes:
-		if node.nodeType == Node.ELEMENT_NODE and \
-		node.nodeName == child_name:
+	for node in parent_node.getchildren():
+		if node.tag == child_name:
 			child_node = node
 			break
 	else:
@@ -92,14 +90,14 @@ def get_name(filename):
 		return
 	
 	# Get 'agent' element
-	agent = get_child(get_child(doc, 'sabacc'), 'agent')
+	agent = get_child(doc, 'agent')
 	
 	if not agent:
 		sys.stderr.write("Error: No agent found in file '%s'!\n" %filename)
 		return
 	
 	# Get 'name' attribute
-	name = str(agent.getAttribute('name'))
+	name = str(agent.get('name'))
 	
 	return name
 
@@ -111,29 +109,29 @@ def load_file(filename):
 	
 	# We don't want to load the doc if it's already loaded!
 	if agent_file != filename:
-		from xml.dom.ext.reader import Sax2
-		reader = Sax2.Reader()
+		from lxml import etree
 		
 		try:
 			# load DOM for file
-			doc = reader.fromStream(filename)
-		except ValueError: # if file not found
+			tree = etree.parse(filename)
+		except IOError: # if file not found
 			sys.stderr.write("Error: The file '%s' was not found!\n" %filename)
 			return False
-		except SAXParseException: # if file not parsing correctly
+		except etree.XMLSyntaxError: # if file not parsing correctly
 			sys.stderr.write("Error: The file '%s' is not formatted correctly!\n" %filename)
 			return False
 		
+		doc = tree.getroot()
+		agent_file = filename
+		
 		# Check that version is OK
-		if get_child(doc, 'SabaccAppXML'):
+		if doc.tag == 'SabaccAppXML':
 			xml_version = 0
+		elif doc.tag == 'sabacc':
+			xml_version = int(doc.get('version'))
 		else:
-			sabacc = get_child(doc, 'sabacc')
-			if sabacc:
-				xml_version = int(sabacc.getAttribute('version'))
-			else:
-				sys.stderr.write("Error: The file '%s' is not a Sabacc file!\n" %filename)
-				return False
+			sys.stderr.write("Error: The file '%s' is not a Sabacc file!\n" %filename)
+			return False
 		
 		from settings import LOWEST_XML_VERSION
 		from sabacc import __major_version__
@@ -152,7 +150,7 @@ def get_stats(filename):
 		return
 	
 	# Get 'agent' element
-	agent = get_child(get_child(doc, 'sabacc'), 'agent')
+	agent = get_child(doc, 'agent')
 	
 	if not agent:
 		sys.stderr.write("Error: No agent found in file '%s'!\n" %filename)
@@ -164,20 +162,17 @@ def get_stats(filename):
 		# No error needed - stats can just stay at 0
 		return
 	
-	from xml.dom import Node
-	
 	# Initialise variables
 	final_stats = dict(games=0, wins=0, losses=0,
 		bomb_outs=0, pure_sabaccs=0)
 	
-	for stat in stats.childNodes:
-		if stat.nodeType == Node.ELEMENT_NODE and \
-		stat.nodeName == 'stat':
-			stat_name = str(stat.getAttribute('name'))
+	for stat in stats.getchildren():
+		if stat.tag == 'stat':
+			stat_name = str(stat.get('name'))
 			
 			if final_stats.has_key(stat_name):
 				try:
-					stat_value = int(stat.firstChild.nodeValue)
+					stat_value = int(stat.text)
 				except ValueError: # not numeric
 					stat_value = 0
 				final_stats[stat_name] = stat_value
@@ -194,7 +189,7 @@ def save_stats(filename, stats_to_save):
 		return
 	
 	# Get 'agent' element
-	agent = get_child(get_child(doc, 'sabacc'), 'agent')
+	agent = get_child(doc, 'agent')
 	
 	if not agent:
 		sys.stderr.write("Error: No agent found in file '%s'!\n" %filename)
@@ -203,23 +198,22 @@ def save_stats(filename, stats_to_save):
 	stats = get_child(agent, 'stats')
 	
 	if not stats:
-		stats = doc.createElement('stats')
-		agent.appendChild(stats)
+		from lxml import etree
+		stats = etree.SubElement(agent, 'stats')
 	
 	for name, value in stats_to_save.iteritems():
 		# Is the stat there already?
-		for stat in stats.getElementsByTagName('stat'):
+		for stat in stats:
 			# Find correct stat
-			if stat.getAttribute('name') == name:
-				stat.firstChild.nodeValue = unicode(value)
+			if stat.tag == 'stat' and stat.get('name') == name:
+				stat.text = unicode(value)
 				break
 		else:
 			# create new element and add to tree
-			new_stat = doc.createElement('stat')
-			new_stat.setAttribute('name', name)
-			stat_value = doc.createTextNode(unicode(value))
-			new_stat.appendChild(stat_value)
-			stats.appendChild(new_stat)
+			from lxml import etree
+			new_stat = etree.SubElement(stats, 'stat')
+			new_stat.set('name', name)
+			new_stat.text = unicode(value)
 	
 	return True
 
@@ -231,14 +225,14 @@ def get_ruleset(filename):
 		return
 	
 	# Get 'agent' element
-	agent = get_child(get_child(doc, 'sabacc'), 'agent')
+	agent = get_child(doc, 'agent')
 	
 	if not agent:
 		sys.stderr.write("Error: No agent found in file '%s'!\n" %filename)
 		return
 	
 	# Get 'ruleset' attribute
-	ruleset = str(agent.getAttribute('ruleset'))
+	ruleset = str(agent.get('ruleset'))
 	
 	return ruleset
 	
@@ -250,11 +244,11 @@ def save_ruleset(filename, ruleset):
 		return
 	
 	# Get 'agent' element
-	agent = get_child(get_child(doc, 'sabacc'), 'agent')
+	agent = get_child(doc, 'agent')
 	
 	if not agent:
 		sys.stderr.write("Error: No agent found in file '%s'!\n" %filename)
 		return
 	
-	agent.setAttribute('ruleset', unicode(ruleset))
+	agent.set('ruleset', unicode(ruleset))
 	return True
