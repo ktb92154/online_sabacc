@@ -44,7 +44,10 @@ class GameCtrl (Controller):
 		Controller.register_view(self, view)
 
 		# setup of widgets
+		self.view['computer_button'].connect('event', self.computer_button_event)
 		self.view['game_window'].connect('delete-event', self.quit_button_clicked)
+		self.view['new_agent_menu'].connect('activate', self.agent_menu_response, False)
+		self.view['load_agent_menu'].connect('activate', self.agent_menu_response, True)
 
 	def register_adapters(self):
 		# setup of adapters
@@ -53,12 +56,141 @@ class GameCtrl (Controller):
 	# Handlers for signals:
 	def human_button_clicked(self, button):
 		'''Handler for 'add human' button'''
-		self._add_player(is_human=True)
+		self._create_player_window()
 		
-	def computer_button_clicked(self, button):
+	def computer_button_event(self, button, event):
 		'''Handler for 'add computer' button'''
-		self._add_player(is_human=False)
+		if event.type == gtk.gdk.BUTTON_PRESS:
+			self.view['computer_button_menu'].popup(None, None, None, event.button, event.time)
+	
+	def agent_menu_response(self, widget, agent_exists):
+		'''Handler for 'create new' and 'load existing' menu items'''
+		if agent_exists:
+			new_file = False
+			
+			# Create dialog
+			message = "Please select the agent file"
+			d = gtk.FileChooserDialog(title=message, parent=self.view['game_window'],
+			buttons=(gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT,
+			gtk.STOCK_OK, gtk.RESPONSE_ACCEPT))
+			
+			from front import basedir, sharedir#!
+			import os.path
+			agentdir = os.path.join(basedir, "agents")
+			if not os.path.exists(agentdir):
+				agentdir = os.path.join(sharedir, "sabacc", "agents")
+			
+			# Create filters
+			xmlfilter = gtk.FileFilter()
+			xmlfilter.add_pattern("*.xml")
+			xmlfilter.set_name("XML Files")
+			anyfilter = gtk.FileFilter()
+			anyfilter.add_pattern("*")
+			anyfilter.set_name("All Files")
+			d.add_filter(xmlfilter)
+			d.set_filter(xmlfilter)
+			d.add_filter(anyfilter)
+			d.set_current_folder(os.path.abspath(agentdir))
+			
+			# Show dialog
+			resp=d.run()
+			filename = d.get_filename()
+			d.destroy()
+			if resp == gtk.RESPONSE_REJECT:
+				return
 		
+		else: # new agent
+			new_file = True
+			
+			# Set up dialog
+			title = "Create agent"
+			message = "Please enter a name and rule set for the new agent:"
+			d = gtk.Dialog(title, self.view['game_window'], gtk.DIALOG_MODAL,
+				(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
+				gtk.STOCK_OK, gtk.RESPONSE_OK))
+			main_layout = gtk.VBox(spacing=10)
+			message_label = gtk.Label(message)
+			main_layout.add(message_label)
+			options = gtk.Table(2, 2)
+			
+			# labels
+			name_label = gtk.Label("Name:")
+			options.attach(name_label, 0, 1, 0, 1, xpadding=10, ypadding=5)
+			ruleset_label = gtk.Label("Rule set:")
+			options.attach(ruleset_label, 0, 1, 1, 2, xpadding=10, ypadding=5)
+			
+			# name entry
+			name_entry = gtk.Entry()
+			name_entry.set_activates_default(True)
+			options.attach(name_entry, 1, 2, 0, 1)
+			
+			# ruleset entry
+			ruleset_layout = gtk.HBox()
+			from sabacc.front.settings import rulesets
+			self.new_ruleset = rulesets[0]
+			button = None
+			
+			for ruleset in rulesets:
+				button = gtk.RadioButton(group=button, label=str.capitalize(ruleset))
+				button.connect('clicked', self.set_new_ruleset, ruleset)
+				ruleset_layout.add(button)
+			
+			options.attach(ruleset_layout, 1, 2, 1, 2)
+			main_layout.add(options)
+			
+			d.vbox.set_spacing(10)
+			d.set_default_response(gtk.RESPONSE_OK)
+			d.vbox.pack_start(main_layout, True, True, 0)
+			main_layout.show_all()
+			
+			while True:
+				resp = d.run()
+				name = None
+				ruleset = self.new_ruleset
+				
+				if resp != gtk.RESPONSE_OK:
+					d.destroy()
+					del(self.new_ruleset)
+					return
+					
+				# get values from input
+				name = name_entry.get_text()
+				
+				if name == "" or ruleset == None:
+					message_label.set_text("Please fill in all fields!")
+				else:
+					d.destroy()
+					del(self.new_ruleset)
+					break
+			
+			# make temporary file
+			from tempfile import mkstemp
+			from sabacc.back import xml_tools
+			
+			filename = mkstemp('.xml', 'sabacc_', text=True)[1]
+			
+			if not xml_tools.create_agent(filename, name, ruleset):
+				Game.interface.write_error("Error creating temporary file!")
+				from os.path import remove
+				remove(filename)
+				return
+		
+		# add player to game
+		from interface import playerInterface
+		player_interface = playerInterface(None, None)
+		player_interface.new_file = new_file
+		
+		agent = Game.add_player(filename, player_interface, human=False)
+		if not agent:
+			# Error already displayed
+			return
+		
+		self._create_player_window(agent.name)
+	
+	def set_new_ruleset(self, widget, ruleset):
+		'''Sets the ruleset for the new agent'''
+		self.new_ruleset = ruleset
+	
 	def start_button_clicked(self, button):
 		'''Handler for 'start game' button'''
 		
@@ -85,6 +217,9 @@ class GameCtrl (Controller):
 		for player in self.players:
 			player.model.status = player.model.statuses['in_game']
 			player.model.active = True
+			if not player.model.is_human:
+				for index in range(3):
+					player.view['move%i_button' %(index+1)].hide()
 			player.update_labels()
 	
 		from threading import Thread
@@ -99,7 +234,18 @@ class GameCtrl (Controller):
 		
 		if Game.shift_timer != None:
 			Game.shift_timer.cancel()
-		gtk.main_quit()
+		
+		# Make sure no-one needs to save
+		for player in self.players:
+			if not player.confirm_save_game():
+				break
+		else:
+			# Remove all temporary files
+			for player in self.players:
+				if player.model.agent.interface.new_file:
+					from os import remove
+					remove(player.model.agent.filename)
+			gtk.main_quit()
 	
 	def remove_player(self, name, active=False):
 		'''This is called after a player has closed their window. It
@@ -149,14 +295,18 @@ class GameCtrl (Controller):
 			player.update_labels()
 	
 	# Private methods
-	def _add_player(self, is_human):
-		'''Uses dialog boxes to determine player details, then
-		adds to the game.'''
-		if is_human:
+	def _create_player_window(self, name=None):
+		'''Creates a player window for the given agent, or creates a
+		human agent and a player window for it.'''
+		if name:
+			is_human = False
+		else:
+			is_human = True
+			
 			# Set up dialog
 			message = "What is your name?"
 			d = gtk.MessageDialog(self.view['game_window'], gtk.DIALOG_MODAL,
-			gtk.MESSAGE_QUESTION, gtk.BUTTONS_OK_CANCEL, message)
+				gtk.MESSAGE_QUESTION, gtk.BUTTONS_OK_CANCEL, message)
 			text_entry = gtk.Entry()
 			d.vbox.add(text_entry)
 			text_entry.set_activates_default(True)
@@ -180,63 +330,6 @@ class GameCtrl (Controller):
 				# Error already displayed
 				return
 		
-		else:
-			# Create dialog
-			message = "Please select the agent file"
-			d = gtk.FileChooserDialog(title=message, parent=self.view['game_window'],
-			buttons=(gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT,
-			gtk.STOCK_OK, gtk.RESPONSE_ACCEPT))
-			
-			from front import basedir, sharedir#!
-			import os.path
-			agentdir = os.path.join(basedir, "agents")
-			if not os.path.exists(agentdir):
-				agentdir = os.path.join(sharedir, "sabacc", "agents")
-			
-			# Create filters
-			xmlfilter = gtk.FileFilter()
-			xmlfilter.add_pattern("*.xml")
-			xmlfilter.set_name("XML Files")
-			anyfilter = gtk.FileFilter()
-			anyfilter.add_pattern("*")
-			anyfilter.set_name("All Files")
-			d.add_filter(xmlfilter)
-			d.set_filter(xmlfilter)
-			d.add_filter(anyfilter)
-			d.set_current_folder(os.path.abspath(agentdir))
-			
-			# Show dialog
-			resp=d.run()
-			filename = d.get_filename()
-			d.destroy()
-			if resp == gtk.RESPONSE_REJECT:
-				return
-			
-			from threading import Thread
-			t = Thread(target=self._load_agent, args=[filename], name="load_agent")
-			t.setDaemon(True)
-			t.start()
-			
-			title = "Loading..."
-			text = "Please wait. Loading data..."
-			dialog = gtk.Dialog(title, self.view['game_window'], gtk.DIALOG_MODAL,
-					(gtk.STOCK_CANCEL, gtk.RESPONSE_DELETE_EVENT))
-			label = gtk.Label(text)
-			dialog.vbox.pack_start(label, True, True, 0)
-			dialog.show_all()
-			self.view['loading'] = dialog
-			resp = dialog.run()
-			
-			if resp == gtk.RESPONSE_DELETE_EVENT: # 'cancel' clicked
-				dialog.destroy()
-				return
-			else:
-				try:
-					name = self.loaded_name
-				except AttributeError: # Player already exists
-					return
-				
-		
 		# open player window
 		from models.player_model import PlayerModel
 		from player_ctrl import PlayerCtrl
@@ -258,36 +351,6 @@ class GameCtrl (Controller):
 	
 		Game.interface.write("%s entered the game" %name)
 	
-	def _load_agent(self, filename):
-		'''Loads a computer agent in the background, so as not to
-		slow down GTK.'''
-		
-		import gobject
-		from interface import playerInterface
-		agent = Game.add_player(filename, player_interface=playerInterface(None, None), human=False)
-		if not agent:
-			# Error already displayed
-			gobject.idle_add(self.view['loading'].destroy)
-			return
-		
-		self.loaded_name = agent.name
-		agent.interface.name = agent.name
-		try:
-			# Workaround for GUI threading problem on Windows
-			gobject.idle_add(self.view['loading'].destroy)
-		except AttributeError: # loading window already gone
-			pass
-		
-		# Wait until attributes are no longer needed, then clean up
-		# and terminate thread
-		from time import sleep
-		sleep(1)
-		try:
-			del(self.loaded_name)
-			self.view['loading'] = None
-		except:
-			pass
-	
 	def _play_game(self):
 		'''Starts the game and cleans up afterwards. This should be in
 		a separate thread so as to not slow down GTK.'''
@@ -297,6 +360,9 @@ class GameCtrl (Controller):
 		for player in self.players:
 			if not player.model.is_human:
 				player.model.agent.save_to_xml(stats=True)
+				
+				for index in range(3):
+					player.view['move%i_button' %(index+1)].show()
 			
 			player.model.status = player.model.statuses['begin']
 			player.model.active = False

@@ -34,7 +34,7 @@ def main():
 	# Some version dependencies.
 	PYTHON_REQUIRED = (2, 5)
 	PYGTK_REQUIRED = '2.0'
-	ETREE_REQUIRED = '1.3.6'
+	ETREE_REQUIRED = (1, 3, 6)
 	
 	# Get arguments
 	try:
@@ -77,11 +77,20 @@ def main():
 	try:
 		from lxml import etree
 		
-		if etree.__version__ != ETREE_REQUIRED:
-			raise SystemExit, "Error: lxml.etree %s required - version %s found." %(ETREE_REQUIRED, __version__)
-		
 	except ImportError: # lxml.etree not found or wrong version
 		raise SystemExit, "Error: lxml.etree %s required" % ETREE_REQUIRED
+	
+	else: # Check that lxml.etree is correct version
+		etree_version = map(int, str.split(str.split(etree.__version__)[0], '.'))
+		bad_etree_version = False
+		
+		for index in range(3):
+			if etree_version[index] < ETREE_REQUIRED[index]:
+				bad_etree_version = True
+				break
+		
+		if bad_etree_version:
+			raise SystemExit, "Error: lxml.etree %s required - version %s found." %(ETREE_REQUIRED, etree.__version__)
 	
 	if not local:
 		try: # If Sabacc is installed system-wide, this finds it automatically.

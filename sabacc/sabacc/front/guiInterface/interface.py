@@ -96,6 +96,7 @@ class playerInterface (nullInterface.playerInterface):
 		self.controller = controller
 		self.signals = [None, None, None] # Signals connected to buttons
 		self.wait = False
+		self.new_file = False # is this a new, temporary file?
 		
 	def show_cards(self, cards, name=None, show_all=False):
 		'''Calls the GUI to show the cards to the user.'''

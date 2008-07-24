@@ -52,6 +52,17 @@ class GameView (View):
 		message_label.show()
 		self['message_label'] = message_label
 		
+		# Create 'add computer' menu
+		self['computer_button_menu'] = gtk.Menu()
+		self['new_agent_menu'] = gtk.MenuItem('Create a new agent')
+		self['load_agent_menu'] = gtk.MenuItem('Load an existing agent')
+		
+		for menu_item in (self['new_agent_menu'], self['load_agent_menu']):
+			self['computer_button_menu'].append(menu_item)
+			menu_item.show()
+		
+		self['computer_button_menu'].show()
+		
 		#Move window to bottom of screen and resize
 		width, height = self['game_window'].get_size()
 		new_width=gtk.gdk.screen_width()

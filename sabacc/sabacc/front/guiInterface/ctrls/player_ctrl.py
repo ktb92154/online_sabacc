@@ -48,9 +48,15 @@ class PlayerCtrl (Controller):
 			self.view['move2_button'].set_label("Leave game")
 			self.view['move3_button'].set_label("Call the hand")
 		else:
-			self.view['move1_button'].hide()
-			self.view['move2_button'].hide()
-			self.view['move3_button'].hide()
+			self.view['move1_button'].set_label('Agent Data')
+			self.view['move1_button'].connect('clicked', self.show_agent_data)
+			self.view['move1_button'].set_sensitive(True)
+			self.view['move2_button'].set_label('Save Settings')
+			self.view['move2_button'].connect('clicked', self.save_agent)
+			if self.model.agent.interface.new_file:
+				self.view['move2_button'].set_sensitive(True)
+			self.view['move3_button'].set_label('Revert')
+			self.view['move3_button'].connect('clicked', self.revert_to_saved)
 		
 		self.update_cards()
 		self.view['player_window'].show()
@@ -62,9 +68,13 @@ class PlayerCtrl (Controller):
 		return
 
 	# Handlers for signals:
-	def window_close(self, win, event):
+	def window_close(self, win=None, event=None):
 		'''Handler for window close event. Prepares to remove
 		player from game.'''
+		
+		if not self.confirm_save_game():
+			return True
+		
 		if self.model.active:
 			self.model.agent.quit_next_turn = True
 			if self.model.agent.interface.wait:
@@ -72,8 +82,41 @@ class PlayerCtrl (Controller):
 				self.model.agent.interface.chosen_move = moves['fold']
 				self.model.agent.interface.wait = False
 		
+		if self.model.agent.interface.new_file:
+			from os import remove
+			remove(self.model.agent.filename)
+		
 		final = self.model.game_controller.remove_player(self.model.name, self.model.active)
 		return not final
+	
+	def confirm_save_game(self):
+		'''This is called when closing the player window to make sure
+		that no changes are lost.'''
+		if self.model.modified:
+			title = "Save Changes?"
+			text = "The current agent has been modified. Do you want to save changes?"
+			dialog = gtk.Dialog(title, self.view['player_window'], gtk.DIALOG_MODAL,
+				(gtk.STOCK_YES, gtk.RESPONSE_YES,
+				gtk.STOCK_NO, gtk.RESPONSE_NO,
+				gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL))
+			hbox = gtk.HBox()
+			icon = gtk.Image()
+			icon.set_from_stock(gtk.STOCK_DIALOG_QUESTION, gtk.ICON_SIZE_DIALOG)
+			label = gtk.Label(text)
+			hbox.add(icon)
+			hbox.add(label)
+			dialog.vbox.pack_start(hbox, True, True, 0)
+			dialog.show_all()
+			resp = dialog.run()
+			dialog.destroy()
+			if resp == gtk.RESPONSE_YES:
+				return self.save_agent()
+			elif resp == gtk.RESPONSE_NO:
+				return True
+			else:
+				return False
+		else:
+			return True
 	
 	def update_cards(self, show_all_cards=False):
 		'''Shows the given cards to the user.'''
@@ -210,6 +253,94 @@ class PlayerCtrl (Controller):
 			else:
 				self.view['score_type_label'].set_text(' (%s)' %score_type)
 	
+	def show_agent_data(self, button):
+		'''Handler for 'Agent Data' button. Shows the agent data window.'''
+		
+		from models.stats_model import StatsModel
+		from stats_ctrl import StatsCtrl
+		from views.stats_view import StatsView
+		
+		model = StatsModel(self)
+		ctrl = StatsCtrl(model)
+		view = StatsView(ctrl)
+		
+		view['stats_window'].set_transient_for(self.view['player_window'])
+		view['stats_window'].show()
+		
+	def save_agent(self, button=None):
+		'''Saves the agent's settings to XML, prompting for a new location
+		if the agent is stored in a temporary file.'''
+		
+		agent = self.model.agent
+		
+		if agent.interface.new_file:
+			# Get new filename
+			message = "Save agent"
+			action = gtk.FILE_CHOOSER_ACTION_SAVE
+			
+			d = gtk.FileChooserDialog(title=message,
+				parent=self.view['player_window'], action=action,
+				buttons=(gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT,
+					gtk.STOCK_OK, gtk.RESPONSE_ACCEPT))
+			d.set_do_overwrite_confirmation(True)
+			
+			from front import basedir, sharedir#!
+			import os.path
+			agentdir = os.path.join(basedir, "agents")
+			if not os.path.exists(agentdir):
+				agentdir = os.path.join(sharedir, "sabacc", "agents")
+			
+			# Create filters
+			xmlfilter = gtk.FileFilter()
+			xmlfilter.add_pattern("*.xml")
+			xmlfilter.set_name("XML Files")
+			anyfilter = gtk.FileFilter()
+			anyfilter.add_pattern("*")
+			anyfilter.set_name("All Files")
+			d.add_filter(xmlfilter)
+			d.set_filter(xmlfilter)
+			d.add_filter(anyfilter)
+			d.set_current_folder(os.path.abspath(agentdir))
+			
+			# Show dialog
+			resp=d.run()
+			file = d.get_filename()
+			d.destroy()
+			if resp == gtk.RESPONSE_REJECT:
+				return False
+				
+			orig_filename = agent.filename
+			
+			if not file:
+				return False
+			
+			from shutil import copy
+			try:
+				copy(orig_filename, file)
+				agent.filename = file
+				agent.interface.new_file = False
+			except IOError:
+				agent.interface.write_error('Error writing file to XML!')
+				return False
+				
+			from os import remove
+			remove(orig_filename)
+		
+		if self.model.agent.save_to_xml():
+			self.model.modified = False
+			for index in 2, 3:
+				self.view['move%i_button' %index].set_sensitive(False)
+		
+		return True
+		
+	def revert_to_saved(self, button):
+		'''Re-loads the agent data from XML.'''
+		
+		if self.model.agent.load_from_xml():
+			self.model.modified = False
+			for index in 2, 3:
+				self.view['move%i_button' %index].set_sensitive(False)
+	
 	def update_labels(self, credit_mod=0):
 		'''Updates status and credits information labels with correct
 		values. If credit_mod is set, credit value will be modified by the
@@ -229,5 +360,16 @@ class PlayerCtrl (Controller):
 		
 		self.model.credits = self.model.agent.credits + credit_mod
 		self.adapt('credits', 'credits_label')
+	
+	def changes_occurred(self):
+		'''This is used to tell the window that changes have
+		been made to the agent data, so that the 'save' and/or
+		'revert' buttons can be made clickable.'''
+		
+		self.model.modified = True
+		self.view['move2_button'].set_sensitive(True)
+		
+		if not self.model.agent.interface.new_file:
+			self.view['move3_button'].set_sensitive(True)
 	
 	pass # end of class PlayCtrl

@@ -41,7 +41,8 @@ class PlayerModel (Model):
 							#	their cards from each other
 		last_shown_cards=[], #	prevents having to show the same
 						#	cards over and over
-		active=False # is this player currently in the game?
+		active=False, # is this player currently in the game?
+		modified=False # have settings been changed?
 	)
 	
 	def __init__(self, game_controller, name, is_human):
@@ -58,6 +59,8 @@ class PlayerModel (Model):
 		if name in Game.names:
 			index = Game.names.index(name)
 			self.agent = Game.loaded[index][0]
+			if self.agent.interface.new_file:
+				self.modified=True
 		else:
 			sys.stderr.write('Error: Agent \'%s\' not found in game!\n' %name)
 		
