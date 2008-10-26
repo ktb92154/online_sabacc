@@ -74,11 +74,7 @@ class GameCtrl (Controller):
 			buttons=(gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT,
 			gtk.STOCK_OK, gtk.RESPONSE_ACCEPT))
 			
-			from front import basedir, sharedir#!
-			import os.path
-			agentdir = os.path.join(basedir, "agents")
-			if not os.path.exists(agentdir):
-				agentdir = os.path.join(sharedir, "sabacc", "agents")
+			from sabacc.constants import agent_dir
 			
 			# Create filters
 			xmlfilter = gtk.FileFilter()
@@ -90,7 +86,7 @@ class GameCtrl (Controller):
 			d.add_filter(xmlfilter)
 			d.set_filter(xmlfilter)
 			d.add_filter(anyfilter)
-			d.set_current_folder(os.path.abspath(agentdir))
+			d.set_current_folder(agent_dir)
 			
 			# Show dialog
 			resp=d.run()
@@ -126,7 +122,9 @@ class GameCtrl (Controller):
 			
 			# ruleset entry
 			ruleset_layout = gtk.HBox()
-			from sabacc.front.settings import rulesets
+			from sabacc.get_settings import rule_sets
+			rulesets=rule_sets.keys()
+			
 			self.new_ruleset = rulesets[0]
 			button = None
 			

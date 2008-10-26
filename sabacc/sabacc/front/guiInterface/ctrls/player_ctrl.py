@@ -68,7 +68,7 @@ class PlayerCtrl (Controller):
 		return
 
 	# Handlers for signals:
-	def window_close(self, win=None, event=None):
+	def window_close(self, win, event):
 		'''Handler for window close event. Prepares to remove
 		player from game.'''
 		
@@ -78,7 +78,7 @@ class PlayerCtrl (Controller):
 		if self.model.active:
 			self.model.agent.quit_next_turn = True
 			if self.model.agent.interface.wait:
-				from sabacc.back.settings import moves#!
+				from sabacc.constants import moves
 				self.model.agent.interface.chosen_move = moves['fold']
 				self.model.agent.interface.wait = False
 		
@@ -170,16 +170,8 @@ class PlayerCtrl (Controller):
 		score_unknown = False
 		idiot_cards = [False, False, False]
 		
-		from front import basedir, sharedir#!
-		from front.settings import CARDSET, CARDIMAGES#!
-		from back.settings import CARDNAMES, CARDVALUE#!
+		from sabacc.constants import cards_dir, card_images, card_names, card_values
 		import os.path
-		
-		cardsdir = os.path.join(basedir, "cardsets", CARDSET)#!
-		if not os.path.exists(cardsdir):
-			cardsdir = os.path.join(sharedir, "sabacc", "cardsets", CARDSET)#!
-			if not os.path.exists(cardsdir):
-				self.model.agent.interface.write_error("Warning: Cardset '%s' not found!" %CARDSET)
 		
 		for row in range(rows):
 			for col in range(columns):
@@ -188,7 +180,11 @@ class PlayerCtrl (Controller):
 				try:
 					im = gtk.Image()
 					
-					filename = os.path.join(cardsdir, CARDIMAGES[cards[card_index]])
+					filename = os.path.join(cards_dir, card_images[cards[card_index]])
+					
+					if not os.path.exists(filename):
+						self.model.agent.interface.write_error('Warning: Unable to find image file %s' %filename)
+						
 					if smallcards:
 						# Scale card image
 						im.set_from_pixbuf(gtk.gdk.pixbuf_new_from_file(
@@ -203,22 +199,22 @@ class PlayerCtrl (Controller):
 							text = "Unknown card"
 						else:
 							text = '%s (value %i)' \
-								%(CARDNAMES[cards[card_index]],
-								CARDVALUE[cards[card_index]])
+								%(card_names[cards[card_index]],
+								card_values[cards[card_index]])
 						lbl = gtk.Label(text)
 						self.view['card_layout'].attach(lbl, col, col+1, row+1, row+2, xpadding=3)
 						lbl.show()
 					
 					# calculate score
 					if cards[card_index] != -1:
-						score += CARDVALUE[cards[card_index]]
+						score += card_values[cards[card_index]]
 						
 						# Test for idiot's array
-						if CARDVALUE[cards[card_index]] == 0:
+						if card_values[cards[card_index]] == 0:
 							idiot_cards[0] = True
-						elif CARDVALUE[cards[card_index]] == 2:
+						elif card_values[cards[card_index]] == 2:
 							idiot_cards[1] = True
-						elif CARDVALUE[cards[card_index]] == 3:
+						elif card_values[cards[card_index]] == 3:
 							idiot_cards[2] = True
 					else:
 						score_unknown = True
@@ -284,11 +280,7 @@ class PlayerCtrl (Controller):
 					gtk.STOCK_OK, gtk.RESPONSE_ACCEPT))
 			d.set_do_overwrite_confirmation(True)
 			
-			from front import basedir, sharedir#!
-			import os.path
-			agentdir = os.path.join(basedir, "agents")
-			if not os.path.exists(agentdir):
-				agentdir = os.path.join(sharedir, "sabacc", "agents")
+			from sabacc.constants import agent_dir
 			
 			# Create filters
 			xmlfilter = gtk.FileFilter()
@@ -300,7 +292,7 @@ class PlayerCtrl (Controller):
 			d.add_filter(xmlfilter)
 			d.set_filter(xmlfilter)
 			d.add_filter(anyfilter)
-			d.set_current_folder(os.path.abspath(agentdir))
+			d.set_current_folder(agent_dir)
 			
 			# Show dialog
 			resp=d.run()

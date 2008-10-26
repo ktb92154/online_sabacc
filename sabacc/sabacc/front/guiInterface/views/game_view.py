@@ -30,8 +30,8 @@ class GameView (View):
 	This class contains the view for the main game window.
 	'''
 	def __init__(self, ctrl):
-		from front import gladefile#!
-		View.__init__(self, ctrl, gladefile,
+		from sabacc.constants import glade_filename
+		View.__init__(self, ctrl, glade_filename,
 			"game_window", register=False)
 		self.setup_widgets()
 		
@@ -41,8 +41,8 @@ class GameView (View):
 		'''Deals with construction of manual widgets and other
 		settings.'''
 		
-		from front import iconpath#!
-		self['game_window'].set_icon_from_file(iconpath)
+		from sabacc.constants import icon_filename
+		self['game_window'].set_icon_from_file(icon_filename)
 		
 		# Create object for displaying messages
 		message_label = gtk.Label()

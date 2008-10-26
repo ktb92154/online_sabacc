@@ -55,11 +55,11 @@ class StatsCtrl (Controller):
 		self.view['bomb_outs_label'].set_text("%i" %agent.stats['bomb_outs'])
 		self.view['pure_sabaccs_label'].set_text("%i" %agent.stats['pure_sabaccs'])
 		
-		from sabacc.front.settings import rulesets
+		from sabacc.constants import rule_sets
 		button = None
 		self.new_ruleset = agent.ruleset
 		
-		for ruleset in rulesets:
+		for ruleset in rule_sets.keys():
 			button = gtk.RadioButton(group=button, label=str.capitalize(ruleset))
 			if agent.ruleset == ruleset:
 				button.set_active(True)

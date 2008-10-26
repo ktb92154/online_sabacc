@@ -28,8 +28,8 @@ class StatsView (View):
 	This class contains the view for the stats window.
 	'''
 	def __init__(self, ctrl):
-		from front import gladefile#!
-		View.__init__(self, ctrl, gladefile,
+		from sabacc.constants import glade_filename
+		View.__init__(self, ctrl, glade_filename,
 			"stats_window", register=False)
 		self.setup_widgets()
 		ctrl.register_view(self)
@@ -39,8 +39,8 @@ class StatsView (View):
 		'''Deals with construction of manual widgets and other
 		settings.'''
 		
-		from front import iconpath#!
-		self['stats_window'].set_icon_from_file(iconpath)
+		from sabacc.constants import icon_filename
+		self['stats_window'].set_icon_from_file(icon_filename)
 		return
 
 	pass # end of class StatsView

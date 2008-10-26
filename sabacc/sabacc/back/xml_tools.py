@@ -133,10 +133,10 @@ def load_file(filename):
 			sys.stderr.write("Error: The file '%s' is not a Sabacc file!\n" %filename)
 			return False
 		
-		from settings import LOWEST_XML_VERSION
+		from sabacc.constants import lowest_xml_version
 		from sabacc import __major_version__
 		
-		if xml_version < LOWEST_XML_VERSION or xml_version > __major_version__:
+		if xml_version < lowest_xml_version or xml_version > __major_version__:
 			sys.stderr.write("Error: The file '%s' was made using an\nincompatible version of Sabacc!\n" %filename)
 			return False
 		

@@ -28,8 +28,8 @@ class PlayerView (View):
 	This class contains the view for the player window.
 	'''
 	def __init__(self, ctrl):
-		from front import gladefile#!
-		View.__init__(self, ctrl, gladefile,
+		from sabacc.constants import glade_filename
+		View.__init__(self, ctrl, glade_filename,
 			"player_window", register=False)
 		self.setup_widgets()
 		ctrl.register_view(self)
@@ -39,8 +39,8 @@ class PlayerView (View):
 		'''Deals with construction of manual widgets and other
 		settings.'''
 		
-		from front import iconpath#!
-		self['player_window'].set_icon_from_file(iconpath)
+		from sabacc.constants import icon_filename
+		self['player_window'].set_icon_from_file(icon_filename)
 		return
 
 	pass # end of class PlayerView

@@ -111,19 +111,20 @@ def start_game(ante=0):
 	if game_in_progress:
 		interface.write_error('Error: A game is already in progress!')
 		return False
-	from back.settings import MIN_PLAYERS#!
-	if len(loaded) < MIN_PLAYERS:
-		interface.write_error('Error: A minimum of %s players must be in the game!' %MIN_PLAYERS)
+	from sabacc.get_settings import game_settings
+	min_players = game_settings['min_players']
+	if len(loaded) < min_players:
+		interface.write_error('Error: A minimum of %s players must be in the game!' %min_players)
 		return False
 	
 	game_in_progress = True
-	from back.settings import SABACCSHIFT_ON, SABACCSHIFT_TIME_MIN, SABACCSHIFT_TIME_MAX#!
+	from sabacc.get_settings import sabacc_shift
 	
 	# initialise Sabacc Shift timer
-	if SABACCSHIFT_ON:
+	if sabacc_shift['on']:
 		from random import uniform
 		from threading import Timer
-		time_until_shift = round(uniform(SABACCSHIFT_TIME_MIN,  SABACCSHIFT_TIME_MAX),2)
+		time_until_shift = round(uniform(sabacc_shift['min_time'],  sabacc_shift['max_time']),2)
 		shift_timer = Timer(time_until_shift, start_shift)
 		shift_timer.setDaemon(True)
 		shift_timer.start()
@@ -137,8 +138,8 @@ def start_game(ante=0):
 		player, hand, in_game = player_tuple
 		loaded[loaded.index(player_tuple)] = (player, [], True)
 	
-	from back.settings import NUM_CARDS#!
-	for card in range(NUM_CARDS):
+	from sabacc.constants import number_of_cards
+	for card in range(number_of_cards):
 		deck.append(card)
 	
 	from random import shuffle
@@ -215,8 +216,10 @@ def start_game(ante=0):
 			show_all_cards = False
 			break
 		
-		from back.settings import POT_BUILDING_ROUNDS#!
-		if current_round < POT_BUILDING_ROUNDS: # if pot-building phase in progress
+		from sabacc.get_settings import game_settings
+		pot_building_rounds = game_settings['pot_building_rounds']
+		
+		if current_round < pot_building_rounds: # if pot-building phase in progress
 			current_round += 1
 		else:
 			callable = True
@@ -238,7 +241,7 @@ def betting_round(starting_player=0):
 	must_match = 0 # will increase as players bet
 	called = False # has the game been called?
 	already_bet = [] # how much has each player already bet?
-	from settings import moves # mapping of move names to numbers
+	from sabacc.constants import moves # mapping of move names to numbers
 	
 	for index in range(len(loaded_copy)): # for each player
 		# no player has bet this round
@@ -318,7 +321,7 @@ def betting_round(starting_player=0):
 def drawing_round():
 	'''Perform one round of drawing, starting with player 0.'''
 	
-	from settings import moves
+	from sabacc.constants import moves
 	global callable
 	
 	called = False
@@ -329,9 +332,11 @@ def drawing_round():
 		
 		#perform move
 		while in_game and not legal_move:
-			from back.settings import IDLE_TIME
+			from sabacc.get_settings import game_settings
+			idle_time = game_settings['idle_time']
+			
 			global idle_moves
-			if idle_moves >= IDLE_TIME and callable:
+			if idle_moves >= idle_time and callable:
 				# force the game to be called
 				idle_moves = 0
 				move = moves['move_call']
@@ -433,12 +438,12 @@ def end_game(show_all_cards):
 			if hand_value == 5 and len(hand) == 3:
 				idiot_cards = (False, False, False) # used to count number of idiot's array cards
 				for card in hand:
-					from back.settings import CARDVALUE#!
-					if CARDVALUE[card] == 0:
+					from back.constants import card_values
+					if card_values[card] == 0:
 						idiot_cards[0] = True
-					elif CARDVALUE[card] == 2:
+					elif card_values[card] == 2:
 						idiot_cards[1] = True
-					elif CARDVALUE[card] == 3:
+					elif card_values[card] == 3:
 						idiot_cards[2] = True
 				
 				if idiot_cards == [True, True, True]: # idiot's array!
@@ -492,8 +497,10 @@ def end_game(show_all_cards):
 		
 	#Let's try a sudden demise/card count
 	if len(winners) > 1:
-		from back.settings import SUDDENDEMISE#!
-		if SUDDENDEMISE:
+		from sabacc.get_settings import game_settings
+		sudden_demise = game_settings['sudden_demise']
+		
+		if sudden_demise:
 			text="A sudden demise was enacted between "
 			for winner_tuple in winners:
 				name = winner_tuple[0]
@@ -578,8 +585,8 @@ def end_game(show_all_cards):
 		# Don't like sudden demise? Do a card count instead.
 		else:
 			# calculate winner with least cards
-			from back.settings import NUM_CARDS
-			least_cards = NUM_CARDS # maximum number of cards
+			from sabacc.constants import number_of_cards
+			least_cards = number_of_cards # maximum number of cards
 			least_cards_winners = []
 			
 			for winner_tuple in winners:
@@ -680,10 +687,10 @@ def end_game(show_all_cards):
 def get_value(cards):
 	'''Returns the value of the given list of cards.'''
 	
-	from back.settings import CARDVALUE
+	from sabacc.constants import card_values
 	hand_total = 0
 	for card in cards:
-		hand_total += CARDVALUE[card]
+		hand_total += card_values[card]
 	
 	return hand_total
 
@@ -694,10 +701,9 @@ def start_shift():
 	from random import seed, randint, uniform
 	seed()
 	
-	from back.settings import NUM_CARDS, SABACCSHIFT_NUM_MIN,\
-		SABACCSHIFT_NUM_MAX, SABACCSHIFT_TIME_MIN,\
-		SABACCSHIFT_TIME_MAX #!
-	num_to_shift = randint(SABACCSHIFT_NUM_MIN, SABACCSHIFT_NUM_MAX)
+	from sabacc.constants import number_of_cards
+	from sabacc.get_settings import sabacc_shift
+	num_to_shift = randint(sabacc_shift['min_num'], sabacc_shift['max_num'])
 	
 	# A player is more likely to be shifted if he has more cards
 	cards_in_play = []
@@ -716,7 +722,7 @@ def start_shift():
 	for count in range(num_to_shift):
 		# Pick a card to shift
 		orig_pos = randint(0, len(cards_in_play)-1)
-		new_card = randint(0, NUM_CARDS-1)
+		new_card = randint(0, number_of_cards-1)
 		
 		# Card must be swapped with another card,
 		# otherwise chaos will ensue
@@ -747,7 +753,7 @@ def start_shift():
 	
 	# Start new timer
 	if game_in_progress:
-		time_until_shift = round(uniform(SABACCSHIFT_TIME_MIN,  SABACCSHIFT_TIME_MAX),2)
+		time_until_shift = round(uniform(sabacc_shift['min_time'],  sabacc_shift['max_time']),2)
 		
 		from threading import Timer
 		global shift_timer

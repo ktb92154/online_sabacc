@@ -20,7 +20,7 @@ txtInterface.py (rewrite of back.Interfaces.txtInterface from 0.6 'Ackbar')
 This module contains a text-based interface and application.
 """
 import sys, nullInterface
-from back.settings import CARDNAMES, CARDVALUE#!
+from sabacc.constants import card_names, card_values
 
 ##'Shift' and self.current_text are still a bit messed up. Sort out later!
 ## Plus, case-insensitive names for win32.
@@ -631,7 +631,7 @@ def agent_menu():
 
 def get_filename(save=False):
 	'''Gets an agent filename from the user'''
-	from settings import agent_dir
+	from sabacc.constants import agent_dir
 	import os.path
 	
 	current_dir = agent_dir
@@ -771,7 +771,7 @@ def get_filename(save=False):
 def get_dir_contents(directory):
 	import os
 	from string import lower
-	from settings import agent_dir
+	from sabacc.constants import agent_dir
 	
 	os.chdir(directory)
 	dirs = filter(os.path.isdir, os.listdir('.'))
@@ -795,7 +795,7 @@ def new_agent_menu():
 	
 	query = "Please enter a name, or press CTRL-C to abort: "
 	
-	from settings import rulesets
+	from sabacc.get_settings import rule_sets
 	name = None
 	ruleset = None
 	
@@ -817,8 +817,8 @@ def new_agent_menu():
 			if name == None:
 				name = answer
 				query = '''Please choose a rule set, or press CTRL-C to abort:
-(This may be one of %s) ''' %rulesets
-			elif answer in rulesets:
+(This may be one of %s) ''' %rule_sets.keys()
+			elif answer in rule_sets.keys():
 				ruleset = answer
 			else:
 				sys.stderr.write("Error: '%s' is not a valid option!\n" % answer)
@@ -973,10 +973,10 @@ General status of agent %(name)s:
 def modify_agent_ruleset(ruleset):
 	'''Prompt for new rule set, then return.'''
 	
-	from settings import rulesets
+	from sabacc.get_settings import rule_sets
 	query = '''Your current rule set is '%s'.
 Please choose a new one or press CTRL-C to abort:
-(This may be one of %s) ''' %(ruleset, rulesets)
+(This may be one of %s) ''' %(ruleset, rule_sets.keys())
 	
 	while True:
 		answer = None
@@ -993,7 +993,7 @@ Please choose a new one or press CTRL-C to abort:
 			return
 		
 		if answer != "":
-			if answer in rulesets:
+			if answer in rule_sets.keys:
 				return answer
 			else:
 				sys.stderr.write("Error: '%s' is not a valid option!\n" % answer)

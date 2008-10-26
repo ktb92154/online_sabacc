@@ -24,10 +24,10 @@ import gtk, sys
 
 def setup_path():
 	"""Sets up the python include paths to include needed directories"""
-	from front import basedir
+	from sabacc.constants import base_dir
 	import os.path
 	
-	sys.path.insert(0, os.path.join(basedir, 'sabacc/front/guiInterface'))
+	sys.path.insert(0, os.path.join(base_dir, 'sabacc/front/guiInterface'))
 
 def check_requirements():
 	"""Checks versions and other requirements"""
