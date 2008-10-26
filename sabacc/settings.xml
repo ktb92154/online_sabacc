@@ -1,0 +1,29 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<sabacc version='1'>
+  <rule_sets>
+    <rule_set name='bold' upper='18' lower='-18' />
+    <rule_set name='cautious' upper='12' lower='-12' />
+    <rule_set name='balanced' upper='15' lower='-15' />
+  </rule_sets>
+  <settings>
+    <group name='agent_betting'>
+      <setting name='min_bet' value='2' />
+      <setting name='max_bet' value='20' />
+    </group>
+    <group name='game_settings'>
+      <setting name='idle_time' value='10' />
+      <setting name='min_players' value='2' />
+      <setting name='pot_building_rounds' value='4' />
+      <setting type='bool' name='sudden_demise' value='True' />
+    </group>
+    <group name='sabacc_shift'>
+      <setting type='bool' name='on' value='True' />
+      <setting name='min_time' value='0.01' />
+      <setting name='max_time' value='60' />
+      <setting name='min_num' value='1' />
+      <setting name='max_num' value='5' />
+    </group>
+    <setting name='initial_credits' value='500' />
+    <setting type='str' name='card_set' value='swag' />
+  </settings>
+</sabacc>
