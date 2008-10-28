@@ -993,7 +993,7 @@ Please choose a new one or press CTRL-C to abort:
 			return
 		
 		if answer != "":
-			if answer in rule_sets.keys:
+			if answer in rule_sets.keys():
 				return answer
 			else:
 				sys.stderr.write("Error: '%s' is not a valid option!\n" % answer)

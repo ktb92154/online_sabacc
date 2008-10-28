@@ -1,3 +1,0 @@
-"""
-Back end for Sabacc
-"""
