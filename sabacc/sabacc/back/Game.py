@@ -35,6 +35,7 @@ shift_timer = None # Time until the next Sabacc shift
 interface = None # Interface with the user
 idle_moves = 0 # Number of idle moves taken - Used for automatically declaring a draw.
 game_in_progress = False
+maximum_bet = -1 # Do not bet more than another player has!
 
 def add_player(name, player_interface=None, human=True):
 	'''Creates an agent with the specified name (or from the specified
@@ -161,6 +162,15 @@ def start_game(ante=0):
 			player.credits -= ante*2
 			hand_pot += ante
 			sabacc_pot += ante
+		
+		# Set maximum bet
+		if in_game:
+			global maximum_bet
+			if player.credits < 0:
+				maximum_bet = 0
+				
+			elif player.credits < maximum_bet or maximum_bet < 0:
+				maximum_bet = player.credits
 	
 	# If only 1 player left, do not start game
 	if not game_in_progress:
@@ -264,6 +274,8 @@ def betting_round(starting_player=0):
 				this_player_must_match = must_match - already_bet[index]
 				
 				bet = player.bet(hand, this_player_must_match)
+				betting = False
+				global maximum_bet
 				
 				if bet == moves['fold']:
 					legal_move = True
@@ -283,23 +295,34 @@ def betting_round(starting_player=0):
 						legal_move = True
 					
 					called = True
-					
+				
+				elif bet > maximum_bet:
+					interface.write_error("You cannot bet more than another player has!")
+				
 				elif bet == this_player_must_match:
 					legal_move = True
-					hand_pot += bet
 					if bet > 0: # if player bet more than 0, tell the user
+						betting = True
 						interface.write("%s matched the bet" %player.name)
 						already_bet[index] += bet
-						player.credits -= bet
 				
 				elif bet > this_player_must_match: #if player is raising
 					legal_move = True
-					hand_pot += bet
+					betting = True
 					already_bet[index] += bet
 					raised_by = bet - this_player_must_match
 					must_match = already_bet[index]
 					interface.write("%s raised the bet by %i" % (player.name, raised_by))
+					
+				if betting:
+					hand_pot += bet
 					player.credits -= bet
+					
+					# Adjust maximum bet
+					if player.credits < 0:
+						maximum_bet = 0
+					elif player.credits < maximum_bet:
+						maximum_bet = player.credits
 			
 			# lower lowest_bet if necessary
 			if in_game and already_bet[index] < lowest_bet:
@@ -433,6 +456,13 @@ def end_game(show_all_cards):
 					# bombing out penalty
 					sabacc_pot += hand_pot
 					player.credits -= hand_pot
+						
+					# Adjust maximum bet
+					global maximum_bet
+					if player.credits < 0:
+						maximum_bet = 0
+					elif player.credits < maximum_bet:
+						maximum_bet = player_credits
 			
 			# check for possible Idiot's array
 			if hand_value == 5 and len(hand) == 3:
