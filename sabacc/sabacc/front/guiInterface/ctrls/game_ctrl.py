@@ -32,7 +32,6 @@ class GameCtrl (Controller):
 	'''
 	def __init__(self, model):
 		Controller.__init__(self, model)
-		
 		from interface import gameInterface
 		Game.interface = gameInterface(controller=self)
 		
@@ -41,13 +40,15 @@ class GameCtrl (Controller):
 
 	def register_view(self, view):
 		'''Sets up the view and handles widget signals.'''
+		
 		Controller.register_view(self, view)
 
 		# setup of widgets
-		self.view['computer_button'].connect('event', self.computer_button_event)
-		self.view['game_window'].connect('delete-event', self.quit_button_clicked)
-		self.view['new_agent_menu'].connect('activate', self.agent_menu_response, False)
-		self.view['load_agent_menu'].connect('activate', self.agent_menu_response, True)
+		from common import Connect
+		Connect(self.view['computer_button'], 'event', self.computer_button_event)
+		Connect(self.view['game_window'], 'delete-event', self.quit_button_clicked)
+		Connect(self.view['new_agent_menu'], 'activate', self.agent_menu_response, False)
+		Connect(self.view['load_agent_menu'], 'activate', self.agent_menu_response, True)
 
 	def register_adapters(self):
 		# setup of adapters
@@ -61,7 +62,9 @@ class GameCtrl (Controller):
 	def computer_button_event(self, button, event):
 		'''Handler for 'add computer' button'''
 		if event.type == gtk.gdk.BUTTON_PRESS:
+			gtk.gdk.threads_enter()
 			self.view['computer_button_menu'].popup(None, None, None, event.button, event.time)
+			gtk.gdk.threads_leave()
 	
 	def agent_menu_response(self, widget, agent_exists):
 		'''Handler for 'create new' and 'load existing' menu items'''
@@ -70,6 +73,7 @@ class GameCtrl (Controller):
 			
 			# Create dialog
 			message = "Please select the agent file"
+			gtk.gdk.threads_enter()
 			d = gtk.FileChooserDialog(title=message, parent=self.view['game_window'],
 			buttons=(gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT,
 			gtk.STOCK_OK, gtk.RESPONSE_ACCEPT))
@@ -92,6 +96,7 @@ class GameCtrl (Controller):
 			resp=d.run()
 			filename = d.get_filename()
 			d.destroy()
+			gtk.gdk.threads_leave()
 			if resp == gtk.RESPONSE_REJECT:
 				return
 		
@@ -101,6 +106,7 @@ class GameCtrl (Controller):
 			# Set up dialog
 			title = "Create agent"
 			message = "Please enter a name and rule set for the new agent:"
+			gtk.gdk.threads_enter()
 			d = gtk.Dialog(title, self.view['game_window'], gtk.DIALOG_MODAL,
 				(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
 				gtk.STOCK_OK, gtk.RESPONSE_OK))
@@ -128,9 +134,10 @@ class GameCtrl (Controller):
 			self.new_ruleset = rulesets[0]
 			button = None
 			
+			from common import Connect
 			for ruleset in rulesets:
 				button = gtk.RadioButton(group=button, label=str.capitalize(ruleset))
-				button.connect('clicked', self.set_new_ruleset, ruleset)
+				Connect(button, 'clicked', self.set_new_ruleset, ruleset)
 				ruleset_layout.add(button)
 			
 			options.attach(ruleset_layout, 1, 2, 1, 2)
@@ -148,6 +155,7 @@ class GameCtrl (Controller):
 				
 				if resp != gtk.RESPONSE_OK:
 					d.destroy()
+					gtk.gdk.threads_leave()
 					del(self.new_ruleset)
 					return
 					
@@ -160,6 +168,7 @@ class GameCtrl (Controller):
 					d.destroy()
 					del(self.new_ruleset)
 					break
+			gtk.gdk.threads_leave()
 			
 			# make temporary file
 			from tempfile import mkstemp
@@ -194,6 +203,7 @@ class GameCtrl (Controller):
 		
 		# Set up dialog
 		message = "Please enter a buy-in price:"
+		gtk.gdk.threads_enter()
 		d = gtk.MessageDialog(self.view['game_window'], gtk.DIALOG_MODAL,
 		gtk.MESSAGE_QUESTION, gtk.BUTTONS_OK_CANCEL, message)
 		adj=gtk.Adjustment(value=self.model.last_ante, lower=0, 
@@ -205,6 +215,7 @@ class GameCtrl (Controller):
 		d.set_default_response(gtk.RESPONSE_OK)
 		resp=d.run()
 		d.destroy()
+		gtk.gdk.threads_leave()
 		
 		if resp != gtk.RESPONSE_OK:
 			return
@@ -216,8 +227,10 @@ class GameCtrl (Controller):
 			player.model.status = player.model.statuses['in_game']
 			player.model.active = True
 			if not player.model.is_human:
+				gtk.gdk.threads_enter()
 				for index in range(3):
 					player.view['move%i_button' %(index+1)].hide()
+				gtk.gdk.threads_leave()
 			player.update_labels()
 	
 		from threading import Thread
@@ -284,9 +297,11 @@ class GameCtrl (Controller):
 		self.model.hand_pot = Game.hand_pot
 		self.model.sabacc_pot = Game.sabacc_pot
 		
+		gtk.gdk.threads_enter()
 		self.adapt('num_players', 'players_label')
 		self.adapt('hand_pot', 'handpot_label')
 		self.adapt('sabacc_pot', 'sabaccpot_label')
+		gtk.gdk.threads_leave()
 		
 		# show correct details for all players
 		for player in self.players:
@@ -296,6 +311,7 @@ class GameCtrl (Controller):
 	def _create_player_window(self, name=None):
 		'''Creates a player window for the given agent, or creates a
 		human agent and a player window for it.'''
+		
 		if name:
 			is_human = False
 		else:
@@ -303,6 +319,8 @@ class GameCtrl (Controller):
 			
 			# Set up dialog
 			message = "What is your name?"
+			
+			gtk.gdk.threads_enter()
 			d = gtk.MessageDialog(self.view['game_window'], gtk.DIALOG_MODAL,
 				gtk.MESSAGE_QUESTION, gtk.BUTTONS_OK_CANCEL, message)
 			text_entry = gtk.Entry()
@@ -312,6 +330,7 @@ class GameCtrl (Controller):
 			d.set_default_response(gtk.RESPONSE_OK)
 			resp=d.run()
 			d.destroy()
+			gtk.gdk.threads_leave()
 			
 			if resp != gtk.RESPONSE_OK:
 				return
@@ -337,7 +356,10 @@ class GameCtrl (Controller):
 		ctrl = PlayerCtrl(model)
 		view = PlayerView(ctrl)
 		
+		gtk.gdk.threads_enter()
 		view['player_window'].set_transient_for(self.view['game_window'])
+		gtk.gdk.threads_leave()
+		
 		self.players.append(ctrl)
 	
 		# update number of players
@@ -345,7 +367,9 @@ class GameCtrl (Controller):
 		
 		# 2 players minimum!
 		if self.model.num_players == 2:
+			gtk.gdk.threads_enter()
 			self.view['start_button'].set_sensitive(True)
+			gtk.gdk.threads_leave()
 	
 		Game.interface.write("%s entered the game" %name)
 	
@@ -359,8 +383,10 @@ class GameCtrl (Controller):
 			if not player.model.is_human:
 				player.model.agent.save_to_xml(stats=True)
 				
+				gtk.gdk.threads_enter()
 				for index in range(3):
 					player.view['move%i_button' %(index+1)].show()
+				gtk.gdk.threads_leave()
 			
 			player.model.status = player.model.statuses['begin']
 			player.model.active = False
@@ -369,6 +395,8 @@ class GameCtrl (Controller):
 		self.update_labels()
 		
 		if Game.players_in_game >= 2:
+			gtk.gdk.threads_enter()
 			self.view['start_button'].set_sensitive(True)
+			gtk.gdk.threads_leave()
 	
 	pass # end of class GameCtrl

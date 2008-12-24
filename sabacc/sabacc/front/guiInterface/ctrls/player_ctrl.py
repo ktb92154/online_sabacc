@@ -36,11 +36,14 @@ class PlayerCtrl (Controller):
 	
 	def register_view(self, view):
 		'''Sets up the view and handles widget signals.'''
+		
+		from common import Connect
 		Controller.register_view(self, view)
 		
+		gtk.gdk.threads_enter()
 		# setup of widgets
 		self.view['player_window'].set_title(self.model.name)
-		self.view['player_window'].connect('delete-event', self.window_close)
+		Connect(self.view['player_window'], 'delete-event', self.window_close)
 		
 		if self.model.is_human:
 			self.view['betspinner'].show()
@@ -49,17 +52,20 @@ class PlayerCtrl (Controller):
 			self.view['move3_button'].set_label("Call the hand")
 		else:
 			self.view['move1_button'].set_label('Agent Data')
-			self.view['move1_button'].connect('clicked', self.show_agent_data)
+			Connect(self.view['move1_button'], 'clicked', self.show_agent_data)
 			self.view['move1_button'].set_sensitive(True)
 			self.view['move2_button'].set_label('Save Settings')
-			self.view['move2_button'].connect('clicked', self.save_agent)
+			Connect(self.view['move2_button'], 'clicked', self.save_agent)
 			if self.model.agent.interface.new_file:
 				self.view['move2_button'].set_sensitive(True)
 			self.view['move3_button'].set_label('Revert')
-			self.view['move3_button'].connect('clicked', self.revert_to_saved)
+			Connect(self.view['move3_button'], 'clicked', self.revert_to_saved)
+		gtk.gdk.threads_leave()
 		
 		self.update_cards()
+		gtk.gdk.threads_enter()
 		self.view['player_window'].show()
+		gtk.gdk.threads_leave()
 		return
 
 	def register_adapters(self):
@@ -95,6 +101,7 @@ class PlayerCtrl (Controller):
 		if self.model.modified:
 			title = "Save Changes?"
 			text = "The current agent has been modified. Do you want to save changes?"
+			gtk.gdk.threads_enter()
 			dialog = gtk.Dialog(title, self.view['player_window'], gtk.DIALOG_MODAL,
 				(gtk.STOCK_YES, gtk.RESPONSE_YES,
 				gtk.STOCK_NO, gtk.RESPONSE_NO,
@@ -109,6 +116,8 @@ class PlayerCtrl (Controller):
 			dialog.show_all()
 			resp = dialog.run()
 			dialog.destroy()
+			gtk.gdk.threads_leave()
+			
 			if resp == gtk.RESPONSE_YES:
 				return self.save_agent()
 			elif resp == gtk.RESPONSE_NO:
@@ -160,10 +169,12 @@ class PlayerCtrl (Controller):
 			columns = 8
 		
 		# remove current cards from table
+		gtk.gdk.threads_enter()
 		for card in self.view['card_layout'].get_children():
 			self.view['card_layout'].remove(card)
 		
 		self.view['card_layout'].resize(rows, columns)
+		gtk.gdk.threads_leave()
 		
 		card_index = 0
 		score = 0
@@ -178,13 +189,16 @@ class PlayerCtrl (Controller):
 				if not smallcards and row % 2 == 1: # odd rows
 					break
 				try:
+					gtk.gdk.threads_enter()
 					im = gtk.Image()
+					gtk.gdk.threads_leave()
 					
 					filename = os.path.join(cards_dir, card_images[cards[card_index]])
 					
 					if not os.path.exists(filename):
 						self.model.agent.interface.write_error('Warning: Unable to find image file %s' %filename)
-						
+					
+					gtk.gdk.threads_enter()
 					if smallcards:
 						# Scale card image
 						im.set_from_pixbuf(gtk.gdk.pixbuf_new_from_file(
@@ -194,6 +208,8 @@ class PlayerCtrl (Controller):
 						im.set_from_file(filename)
 					self.view['card_layout'].attach(im, col,col+1,row,row+1)
 					im.show()
+					gtk.gdk.threads_leave()
+					
 					if not smallcards:
 						if cards[card_index] == -1:
 							text = "Unknown card"
@@ -201,9 +217,11 @@ class PlayerCtrl (Controller):
 							text = '%s (value %i)' \
 								%(card_names[cards[card_index]],
 								card_values[cards[card_index]])
+						gtk.gdk.threads_enter()
 						lbl = gtk.Label(text)
 						self.view['card_layout'].attach(lbl, col, col+1, row+1, row+2, xpadding=3)
 						lbl.show()
+						gtk.gdk.threads_leave()
 					
 					# calculate score
 					if cards[card_index] != -1:
@@ -226,8 +244,10 @@ class PlayerCtrl (Controller):
 		
 		# resize window to minimum possible
 		if self.view['player_window'].get_property('visible'):
+			gtk.gdk.threads_enter()
 			min_width, min_height = self.view['player_window'].size_request()
 			self.view['player_window'].resize(min_width, min_height)
+			gtk.gdk.threads_leave()
 		
 		# Score type
 		score_type = None
@@ -260,8 +280,10 @@ class PlayerCtrl (Controller):
 		ctrl = StatsCtrl(model)
 		view = StatsView(ctrl)
 		
+		gtk.gdk.threads_enter()
 		view['stats_window'].set_transient_for(self.view['player_window'])
 		view['stats_window'].show()
+		gtk.gdk.threads_leave()
 		
 	def save_agent(self, button=None):
 		'''Saves the agent's settings to XML, prompting for a new location
@@ -272,6 +294,8 @@ class PlayerCtrl (Controller):
 		if agent.interface.new_file:
 			# Get new filename
 			message = "Save agent"
+			
+			gtk.gdk.threads_enter()
 			action = gtk.FILE_CHOOSER_ACTION_SAVE
 			
 			d = gtk.FileChooserDialog(title=message,
@@ -298,6 +322,8 @@ class PlayerCtrl (Controller):
 			resp=d.run()
 			file = d.get_filename()
 			d.destroy()
+			gtk.gdk.threads_leave()
+			
 			if resp == gtk.RESPONSE_REJECT:
 				return False
 				
@@ -320,8 +346,10 @@ class PlayerCtrl (Controller):
 		
 		if self.model.agent.save_to_xml():
 			self.model.modified = False
+			gtk.gdk.threads_enter()
 			for index in 2, 3:
 				self.view['move%i_button' %index].set_sensitive(False)
+			gtk.gdk.threads_leave()
 		
 		return True
 		
@@ -330,8 +358,10 @@ class PlayerCtrl (Controller):
 		
 		if self.model.agent.load_from_xml():
 			self.model.modified = False
+			gtk.gdk.threads_enter()
 			for index in 2, 3:
 				self.view['move%i_button' %index].set_sensitive(False)
+			gtk.gdk.threads_leave()
 	
 	def update_labels(self, credit_mod=0):
 		'''Updates status and credits information labels with correct
@@ -348,10 +378,13 @@ class PlayerCtrl (Controller):
 			self.model.agent.interface.write_error(
 				'Error setting status for agent %s!' %self.model.name)
 			return
+		
+		gtk.gdk.threads_enter()
 		self.view['status_label'].set_text(text)
 		
 		self.model.credits = self.model.agent.credits + credit_mod
 		self.adapt('credits', 'credits_label')
+		gtk.gdk.threads_leave()
 	
 	def changes_occurred(self):
 		'''This is used to tell the window that changes have
@@ -359,9 +392,10 @@ class PlayerCtrl (Controller):
 		'revert' buttons can be made clickable.'''
 		
 		self.model.modified = True
+		
+		gtk.gdk.threads_enter()
 		self.view['move2_button'].set_sensitive(True)
 		
 		if not self.model.agent.interface.new_file:
 			self.view['move3_button'].set_sensitive(True)
-	
-	pass # end of class PlayCtrl
+		gtk.gdk.threads_leave()

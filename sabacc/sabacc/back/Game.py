@@ -260,10 +260,9 @@ def betting_round(starting_player=0):
 	while True: # loop will repeat until all players have matched
 		# used to ensure that every player bets enough
 		lowest_bet = must_match
-		
 		index = 0
 		
-		global hand_pot, callable
+		global hand_pot, callable, maximum_bet
 		
 		for player, hand, in_game in loaded_copy:
 			legal_move = False
@@ -275,7 +274,6 @@ def betting_round(starting_player=0):
 				
 				bet = player.bet(hand, this_player_must_match)
 				betting = False
-				global maximum_bet
 				
 				if bet == moves['fold']:
 					legal_move = True
@@ -338,7 +336,7 @@ def betting_round(starting_player=0):
 		
 		if lowest_bet == must_match: # if betting complete
 			break
-		
+	
 	return called
 
 def drawing_round():
@@ -426,7 +424,11 @@ def end_game(show_all_cards):
 	best_score = 0 # best recorded score so far
 	cards_to_show = [] # takes form (name, cards) for all relevant players
 	
-	global players_in_game, hand_pot, sabacc_pot, game_in_progress
+	global players_in_game, hand_pot, sabacc_pot, game_in_progress, \
+		maximum_bet
+	
+	# Reset maximum bet to default
+	maximum_bet = -1
 	
 	# if only one player, he wins by default
 	if players_in_game == 1:
@@ -456,13 +458,6 @@ def end_game(show_all_cards):
 					# bombing out penalty
 					sabacc_pot += hand_pot
 					player.credits -= hand_pot
-						
-					# Adjust maximum bet
-					global maximum_bet
-					if player.credits < 0:
-						maximum_bet = 0
-					elif player.credits < maximum_bet:
-						maximum_bet = player_credits
 			
 			# check for possible Idiot's array
 			if hand_value == 5 and len(hand) == 3:
@@ -578,7 +573,7 @@ def end_game(show_all_cards):
 						interface.write("%s bombed out" %player_name)
 						
 					elif positive_value > best_score:
-						best_score = positive_total
+						best_score = positive_value
 				
 				interface.show_all_cards(cards_to_show)
 				
@@ -690,11 +685,14 @@ def end_game(show_all_cards):
 	
 	# Has anyone actually given up? Get rid of them!
 	index = 0
+	
 	while index < len(loaded):
 		player = loaded[index][0]
+		
 		if player.quit_next_turn:
-			player.quit_next_turn = False
-			remove_player(player.name)
+			# unload player
+			del loaded[index]
+			names.remove(player.name)
 		else:
 			index += 1
 	

@@ -43,14 +43,12 @@ def start_app():
 	from ctrls.game_ctrl import GameCtrl
 	from views.game_view import GameView
 	
+	gtk.gdk.threads_init()
 	model = GameModel()
 	ctrl = GameCtrl(model)
 	view = GameView(ctrl)
 
-	gtk.gdk.threads_init()
-	gtk.gdk.threads_enter()
 	try:
 		gtk.main()
 	except KeyboardInterrupt:
 		sys.exit(1)
-	gtk.gdk.threads_leave()

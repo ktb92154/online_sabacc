@@ -36,8 +36,6 @@ class StatsCtrl (Controller):
 	def register_view(self, view):
 		'''Sets up the view and handles widget signals.'''
 		Controller.register_view(self, view)
-		
-		return
 	
 	def register_adapters(self):
 		'''Updates all labels and inputs with correct values.'''
@@ -47,6 +45,8 @@ class StatsCtrl (Controller):
 			filename = 'N/A'
 		else:
 			filename = agent.filename
+		
+		gtk.gdk.threads_enter()
 		self.view['name_entry'].set_text(agent.name)
 		self.view['filename_label'].set_text(filename)
 		self.view['games_played_label'].set_text("%i" %agent.stats['games'])
@@ -54,20 +54,22 @@ class StatsCtrl (Controller):
 		self.view['games_lost_label'].set_text("%i" %agent.stats['losses'])
 		self.view['bomb_outs_label'].set_text("%i" %agent.stats['bomb_outs'])
 		self.view['pure_sabaccs_label'].set_text("%i" %agent.stats['pure_sabaccs'])
+		gtk.gdk.threads_leave()
 		
 		from sabacc.constants import rule_sets
 		button = None
 		self.new_ruleset = agent.ruleset
 		
+		from common import Connect
 		for ruleset in rule_sets.keys():
+			gtk.gdk.threads_enter()
 			button = gtk.RadioButton(group=button, label=str.capitalize(ruleset))
 			if agent.ruleset == ruleset:
 				button.set_active(True)
-			button.connect('clicked', self.set_new_ruleset, ruleset)
+			Connect(button, 'clicked', self.set_new_ruleset, ruleset)
 			button.show()
 			self.view['ruleset_layout'].add(button)
-		
-		return
+			gtk.gdk.threads_leave()
 	
 	# Handlers for signals:
 	def ok_button_clicked(self, button):
@@ -76,33 +78,39 @@ class StatsCtrl (Controller):
 		self.model.agent.name = self.view['name_entry'].get_text()
 		self.model.agent.ruleset = self.new_ruleset
 		self.model.player_controller.changes_occurred()
+		gtk.gdk.threads_enter()
 		self.view['stats_window'].destroy()
+		gtk.gdk.threads_leave()
 		
 	def cancel_button_clicked(self, button):
 		'''Close the window without saving changes.'''
+		gtk.gdk.threads_enter()
 		self.view['stats_window'].destroy()
+		gtk.gdk.threads_leave()
 	
 	def name_entry_changed(self, entry):
 		'''Tells the controller that the name has changed'''
+		gtk.gdk.threads_enter()
 		if entry.get_text() == self.model.agent.name and \
 		self.new_ruleset == self.model.agent.ruleset:
 			self.view['ok_button'].set_sensitive(False)
 		else:
 			self.view['ok_button'].set_sensitive(True)
+		gtk.gdk.threads_leave()
 	
 	def set_new_ruleset(self, widget, ruleset):
 		'''Tells the controller that the ruleset has changed'''
 		if not widget.get_active():
 			return
 		
+		gtk.gdk.threads_enter()
 		if self.view['name_entry'].get_text() == self.model.agent.name and \
 		ruleset == self.model.agent.ruleset:
 			self.view['ok_button'].set_sensitive(False)
 		else:
 			self.view['ok_button'].set_sensitive(True)
+		gtk.gdk.threads_leave()
 		
 		self.new_ruleset = ruleset
 	
 	# Private methods
-	
-	pass # end of class StatsCtrl

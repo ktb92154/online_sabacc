@@ -20,21 +20,21 @@ game_view.py (rewrite of front.wndGame from 0.6 'Ackbar')
 This module contains the view for the main game window.
 """
 
-from gtkmvc import View
+from common import ThreadSafeView
 
 import gtk
 import os.path
 
-class GameView (View):
+class GameView (ThreadSafeView):
 	'''
 	This class contains the view for the main game window.
 	'''
 	def __init__(self, ctrl):
 		from sabacc.constants import glade_filename
-		View.__init__(self, ctrl, glade_filename,
+		
+		ThreadSafeView.__init__(self, ctrl, glade_filename,
 			"game_window", register=False)
 		self.setup_widgets()
-		
 		ctrl.register_view(self)
 
 	def setup_widgets(self):
@@ -42,6 +42,8 @@ class GameView (View):
 		settings.'''
 		
 		from sabacc.constants import icon_filename
+		
+		gtk.gdk.threads_enter()
 		self['game_window'].set_icon_from_file(icon_filename)
 		
 		# Create object for displaying messages
@@ -75,5 +77,4 @@ class GameView (View):
 		self['game_window'].resize(new_width, new_height)
 		self['game_window'].move(0, gtk.gdk.screen_height() - new_height)
 		self['game_window'].show()
-
-	pass # end of class GameView
+		gtk.gdk.threads_leave()

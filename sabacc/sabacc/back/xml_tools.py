@@ -92,7 +92,7 @@ def get_name(filename):
 	# Get 'agent' element
 	agent = get_child(doc, 'agent')
 	
-	if not agent:
+	if agent is None:
 		sys.stderr.write("Error: No agent found in file '%s'!\n" %filename)
 		return
 	
@@ -152,13 +152,13 @@ def get_stats(filename):
 	# Get 'agent' element
 	agent = get_child(doc, 'agent')
 	
-	if not agent:
+	if agent is None:
 		sys.stderr.write("Error: No agent found in file '%s'!\n" %filename)
 		return
 	
 	stats = get_child(agent, 'stats')
 	
-	if not stats:
+	if stats is None:
 		# No error needed - stats can just stay at 0
 		return
 	
@@ -191,13 +191,13 @@ def save_stats(filename, stats_to_save):
 	# Get 'agent' element
 	agent = get_child(doc, 'agent')
 	
-	if not agent:
+	if agent is None:
 		sys.stderr.write("Error: No agent found in file '%s'!\n" %filename)
 		return
 	
 	stats = get_child(agent, 'stats')
 	
-	if not stats:
+	if stats is None:
 		from lxml import etree
 		stats = etree.SubElement(agent, 'stats')
 	
@@ -227,7 +227,7 @@ def get_ruleset(filename):
 	# Get 'agent' element
 	agent = get_child(doc, 'agent')
 	
-	if not agent:
+	if agent is None:
 		sys.stderr.write("Error: No agent found in file '%s'!\n" %filename)
 		return
 	
@@ -246,7 +246,7 @@ def save_ruleset(filename, ruleset):
 	# Get 'agent' element
 	agent = get_child(doc, 'agent')
 	
-	if not agent:
+	if agent is None:
 		sys.stderr.write("Error: No agent found in file '%s'!\n" %filename)
 		return
 	

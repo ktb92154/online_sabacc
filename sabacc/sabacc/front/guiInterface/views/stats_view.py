@@ -20,16 +20,16 @@ stats_view.py (partial rewrite of front.wndTrain from 0.6 'Ackbar')
 This module contains the view for the individual 'agent data' windows.
 """
 
-from gtkmvc import View
+from gtkmvc import ThreadSafeView
 import gtk
 
-class StatsView (View):
+class StatsView (ThreadSafeView):
 	'''
 	This class contains the view for the stats window.
 	'''
 	def __init__(self, ctrl):
 		from sabacc.constants import glade_filename
-		View.__init__(self, ctrl, glade_filename,
+		ThreadSafeView.__init__(self, ctrl, glade_filename,
 			"stats_window", register=False)
 		self.setup_widgets()
 		ctrl.register_view(self)
@@ -40,7 +40,7 @@ class StatsView (View):
 		settings.'''
 		
 		from sabacc.constants import icon_filename
+		
+		gtk.gdk.threads_enter()
 		self['stats_window'].set_icon_from_file(icon_filename)
-		return
-
-	pass # end of class StatsView
+		gtk.gdk.threads_leave()

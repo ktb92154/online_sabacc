@@ -20,16 +20,16 @@ player_view.py (rewrite of front.wndPlayer from 0.6 'Ackbar')
 This module contains the view for the individual player windows.
 """
 
-from gtkmvc import View
+from common import ThreadSafeView
 import gtk
 
-class PlayerView (View):
+class PlayerView (ThreadSafeView):
 	'''
 	This class contains the view for the player window.
 	'''
 	def __init__(self, ctrl):
 		from sabacc.constants import glade_filename
-		View.__init__(self, ctrl, glade_filename,
+		ThreadSafeView.__init__(self, ctrl, glade_filename,
 			"player_window", register=False)
 		self.setup_widgets()
 		ctrl.register_view(self)
@@ -40,7 +40,9 @@ class PlayerView (View):
 		settings.'''
 		
 		from sabacc.constants import icon_filename
+		gtk.gdk.threads_enter()
 		self['player_window'].set_icon_from_file(icon_filename)
+		gtk.gdk.threads_leave()
 		return
 
 	pass # end of class PlayerView
