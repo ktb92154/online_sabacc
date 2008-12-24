@@ -51,6 +51,7 @@ def get_base_share_home_dirs():
 	else:
 		current_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
 		base_dir = os.path.normpath(os.path.join(current_dir, '..'))
+	
 	share_dir = os.path.join(base_dir, 'share')
 	
 	# Find home dir

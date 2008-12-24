@@ -1,28 +1,51 @@
+======================
+1.0Beta1 (24 Dec 2008)
+======================
+
+New Features
+------------
+  - A complete text-based interface has been added.
+  - The bin/sabacc executable now accepts Unix-style arguments.
+  - Added new functionality to create/modify/save agents from the main 
+    interface.
+  - Added new settings.xml file and renamed some settings.
+
+
+Bug Fixes
+---------
+  - It is now impossible to bet more than another player has.
+  - Sabacc is now thread-safe and will no longer crash over 
+    thread-based issues.
+  - Closing the player window during a game now no longer breaks the 
+    game.
+
+
+Miscellaneous
+-------------
+  - All Python modules have been moved to a seperate 'sabacc' directory, 
+    and all code has been rewritten
+  - GUI front-end has been rewritten using MVC and a separate interface 
+    package.
+  - Changed XML library to lxml.etree as pyxml is becoming obsoleted.
+
 =================
 0.6 (01 May 2008)
 =================
 
 New Features
 ------------
-
   - An icon has been added to the application.
-  
   - 'Bet' button is now renamed to 'End betting' when the bet
     counter is set to 0.
 	
 Bug Fixes
 ---------
-
   - The only player able to afford the initial ante will no
-	longer have to buy in to the game.
-	
+    longer have to buy in to the game.
   - Various problems with 'New Agent' button fixed.
-  
   - When no winner is declared the unwon winnings will now
     be moved into the Sabacc pot.
-
   - Win32 'dual display' mode no longer causes problems.
-  
   - Computer agents are now much more likely to call the hand.
 
 ======================
@@ -31,71 +54,52 @@ Bug Fixes
 
 New Features
 ------------
-
   - Back End:
-
     - An ante/buy-in has been added to the game. This goes into
       both pots. If a player cannot afford the ante, he/she is
       kicked out of the game.
-
     - An initial round of betting has been added to the game.
       This round takes place after the game has begun but before
       the cards are revealed.
-
     - The end-game winning conditions have been modified to make
       them fit in more easily with the rules on the website. The
       new 'Sudden Demise' rule has been added, but may be switched
       on or off by modifying the sabacc.back.settings module.
-
     - A player drawing a card and having a new total over 23 or
       under -23 will now not bomb out until the game is called.
-
     - A 'Sabacc Shift' feature has been added to the game. Now,
       a random number of cards will be changed at random points
       during the game. This can happen at any stage, even mid-turn.
-
     - Computer agents are now capable of betting with a reasonable
       degree of intelligence.
 
-
   - Front End:
-
     - The game now supports multiple human agents in the same game.
       If there are multiple humans in the same game, there will be a
       pause between turns and a player's cards will only be shown
       during his/her turn.
 
-
 Bug Fixes
 ---------
-
   - Calling a game during the betting round will now not end the
     player's turn.
-
   - Multiple bugs involving players leaving the game and clicking
     the 'Quit Game' button have been fixed.
-
   - A number of bugs involving the end of the game and bomb outs
     have been fixed.
 
-
 Miscellaneous
 -------------
-
   - All LearningAgent-related features have been removed to speed
     the transition from academic project to playable game. The
     project no longer depends on NumPy.
-
   - The project has been renamed from SabaccApp to Sabacc. Some
     files have been renamed and others moved. Some text has been
     changed.
-
   - A setup script has been added to ease installation.
-
 
 ======================
 0.5 (16 November 2007)
 ======================
 
   - Initial release.
-

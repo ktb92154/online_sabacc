@@ -5,9 +5,10 @@ include COPYING
 include INSTALL
 include NEWS
 include README
+include settings.xml
 include man/sabacc.6
-include glade/sabacc.*
+include glade/sabacc.glade
 include cardsets/swag/*.png
-include agents/*.xml
-include templates/agent.xml
-include pixmaps/*
+include agents/Example.xml
+include pixmaps/sabacc.*
+include sabacc/front/guiInterface/gtkmvc/GTKMVC_README

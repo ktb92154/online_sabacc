@@ -24,15 +24,22 @@ import gtk, sys
 
 def setup_path():
 	"""Sets up the python include paths to include needed directories"""
-	from sabacc.constants import base_dir
+	from sabacc.constants import base_dir, share_dir
 	import os.path
 	
-	sys.path.insert(0, os.path.join(base_dir, 'sabacc/front/guiInterface'))
+	if os.path.exists(share_dir):
+		# Bad practice, I know, but is there another way?
+		interface_dir = os.path.join(base_dir, 'lib/python2.5/site-packages/sabacc/front/guiInterface')
+	else:
+		interface_dir = os.path.join(base_dir, 'sabacc/front/guiInterface')
+	
+	sys.path.insert(0, interface_dir)
+	
 
 def check_requirements():
 	"""Checks versions and other requirements"""
 	import gtkmvc
-	gtkmvc.require("1.2.0")
+	gtkmvc.require("1.2.2")
 	return
 
 def start_app():

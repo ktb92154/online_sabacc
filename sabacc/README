@@ -1,30 +1,30 @@
-Sabacc 0.6 - an interesting card game similar to Blackjack
+Sabacc 1.0Beta1 - an interesting card game similar to Blackjack
 http://sabacc.sourceforge.net/
 http://sourceforge.net/projects/sabacc/
 
 About Sabacc
 ============
 
-Sabacc is a card game originally from the Star Wars universe. It is similar to Blackjack except it employs a random element where any card may change value at any point during the game.
+Sabacc is a card game originally from the Star Wars universe. It is similar
+to Blackjack except it employs a random element where any card may change
+value at any point during the game.
 
-For more information on Sabacc, see the website at <http://sabacc.sourceforge.net/>. A useful website that fully explains the rules as adopted in this game is <http://www.pagat.com/invented/sabacc.html>. Please note: all of these rules have been adopted in the game, apart from the static field. Currently, no card may be made exempt from the Sabacc Shift.
+For more information on Sabacc, see the website at
+<http://sabacc.sourceforge.net/>. A useful website that fully explains the
+rules as adopted in this game is <http://www.pagat.com/invented/sabacc.html>.
+Please note: all of these rules have been adopted in the game, apart from the
+static field. Currently, no card may be made exempt from the Sabacc Shift.
 
 
 Release Notes
 =============
 
-Upon starting Sabacc, most users should click 'Play the Game'. The 'training' buttons are only useful for creating or modifying agents. From here, 'Add Human Player' will prompt for the user's name, then add him or her to the game. 'Add Computer Player' will ask the user for the location of the agent to load (three agents are installed by default). If two or more humans are in the game at a time, all humans' cards are hidden during another player's turn. 'Start the Game' will cause the game to begin, and clicking 'Quit Game' at any time will cause the current game to end and the 'Play Game' window to be closed. Only by clicking 'Quit Sabacc' from the main menu will the program terminate.
-
 Installation instructions can be found in the INSTALL file. Details of new
 features, bug fixes and other changes can be found in the NEWS file.
 
 Your feedback, bug reports and ideas for new features are especially welcome.
-
-  - Forums: http://sourceforge.net/forum/?group_id=209559
-
-  - Bug reports: http://sourceforge.net/tracker/?atid=1010201&group_id=209559
-
-  - Feature ideas: http://sourceforge.net/tracker/?atid=1010204&group_id=209559
+  - Bug reports: http://bugs.launchpad.net/sabacc
+  - Feature ideas: http://blueprints.launchpad.net/sabacc
 
 If you are a competent (or aspiring!) Python programmer and would like to
 contribute code to Sabacc, then please get in touch with the developers!
@@ -32,27 +32,12 @@ contribute code to Sabacc, then please get in touch with the developers!
 
 Known Issues
 ============
-On most Unix-based systems, the example agent files will be 
-write-protected, so after each game an error message will appear, as 
-the status (number of wins/losses etc) will not be able to be updated. 
-This is a very minor issue, but can be fixed by changing the 
-permissions in the following way (assuming Sabacc is installed into 
-/usr/share/sabacc):
-
-- Open a terminal as the root user
-- Enter the following commands:
-	chmod 777 /usr/share/sabacc/agents
-	chmod 666 /usr/share/sabacc/agents/*.xml
-
-This problem should be fixed in later versions of Sabacc.
-
-
-If running Sabacc from the source directory (ie. having not installed 
-it first) you may need to rename the sabacc-0.6beta1 directory to simply 
-'sabacc'. Also, if Sabacc is already installed, running the Sabacc 
-script from the source directory will call the previously installed 
-version of Sabacc. To force Sabacc to use local source files, call 
-sabacc with the word 'local' as an argument.
+  - It is currently not possible to add a computer player to the game 
+    using the GUI interface without using a mouse. If you are unable to
+    use a mouse, you will need to run Sabacc with the --no-gui option.
+  - The text-based interface is currently not very stable and may do 
+    some strange things. If you can, it is best to use the GUI 
+    interface.
 
 Copyright Information
 =====================
