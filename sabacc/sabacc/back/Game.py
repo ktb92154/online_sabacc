@@ -463,7 +463,7 @@ def end_game(show_all_cards):
 			if hand_value == 5 and len(hand) == 3:
 				idiot_cards = (False, False, False) # used to count number of idiot's array cards
 				for card in hand:
-					from back.constants import card_values
+					from sabacc.constants import card_values
 					if card_values[card] == 0:
 						idiot_cards[0] = True
 					elif card_values[card] == 2:

@@ -61,7 +61,6 @@ def main():
 	
 	# Check version requirements.
 	if PYTHON_VERSION < PYTHON_REQUIRED:
-		sys.stderr.write("python\n")
 		raise SystemExit, "Error: Python %d.%d+ required" % PYTHON_REQUIRED
 		
 	if nogui == False:
@@ -70,15 +69,15 @@ def main():
 			pygtk.require(PYGTK_REQUIRED)
 			import gtk
 		except ImportError, AssertionError: # PyGTK not found or wrong version
-			sys.stderr.write("pygtk\n")
-			print "PyGTK %s+ is required for the graphical interface, but it was not found. Using 'no-gui' option..." % PYGTK_REQUIRED
+			sys.stderr.write("PyGTK %s+ is required for the graphical interface, but it was not found. Using 'no-gui' option...\n" % PYGTK_REQUIRED)
 			nogui=True
 	
+	etree_req_string = '%i.%i.%i' %ETREE_REQUIRED
 	try:
 		from lxml import etree
 		
 	except ImportError: # lxml.etree not found or wrong version
-		raise SystemExit, "Error: lxml.etree %s required" % ETREE_REQUIRED
+		raise SystemExit, "Error: lxml.etree %s required" % etree_req_string
 	
 	else: # Check that lxml.etree is correct version
 		etree_version = map(int, str.split(str.split(str(etree.__version__))[0], '.'))
@@ -93,7 +92,6 @@ def main():
 				break
 		
 		if bad_etree_version:
-			req_string = '%i.%i.%i' %ETREE_REQUIRED
 			raise SystemExit, "Error: lxml.etree %s or above required - version %s found." %(req_string, etree.__version__)
 	
 	if not local:

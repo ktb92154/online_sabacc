@@ -47,7 +47,7 @@ def get_base_share_home_dirs():
 	import sys, os.path
 	if hasattr(sys, 'frozen'):  # If py2exe distribution.
 		current_dir = os.path.dirname(sys.executable)
-		base_dir = os.path.abspath(currentdir)
+		base_dir = os.path.abspath(current_dir)
 	else:
 		current_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
 		base_dir = os.path.normpath(os.path.join(current_dir, '..'))

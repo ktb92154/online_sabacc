@@ -88,7 +88,7 @@ class gameInterface (nullInterface.gameInterface):
 				player.model.agent.interface.show_cards(cards, show_all=show_all)
 				break
 		else:
-			self.write_error('Error: Player %s not found!' %name)
+			self.write_error("Error: Player '%s' not found!" %name)
 		
 class playerInterface (nullInterface.playerInterface):
 	'''

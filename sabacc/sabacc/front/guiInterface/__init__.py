@@ -20,6 +20,8 @@ guiInterface (rewrite of front.* from 0.6 'Ackbar')
 This module contains the GTK graphical interface and application.
 """
 
+__all__ = "ctrls models views common interface".split()
+
 import gtk, sys
 
 def setup_path():
@@ -27,11 +29,13 @@ def setup_path():
 	from sabacc.constants import base_dir, share_dir
 	import os.path
 	
-	if os.path.exists(share_dir):
+	if hasattr(sys, 'frozen'):  # If py2exe distribution.
+		interface_dir = os.path.join(base_dir, 'library.zip', 'sabacc', 'front', 'guiInterface')
+	elif os.path.exists(share_dir):
 		# Bad practice, I know, but is there another way?
-		interface_dir = os.path.join(base_dir, 'lib/python2.5/site-packages/sabacc/front/guiInterface')
+		interface_dir = os.path.join(base_dir, 'lib', 'python2.5', 'site-packages', 'sabacc', 'front', 'guiInterface')
 	else:
-		interface_dir = os.path.join(base_dir, 'sabacc/front/guiInterface')
+		interface_dir = os.path.join(base_dir, 'sabacc', 'front', 'guiInterface')
 	
 	sys.path.insert(0, interface_dir)
 	
@@ -56,6 +60,8 @@ def start_app():
 	view = GameView(ctrl)
 
 	try:
+		gtk.gdk.threads_enter()
 		gtk.main()
+		gtk.gdk.threads_leave()
 	except KeyboardInterrupt:
 		sys.exit(1)

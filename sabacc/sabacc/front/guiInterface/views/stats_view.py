@@ -20,7 +20,7 @@ stats_view.py (partial rewrite of front.wndTrain from 0.6 'Ackbar')
 This module contains the view for the individual 'agent data' windows.
 """
 
-from gtkmvc import ThreadSafeView
+from common import ThreadSafeView
 import gtk
 
 class StatsView (ThreadSafeView):

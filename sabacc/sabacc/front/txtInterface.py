@@ -827,9 +827,9 @@ def new_agent_menu():
 				from tempfile import mkstemp
 				from sabacc.back import xml_tools
 				
-				filename = mkstemp('.xml', 'sabacc_', text=True)[1]
-				
-				from os import remove
+				from os import close, remove
+				handler, filename = mkstemp('.xml', 'sabacc_', text=True)
+				close(handler)
 				
 				if not xml_tools.create_agent(filename, name, ruleset):
 					sys.stderr.write("Error creating temporary file!\n")

@@ -56,7 +56,7 @@ class StatsCtrl (Controller):
 		self.view['pure_sabaccs_label'].set_text("%i" %agent.stats['pure_sabaccs'])
 		gtk.gdk.threads_leave()
 		
-		from sabacc.constants import rule_sets
+		from sabacc.get_settings import rule_sets
 		button = None
 		self.new_ruleset = agent.ruleset
 		
@@ -75,7 +75,30 @@ class StatsCtrl (Controller):
 	def ok_button_clicked(self, button):
 		'''Close the window and save changes.'''
 		
-		self.model.agent.name = self.view['name_entry'].get_text()
+		if self.model.agent.name != self.view['name_entry'].get_text():
+			old_name = self.model.agent.name
+			new_name = self.view['name_entry'].get_text()
+			
+			# Change name in game
+			from sabacc.back import Game
+			name_conflict = False
+			index_to_change = None
+			
+			for index in range(len(Game.names)):
+				if Game.names[index] == old_name:
+					index_to_change = index
+				elif Game.names[index] == new_name:
+					name_conflict = True
+					
+			if name_conflict:
+				Game.interface.write_error(
+					'There is already a player with the name %s. The name has not been changed.' %new_name)
+			else:
+				Game.names[index_to_change] = new_name
+				self.model.agent.name = new_name
+				self.model.player_controller.view['player_window'].set_title(new_name)
+				self.model.player_controller.model.name = new_name
+			
 		self.model.agent.ruleset = self.new_ruleset
 		self.model.player_controller.changes_occurred()
 		gtk.gdk.threads_enter()

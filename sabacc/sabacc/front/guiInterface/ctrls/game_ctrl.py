@@ -174,11 +174,13 @@ class GameCtrl (Controller):
 			from tempfile import mkstemp
 			from sabacc.back import xml_tools
 			
-			filename = mkstemp('.xml', 'sabacc_', text=True)[1]
+			handler, filename = mkstemp('.xml', 'sabacc_', text=True)
+			from os import close
+			close(handler)
 			
 			if not xml_tools.create_agent(filename, name, ruleset):
 				Game.interface.write_error("Error creating temporary file!")
-				from os.path import remove
+				from os import remove
 				remove(filename)
 				return
 		
@@ -374,11 +376,16 @@ class GameCtrl (Controller):
 		Game.interface.write("%s entered the game" %name)
 	
 	def _play_game(self):
-		'''Starts the game and cleans up afterwards. This should be in
-		a separate thread so as to not slow down GTK.'''
+		'''Starts the game. This should be in a separate thread
+		so as to not slow down GTK.'''
 		
 		Game.start_game(self.model.last_ante)
 		
+		import gobject
+		gobject.idle_add(self._end_game)
+	
+	def _end_game(self):
+		'''This cleans up after the end of a game.'''
 		for player in self.players:
 			if not player.model.is_human:
 				player.model.agent.save_to_xml(stats=True)
@@ -398,5 +405,3 @@ class GameCtrl (Controller):
 			gtk.gdk.threads_enter()
 			self.view['start_button'].set_sensitive(True)
 			gtk.gdk.threads_leave()
-	
-	pass # end of class GameCtrl
