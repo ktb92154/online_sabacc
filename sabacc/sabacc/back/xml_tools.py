@@ -16,11 +16,12 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 """
-xml_tools.py (rewrite of back.XML{,rule}Agent from 0.6 'Ackbar')
+xml_tools.py (taken from Sabacc version 1.0-beta1)
 This module contains code for dealing with Sabacc XML files.
 """
 
 import sys
+import gettext; _=gettext.gettext # gettext for translations
 
 # Keeping the document here means we don't need to save unnecessarily
 doc = None
@@ -58,7 +59,7 @@ def save_file(filename):
 		# Create file object for writing
 		file = open(filename, 'w')
 	except IOError:
-		sys.stderr.write("An I/O Error occurred while attempting to write file\n'%s'\n" %filename)
+		sys.stderr.write(_("An I/O Error occurred while attempting to write file\n'%s'\n") %filename)
 		return False
 		
 	# Write XML to file, then close
@@ -93,7 +94,7 @@ def get_name(filename):
 	agent = get_child(doc, 'agent')
 	
 	if agent is None:
-		sys.stderr.write("Error: No agent found in file '%s'!\n" %filename)
+		sys.stderr.write(_("Error: No agent found in file '%s'!\n") %filename)
 		return
 	
 	# Get 'name' attribute
@@ -115,10 +116,10 @@ def load_file(filename):
 			# load DOM for file
 			tree = etree.parse(filename)
 		except IOError: # if file not found
-			sys.stderr.write("Error: The file '%s' was not found!\n" %filename)
+			sys.stderr.write(_("Error: The file '%s' was not found!\n") %filename)
 			return False
 		except etree.XMLSyntaxError: # if file not parsing correctly
-			sys.stderr.write("Error: The file '%s' is not formatted correctly!\n" %filename)
+			sys.stderr.write(_("Error: The file '%s' is not formatted correctly!\n") %filename)
 			return False
 		
 		doc = tree.getroot()
@@ -130,14 +131,14 @@ def load_file(filename):
 		elif doc.tag == 'sabacc':
 			xml_version = int(doc.get('version'))
 		else:
-			sys.stderr.write("Error: The file '%s' is not a Sabacc file!\n" %filename)
+			sys.stderr.write(_("Error: The file '%s' is not a Sabacc file!\n") %filename)
 			return False
 		
 		from sabacc.constants import lowest_xml_version
 		from sabacc import __major_version__
 		
 		if xml_version < lowest_xml_version or xml_version > __major_version__:
-			sys.stderr.write("Error: The file '%s' was made using an\nincompatible version of Sabacc!\n" %filename)
+			sys.stderr.write(_("Error: The file '%s' was made using an\nincompatible version of Sabacc!\n") %filename)
 			return False
 		
 	return True
@@ -153,7 +154,7 @@ def get_stats(filename):
 	agent = get_child(doc, 'agent')
 	
 	if agent is None:
-		sys.stderr.write("Error: No agent found in file '%s'!\n" %filename)
+		sys.stderr.write(_("Error: No agent found in file '%s'!\n") %filename)
 		return
 	
 	stats = get_child(agent, 'stats')
@@ -177,7 +178,7 @@ def get_stats(filename):
 					stat_value = 0
 				final_stats[stat_name] = stat_value
 			else:
-				sys.stderr.write("Warning: Unknown stat '%s' in file '%s'\n" %(stat_name, filename))
+				sys.stderr.write(_("Warning: Unknown stat '%s' in file '%s'\n") %(stat_name, filename))
 	
 	return final_stats
 
@@ -192,7 +193,7 @@ def save_stats(filename, stats_to_save):
 	agent = get_child(doc, 'agent')
 	
 	if agent is None:
-		sys.stderr.write("Error: No agent found in file '%s'!\n" %filename)
+		sys.stderr.write(_("Error: No agent found in file '%s'!\n") %filename)
 		return
 	
 	stats = get_child(agent, 'stats')
@@ -228,7 +229,7 @@ def get_ruleset(filename):
 	agent = get_child(doc, 'agent')
 	
 	if agent is None:
-		sys.stderr.write("Error: No agent found in file '%s'!\n" %filename)
+		sys.stderr.write(_("Error: No agent found in file '%s'!\n") %filename)
 		return
 	
 	# Get 'ruleset' attribute
@@ -247,7 +248,7 @@ def save_ruleset(filename, ruleset):
 	agent = get_child(doc, 'agent')
 	
 	if agent is None:
-		sys.stderr.write("Error: No agent found in file '%s'!\n" %filename)
+		sys.stderr.write(_("Error: No agent found in file '%s'!\n") %filename)
 		return
 	
 	agent.set('ruleset', unicode(ruleset))

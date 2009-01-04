@@ -16,12 +16,13 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 """
-interface.py (rewrite of front.wnd{Game,Player} and front.gtkPlayerInterface from 0.6 'Ackbar')
+interface.py (taken from Sabacc version 1.0-beta1)
 This module contains GUI interfaces for the game and players.
 """
 
 from sabacc.front import nullInterface
 import gtk
+import gettext; _=gettext.gettext # gettext for translations
 
 class gameInterface (nullInterface.gameInterface):
 	'''
@@ -54,9 +55,11 @@ class gameInterface (nullInterface.gameInterface):
 		
 		# If a player has left, set correct status
 		name = None
-		if text[-13:] == "left the game":
+		left_game_txt = _("left the game")
+		bombed_out_txt = _("bombed out")
+		if text[-len(left_game_txt):] == left_game_txt:
 			name = text[:-14]
-		elif text[-10:] == "bombed out":
+		elif text[-len(bombed_out_txt):] == bombed_out_txt:
 			name = text[:-11]
 				
 		if name == None:
@@ -88,7 +91,7 @@ class gameInterface (nullInterface.gameInterface):
 				player.model.agent.interface.show_cards(cards, show_all=show_all)
 				break
 		else:
-			self.write_error("Error: Player '%s' not found!" %name)
+			self.write_error(_("Error: Player '%s' not found!") %name)
 		
 class playerInterface (nullInterface.playerInterface):
 	'''
@@ -167,12 +170,12 @@ class playerInterface (nullInterface.playerInterface):
 		self.controller.view['betspinner'].hide()
 		
 		# 'Draw 'button
-		self.controller.view['move1_button'].set_label("Draw a card")
+		self.controller.view['move1_button'].set_label(_("Draw a card"))
 		self.controller.view['move1_button'].set_sensitive(True)
 		self.signals[0] = Connect(self.controller.view['move1_button'], "clicked", self._make_move, moves['draw'])
 		
 		# 'Stick' button
-		self.controller.view['move2_button'].set_label("Stick")
+		self.controller.view['move2_button'].set_label(_("Stick"))
 		self.controller.view['move2_button'].set_sensitive(True)
 		self.signals[1] = Connect(self.controller.view['move2_button'], "clicked", self._make_move, moves['stick'])
 		
@@ -210,7 +213,7 @@ class playerInterface (nullInterface.playerInterface):
 		self.controller.view['move1_button'].set_sensitive(True)
 		
 		# 'Leave game' button
-		self.controller.view['move2_button'].set_label("Leave game")
+		self.controller.view['move2_button'].set_label(_("Leave game"))
 		self.signals[1] = Connect(self.controller.view['move2_button'], "clicked", self._make_move, moves['fold'])
 		self.controller.view['move2_button'].set_sensitive(True)
 		
@@ -225,9 +228,9 @@ class playerInterface (nullInterface.playerInterface):
 		confusion over how to end betting.'''
 		
 		if int(spinner.get_value()) > 0:
-			bet_text = "Bet"
+			bet_text = _("Bet")
 		else:
-			bet_text = "End betting"
+			bet_text = _("End betting")
 		
 		gtk.gdk.threads_enter()
 		self.controller.view['move1_button'].set_label(bet_text)
@@ -257,7 +260,7 @@ class playerInterface (nullInterface.playerInterface):
 		self.wait = False
 		
 	def _make_bet(self, button):
-		'''DIscovers the correct bet amount, then makes the bet.'''
+		'''Discovers the correct bet amount, then makes the bet.'''
 		bet = int(self.controller.view['betspinner'].get_value())
 		self.controller.update_labels(credit_mod=-bet)
 		self._make_move(button, bet)
@@ -268,11 +271,11 @@ class playerInterface (nullInterface.playerInterface):
 		
 		self.controller.update_labels()
 		
-		title = "Message for %s" %self.name
+		title = _("Message for %s") %self.name
 		if won:
-			text = "Congratulations. You have won!"
+			text = _("Congratulations. You have won!")
 		else:
-			text = "Sorry. You didn't win this time."
+			text = _("Sorry. You didn't win this time.")
 		
 		gtk.gdk.threads_enter()
 		dialog = gtk.Dialog(title, self.controller.view['player_window'], gtk.DIALOG_MODAL,
@@ -308,8 +311,8 @@ class playerInterface (nullInterface.playerInterface):
 		
 		from common import Connect
 		
-		title = "New Turn"
-		text = "%s's turn..." %self.name
+		title = _("New Turn")
+		text = _("%s's turn...") %self.name
 		
 		gtk.gdk.threads_enter()
 		dialog = gtk.Dialog(title, self.controller.view['player_window'], gtk.DIALOG_MODAL,

@@ -16,7 +16,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 """
-guiInterface (rewrite of front.* from 0.6 'Ackbar')
+guiInterface (taken from Sabacc version 1.0-beta1)
 This module contains the GTK graphical interface and application.
 """
 
@@ -32,8 +32,7 @@ def setup_path():
 	if hasattr(sys, 'frozen'):  # If py2exe distribution.
 		interface_dir = os.path.join(base_dir, 'library.zip', 'sabacc', 'front', 'guiInterface')
 	elif os.path.exists(share_dir):
-		# Bad practice, I know, but is there another way?
-		interface_dir = os.path.join(base_dir, 'lib', 'python2.5', 'site-packages', 'sabacc', 'front', 'guiInterface')
+		interface_dir = os.path.join(base_dir, 'lib', 'python%i.%i' %sys.version_info[:2], 'site-packages', 'sabacc', 'front', 'guiInterface')
 	else:
 		interface_dir = os.path.join(base_dir, 'sabacc', 'front', 'guiInterface')
 	

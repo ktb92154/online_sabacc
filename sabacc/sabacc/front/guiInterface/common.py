@@ -18,7 +18,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 """
-common.py
+common.py (taken from Sabacc version 1.0-beta1)
 This module contains common methods for the entire GTK GUI
 """
 
@@ -44,7 +44,6 @@ def Connect(obj, signal, handler, *args):
 def AutoConnect(xml, dic):
 	'''A thread-friendly replacement for XMLObject.signal_autoconnect()'''
 	for key in dic.keys():
-		#print "%s = %s" %(key, dic[key])
 		xml.signal_connect(key, _wrap(dic[key]))
 
 from gtkmvc import View as _View

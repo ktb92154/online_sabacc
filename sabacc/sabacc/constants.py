@@ -16,9 +16,10 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 """
-constants.py (partial rewrite of the various settings files from 0.6 'Ackbar')
+constants.py (taken from Sabacc version 1.0-beta1)
 This module contains all shared constants for the game.
 """
+import gettext; _=gettext.gettext # gettext for translations
 
 # Methods to calculate certain constants
 def get_agent_dir():
@@ -32,7 +33,7 @@ def get_agent_dir():
 		
 		# Create dir and copy files if necessary
 		if not os.path.exists(agent_dir):
-			print "Creating agent directory..."
+			print _("Creating agent directory...")
 			from shutil import copytree
 			copytree(global_agent_dir, agent_dir)
 		
@@ -61,7 +62,7 @@ def get_base_share_home_dirs():
 			from win32com.shell import shellcon, shell
 			user_home = shell.SHGetFolderPath(0, shellcon.CSIDL_APPDATA, 0, 0)
 		except ImportError:
-			sys.stderr.write('Warning: PyWin32 not found - falling back to built-in method...\n')
+			sys.stderr.write(_('Warning: PyWin32 not found - falling back to built-in method...\n'))
 			user_home = os.path.join(os.path.expanduser('~'), 'Application Data')
 		
 		sabacc_home = os.path.join(user_home, 'Sabacc')
@@ -71,7 +72,7 @@ def get_base_share_home_dirs():
 		
 	# Create home dir if necessary
 	if os.path.exists(share_dir) and not os.path.exists(sabacc_home):
-		print "Creating directory %s" %sabacc_home
+		print _("Creating directory %s") %sabacc_home
 		from os import makedirs
 		makedirs(sabacc_home)
 	
@@ -116,17 +117,17 @@ def get_card_names():
 	card_names = []
 			
 	number_cards = range(1, 12) # number_cards = [1 ... 11]
-	number_cards.extend(["Commander", "Mistress", "Master", "Ace"])
+	number_cards.extend([_("Commander"), _("Mistress"), _("Master"), _("Ace")])
 			
 	# Names of face cards
-	face_cards = "Idiot", "Queen of Air and Darkness", "Endurance", \
-	"Balance", "Demise", "Moderation", "The Evil One", "The Star"
+	face_cards = _("Idiot"), _("Queen of Air and Darkness"), _("Endurance"), \
+	_("Balance"), _("Demise"), _("Moderation"), _("The Evil One"), _("The Star")
 	
 	# Add numbered cards to list
 	for value in number_cards:
-		for suit in ["Sabers", "Flasks", "Coins", "Staves"]:
+		for suit in [_("Sabers"), _("Flasks"), _("Coins"), _("Staves")]:
 			# Append card title
-			card_names.append("%s of %s" %(value, suit))
+			card_names.append(_("%s of %s") %(value, suit))
 					
 	# Add face cards to list
 	for card_name in face_cards:
@@ -164,7 +165,7 @@ def get_cards_dir():
 		
 		# Create dir and copy files if necessary
 		if not os.path.exists(os.path.join(home_dir, 'cardsets')):
-			print "Creating cardsets directory..."
+			print _("Creating cardsets directory...")
 			from os import mkdir
 			mkdir(os.path.join(home_dir, 'cardsets'))
 			
@@ -181,7 +182,7 @@ def get_cards_dir():
 	
 	if not os.path.exists(cards_dir):
 		import sys
-		sys.stderr.write("Warning: Cardset '%s' not found!\n" %card_set)
+		sys.stderr.write(_("Warning: Cardset '%s' not found!\n") %card_set)
 	return cards_dir
 
 def get_glade_filename():
@@ -230,10 +231,10 @@ def get_local_settings_file():
 			
 			if not os.path.exists(global_settings_file):
 				import sys
-				sys.exit('Error! Could not locate default settings file %s!' %global_settings_file)
+				sys.exit(_('Error! Could not locate default settings file %s!') %global_settings_file)
 				
 			# Create dir and copy files if necessary
-			print "Creating local settings file..."
+			print _("Creating local settings file...")
 			from shutil import copyfile
 			copyfile(global_settings_file, local_settings_file)
 	else:

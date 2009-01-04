@@ -16,11 +16,12 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 """
-Agents.py (rewrite of back.{,Human,RuleBased}Agent{,FromXML} from 0.6 'Ackbar')
+Agents.py (taken from Sabacc version 1.0-beta1)
 This module contains code for all the agent and XML related objects.
 """
 
 import sys
+import gettext; _=gettext.gettext # gettext for translations
 
 class HumanAgent (object):
 	"""
@@ -106,7 +107,7 @@ class RuleBasedAgent (HumanAgent):
 		import xml_tools
 		
 		if not exists(self.filename):
-			self.interface.write_error('Error: The file %s could not be found!' %self.filename)
+			self.interface.write_error(_('Error: The file %s could not be found!') %self.filename)
 			return False
 
 		# Load game statistics
@@ -117,7 +118,7 @@ class RuleBasedAgent (HumanAgent):
 			self.name = name
 			self.stats = stats
 		else:
-			self.interface.write_error('Error loading data from XML!')
+			self.interface.write_error(_('Error loading data from XML!'))
 			return False
 		
 		# Load rule set
@@ -174,7 +175,7 @@ class RuleBasedAgent (HumanAgent):
 		if rule_sets.has_key(self.ruleset):
 			threshold = rule_sets[self.ruleset]
 		else:
-			self.interface.write_error("Error: '%s' is not a valid rule set!" %self.ruleset)
+			self.interface.write_error(_("Error: '%s' is not a valid rule set!") %self.ruleset)
 			return moves['fold']
 		
 		from Game import callable
@@ -270,7 +271,6 @@ class RuleBasedAgent (HumanAgent):
 			else:
 				bet = moves['fold']
 		
-		## Betting more than another player can afford shouldn't be allowed!!
 		# Calculate final
 		if self.credits < must_match and must_match != 0: # if agent can't match
 			# leave game

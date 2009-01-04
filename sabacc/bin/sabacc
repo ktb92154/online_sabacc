@@ -18,7 +18,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 """
-Sabacc caller script (taken from version 0.6 'Ackbar')
+Sabacc caller script (taken from Sabacc version 1.0-beta1)
 This is the application caller, that imports all packages
 and loads the initial window.
 """
@@ -26,6 +26,8 @@ and loads the initial window.
 import sys
 import os.path
 from getopt import getopt, GetoptError
+
+import gettext; _=gettext.gettext # gettext for translations
 
 def main():
 	from exceptions import AssertionError
@@ -41,13 +43,13 @@ def main():
 		optlist, args = getopt(sys.argv[1:], '', ['local', 'no-gui'])
 	except GetoptError:
 		# print usage message and exit
-		usage="\nUsage: "+sys.argv[0]+''' [OPTIONS]
+		usage=_("\nUsage: ")+sys.argv[0]+_(''' [OPTIONS]
 	--local		Force Sabacc to use local Python packages.
 	--no-gui	Do not use the GTK graphical user interface. Instead
 			use a text-based interface. This is the default for
 			those environments where PyGTK is not installed or is
 			not the correct version.
-'''
+''')
 		sys.stderr.write(usage+"\n")
 		sys.exit(2)
 	local = nogui = False
@@ -61,7 +63,7 @@ def main():
 	
 	# Check version requirements.
 	if PYTHON_VERSION < PYTHON_REQUIRED:
-		raise SystemExit, "Error: Python %d.%d+ required" % PYTHON_REQUIRED
+		raise SystemExit, _("Error: Python %d.%d+ required") % PYTHON_REQUIRED
 		
 	if nogui == False:
 		try:
@@ -69,7 +71,7 @@ def main():
 			pygtk.require(PYGTK_REQUIRED)
 			import gtk
 		except ImportError, AssertionError: # PyGTK not found or wrong version
-			sys.stderr.write("PyGTK %s+ is required for the graphical interface, but it was not found. Using 'no-gui' option...\n" % PYGTK_REQUIRED)
+			sys.stderr.write(_("PyGTK %s+ is required for the graphical interface, but it was not found. Using 'no-gui' option...\n") % PYGTK_REQUIRED)
 			nogui=True
 	
 	etree_req_string = '%i.%i.%i' %ETREE_REQUIRED
@@ -77,7 +79,7 @@ def main():
 		from lxml import etree
 		
 	except ImportError: # lxml.etree not found or wrong version
-		raise SystemExit, "Error: lxml.etree %s required" % etree_req_string
+		raise SystemExit, _("Error: lxml.etree %s required") % etree_req_string
 	
 	else: # Check that lxml.etree is correct version
 		etree_version = map(int, str.split(str.split(str(etree.__version__))[0], '.'))
@@ -92,7 +94,7 @@ def main():
 				break
 		
 		if bad_etree_version:
-			raise SystemExit, "Error: lxml.etree %s or above required - version %s found." %(req_string, etree.__version__)
+			raise SystemExit, _("Error: lxml.etree %s or above required - version %s found.") %(req_string, etree.__version__)
 	
 	if not local:
 		try: # If Sabacc is installed system-wide, this finds it automatically.
@@ -114,7 +116,7 @@ def main():
 		try:
 			import sabacc.front
 		except ImportError:
-			raise SystemExit, "Fatal error: could not locate Sabacc installation."
+			raise SystemExit, _("Fatal error: could not locate Sabacc installation.")
 	
 	if nogui: # use text-based interface
 		from sabacc.front import txtInterface
@@ -127,7 +129,7 @@ def main():
 	try:
 		interface.start_app()
 	except KeyboardInterrupt:
-		raise SystemExit, "CTRL-C pressed. Exiting..."
+		raise SystemExit, _("CTRL-C pressed. Exiting...")
 	
 	sys.exit()
 	

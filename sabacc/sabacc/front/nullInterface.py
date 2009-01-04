@@ -16,11 +16,12 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 """
-nullInterface.py (rewrite of back.Interfaces.{null,game,player}Interface from 0.6 'Ackbar')
+nullInterface.py (taken from Sabacc version 1.0-beta1)
 This module contains three null interfaces for extending by other classes.
 """
 
 import sys
+import gettext; _=gettext.gettext # gettext for translations
 
 class nullInterface(object):
 	"""
@@ -65,7 +66,7 @@ class playerInterface(nullInterface):
 	"""
 	def __init__(self, name):
 		self.name = name
-		self.null_error = 'Warning: Interface for player %s is not correctly set up!' %name
+		self.null_error = _('Warning: Interface for player %s is not correctly set up!') %name
 	
 	def get_move(self, cards):
 		'''This method prints a warning to the screen, then causes

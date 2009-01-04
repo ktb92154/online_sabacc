@@ -16,11 +16,12 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 """
-get_settings.py (partial rewrite of the various settings files from 0.6 'Ackbar')
+get_settings.py (taken from Sabacc version 1.0-beta1)
 This module contains code to retrieve settings for the game.
 """
 
 from lxml import etree # xml parser
+import gettext; _=gettext.gettext # gettext for translations
 
 def get_rule_sets():
 	'''Find the list of rule sets and their data and return it as a dictionary'''
@@ -32,7 +33,7 @@ def get_rule_sets():
 			break
 	else:
 		import sys
-		sys.exit("Error: No rule_sets element found in file '%s'!\n" %filename)
+		sys.exit(_("Error: No rule_sets element found in file '%s'!\n") %filename)
 	
 	# Get all rulesets
 	final = {}
@@ -55,7 +56,7 @@ def get_setting(setting_name):
 			break
 	else:
 		import sys
-		sys.exit("Error: No settings element found in file '%s'!\n" %filename)
+		sys.exit(_("Error: No settings element found in file '%s'!\n") %filename)
 	
 	# Get required setting
 	for node in settings.getchildren():
@@ -64,7 +65,7 @@ def get_setting(setting_name):
 			break
 	else:
 		import sys
-		sys.stderr.write("Error: '%s' was not found in the settings file!\n" %setting_name)
+		sys.stderr.write(_("Error: '%s' was not found in the settings file!\n") %setting_name)
 		return None
 	
 	setting_value = get_setting_data(required_setting)
@@ -102,7 +103,7 @@ def get_setting_group(group_name):
 			break
 	else:
 		import sys
-		sys.exit("Error: No settings element found in file '%s'!\n" %filename)
+		sys.exit(_("Error: No settings element found in file '%s'!\n") %filename)
 	
 	# Get required group
 	for node in settings.getchildren():
@@ -111,7 +112,7 @@ def get_setting_group(group_name):
 			break
 	else:
 		import sys
-		sys.stderr.write("Error: '%s' was not found in the settings file!\n" %group_name)
+		sys.stderr.write(_("Error: '%s' was not found in the settings file!\n") %group_name)
 		return None
 	
 	# Get all settings from the group
@@ -134,11 +135,11 @@ def load_settings_file():
 		tree = etree.parse(local_settings_file)
 	except IOError: # if file not found
 		import sys
-		sys.exit("Error: The file '%s' was not found!\n" %local_settings_file)
+		sys.exit(_("Error: The file '%s' was not found!\n") %local_settings_file)
 		
 	except etree.XMLSyntaxError: # if file not parsing correctly
 		import sys
-		sys.exit("Error: The file '%s' is not formatted correctly!\n" %local_settings_file)
+		sys.exit(_("Error: The file '%s' is not formatted correctly!\n") %local_settings_file)
 	
 	doc = tree.getroot()
 	
@@ -149,14 +150,14 @@ def load_settings_file():
 		xml_version = int(doc.get('version'))
 	else:
 		import sys
-		sys.exit("Error: The file '%s' is not a Sabacc file!\n" %filename)
+		sys.exit(_("Error: The file '%s' is not a Sabacc file!\n") %filename)
 	
 	from constants import lowest_xml_version
 	from sabacc import __major_version__
 	
 	if xml_version < lowest_xml_version or xml_version > __major_version__:
 		import sys
-		sys.exit("Error: The file '%s' was made using an\nincompatible version of Sabacc!\n" %filename)
+		sys.exit(_("Error: The file '%s' was made using an\nincompatible version of Sabacc!\n") %filename)
 	
 	return doc
 

@@ -16,7 +16,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 """
-game_view.py (rewrite of front.wndGame from 0.6 'Ackbar')
+game_view.py (taken from Sabacc version 1.0-beta1)
 This module contains the view for the main game window.
 """
 
@@ -24,6 +24,7 @@ from common import ThreadSafeView
 
 import gtk
 import os.path
+import gettext; _=gettext.gettext # gettext for translations
 
 class GameView (ThreadSafeView):
 	'''
@@ -56,8 +57,8 @@ class GameView (ThreadSafeView):
 		
 		# Create 'add computer' menu
 		self['computer_button_menu'] = gtk.Menu()
-		self['new_agent_menu'] = gtk.MenuItem('Create a new agent')
-		self['load_agent_menu'] = gtk.MenuItem('Load an existing agent')
+		self['new_agent_menu'] = gtk.MenuItem(_('Create a new agent'))
+		self['load_agent_menu'] = gtk.MenuItem(_('Load an existing agent'))
 		
 		for menu_item in (self['new_agent_menu'], self['load_agent_menu']):
 			self['computer_button_menu'].append(menu_item)

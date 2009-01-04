@@ -16,13 +16,14 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 """
-player_ctrl.py (rewrite of front.wndPlayer from 0.6 'Ackbar')
+player_ctrl.py (taken from Sabacc version 1.0-beta1)
 This module contains the controller for the individual player windows.
 """
 
 from gtkmvc import Controller
 from gtkmvc import adapters
 import gtk
+import gettext; _=gettext.gettext # gettext for translations
 
 class PlayerCtrl (Controller):
 	'''
@@ -47,18 +48,18 @@ class PlayerCtrl (Controller):
 		
 		if self.model.is_human:
 			self.view['betspinner'].show()
-			self.view['move1_button'].set_label("End betting")
-			self.view['move2_button'].set_label("Leave game")
-			self.view['move3_button'].set_label("Call the hand")
+			self.view['move1_button'].set_label(_("End betting"))
+			self.view['move2_button'].set_label(_("Leave game"))
+			self.view['move3_button'].set_label(_("Call the hand"))
 		else:
-			self.view['move1_button'].set_label('Agent Data')
+			self.view['move1_button'].set_label(_('Agent Data'))
 			Connect(self.view['move1_button'], 'clicked', self.show_agent_data)
 			self.view['move1_button'].set_sensitive(True)
-			self.view['move2_button'].set_label('Save Settings')
+			self.view['move2_button'].set_label(_('Save Settings'))
 			Connect(self.view['move2_button'], 'clicked', self.save_agent)
 			if self.model.agent.interface.new_file:
 				self.view['move2_button'].set_sensitive(True)
-			self.view['move3_button'].set_label('Revert')
+			self.view['move3_button'].set_label(_('Revert'))
 			Connect(self.view['move3_button'], 'clicked', self.revert_to_saved)
 		gtk.gdk.threads_leave()
 		
@@ -99,8 +100,8 @@ class PlayerCtrl (Controller):
 		'''This is called when closing the player window to make sure
 		that no changes are lost.'''
 		if self.model.modified:
-			title = "Save Changes?"
-			text = "The current agent has been modified. Do you want to save changes?"
+			title = _("Save Changes?")
+			text = _("The current agent has been modified. Do you want to save changes?")
 			gtk.gdk.threads_enter()
 			dialog = gtk.Dialog(title, self.view['player_window'], gtk.DIALOG_MODAL,
 				(gtk.STOCK_YES, gtk.RESPONSE_YES,
@@ -196,7 +197,7 @@ class PlayerCtrl (Controller):
 					filename = os.path.join(cards_dir, card_images[cards[card_index]])
 					
 					if not os.path.exists(filename):
-						self.model.agent.interface.write_error('Warning: Unable to find image file %s' %filename)
+						self.model.agent.interface.write_error(_('Warning: Unable to find image file %s') %filename)
 					
 					gtk.gdk.threads_enter()
 					if smallcards:
@@ -212,9 +213,9 @@ class PlayerCtrl (Controller):
 					
 					if not smallcards:
 						if cards[card_index] == -1:
-							text = "Unknown card"
+							text = _("Unknown card")
 						else:
-							text = '%s (value %i)' \
+							text = _('%s (value %i)') \
 								%(card_names[cards[card_index]],
 								card_values[cards[card_index]])
 						gtk.gdk.threads_enter()
@@ -253,14 +254,14 @@ class PlayerCtrl (Controller):
 		score_type = None
 		
 		if idiot_cards == [True, True, True] and len(cards) == 3:
-			score_type = "Idiot's Array"
+			score_type = _("Idiot's Array")
 		elif score in (23, -23):
-			score_type = "Pure Sabacc"
+			score_type = _("Pure Sabacc")
 		elif score == 0 or score > 23 or score < -23:
-			score_type = "Bomb out"
+			score_type = _("Bomb out")
 			
 		if score_unknown:
-			self.view['score_label'].set_text("Unknown")
+			self.view['score_label'].set_text(_("Unknown"))
 			self.view['score_type_label'].set_text('')
 		else:
 			self.view['score_label'].set_text('%i' %score)
@@ -293,7 +294,7 @@ class PlayerCtrl (Controller):
 		
 		if agent.interface.new_file:
 			# Get new filename
-			message = "Save agent"
+			message = _("Save agent")
 			
 			gtk.gdk.threads_enter()
 			action = gtk.FILE_CHOOSER_ACTION_SAVE
@@ -309,10 +310,10 @@ class PlayerCtrl (Controller):
 			# Create filters
 			xmlfilter = gtk.FileFilter()
 			xmlfilter.add_pattern("*.xml")
-			xmlfilter.set_name("XML Files")
+			xmlfilter.set_name(_("XML Files"))
 			anyfilter = gtk.FileFilter()
 			anyfilter.add_pattern("*")
-			anyfilter.set_name("All Files")
+			anyfilter.set_name(_("All Files"))
 			d.add_filter(xmlfilter)
 			d.set_filter(xmlfilter)
 			d.add_filter(anyfilter)
@@ -338,7 +339,7 @@ class PlayerCtrl (Controller):
 				agent.filename = file
 				agent.interface.new_file = False
 			except IOError:
-				agent.interface.write_error('Error writing file to XML!')
+				agent.interface.write_error(_('Error writing file to XML!'))
 				return False
 				
 			from os import remove
@@ -369,14 +370,14 @@ class PlayerCtrl (Controller):
 		value of credit_mod.'''
 		
 		if self.model.status == self.model.statuses['begin']:
-			text = "Waiting for game to begin..."
+			text = _("Waiting for game to begin...")
 		elif self.model.status == self.model.statuses['in_game']:
-			text = "In game"
+			text = _("In game")
 		elif self.model.status == self.model.statuses['end']:
-			text = "Waiting for game to end..."
+			text = _("Waiting for game to end...")
 		else:
 			self.model.agent.interface.write_error(
-				'Error setting status for agent %s!' %self.model.name)
+				_('Error setting status for agent %s!') %self.model.name)
 			return
 		
 		gtk.gdk.threads_enter()

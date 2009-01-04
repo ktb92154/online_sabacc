@@ -16,7 +16,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 """
-player_view.py (rewrite of front.wndPlayer from 0.6 'Ackbar')
+player_view.py (taken from Sabacc version 1.0-beta1)
 This module contains the view for the individual player windows.
 """
 

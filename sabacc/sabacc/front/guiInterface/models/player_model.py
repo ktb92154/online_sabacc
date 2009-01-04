@@ -16,11 +16,12 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 """
-player_model.py (rewrite of front.wndPlayer from 0.6 'Ackbar')
+player_model.py (taken from Sabacc version 1.0-beta1)
 This module contains the model for the individual player windows.
 """
 
 from gtkmvc import Model
+import gettext; _=gettext.gettext # gettext for translations
 
 class PlayerModel (Model):
 	'''
@@ -62,7 +63,7 @@ class PlayerModel (Model):
 			if self.agent.interface.new_file:
 				self.modified=True
 		else:
-			sys.stderr.write('Error: Agent \'%s\' not found in game!\n' %name)
+			sys.stderr.write(_('Error: Agent \'%s\' not found in game!\n') %name)
 		
 		return
 	

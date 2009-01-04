@@ -16,12 +16,13 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 """
-Game.py (rewrite of back.Game and back.Players from 0.6 'Ackbar')
+Game.py (taken from Sabacc version 1.0-beta1)
 This module contains the code for the game of Sabacc, including
 adding players, starting and finishing the game.
 """
 
 import sys
+import gettext; _=gettext.gettext # gettext for translations
 
 # Initialise variables
 players_in_game = 0
@@ -41,7 +42,7 @@ def add_player(name, player_interface=None, human=True):
 	'''Creates an agent with the specified name (or from the specified
 	filename) and adds to the game.'''
 	if game_in_progress:
-		interface.write_error('Error: A game is already in progress!')
+		interface.write_error(_('Error: A game is already in progress!'))
 		return False
 	
 	already_in_game = False
@@ -65,7 +66,7 @@ def add_player(name, player_interface=None, human=True):
 			already_in_game = True
 	
 	if already_in_game:
-		interface.write_error("Error: A player with the name '%s' is already in the game." %name)
+		interface.write_error(_("Error: A player with the name '%s' is already in the game.") %name)
 		return False
 	else:
 		# add agent to list of agents
@@ -100,7 +101,7 @@ def remove_player(name):
 		
 		return True
 	else: 
-		interface.write_error("Error: Player '%s' not found!" %name)
+		interface.write_error(_("Error: Player '%s' not found!") %name)
 		return False
 
 def start_game(ante=0):
@@ -110,12 +111,12 @@ def start_game(ante=0):
 	global game_in_progress, shift_timer
 	
 	if game_in_progress:
-		interface.write_error('Error: A game is already in progress!')
+		interface.write_error(_('Error: A game is already in progress!'))
 		return False
 	from sabacc.get_settings import game_settings
 	min_players = game_settings['min_players']
 	if len(loaded) < min_players:
-		interface.write_error('Error: A minimum of %s players must be in the game!' %min_players)
+		interface.write_error(_('Error: A minimum of %s players must be in the game!') %min_players)
 		return False
 	
 	game_in_progress = True
@@ -155,7 +156,7 @@ def start_game(ante=0):
 		
 		# player can't afford game so is kicked out
 		if player.credits < ante*2:
-			interface.write("%s could not afford the buy into the game" %player.name)
+			interface.write(_("%s could not afford the buy into the game") %player.name)
 			remove_player(player.name)
 			in_game = False
 		else: # place ante into hand and sabacc pots
@@ -278,11 +279,11 @@ def betting_round(starting_player=0):
 				if bet == moves['fold']:
 					legal_move = True
 					remove_player(player.name)
-					interface.write("%s left the game" %player.name)
+					interface.write(_("%s left the game") %player.name)
 					in_game = False
 					
 				elif bet == moves['bet_call'] and callable:
-					interface.write("%s called the hand" %player.name)
+					interface.write(_("%s called the hand") %player.name)
 					
 					# Calling no longer allowed
 					callable = False
@@ -295,13 +296,13 @@ def betting_round(starting_player=0):
 					called = True
 				
 				elif bet > maximum_bet:
-					interface.write_error("You cannot bet more than another player has!")
+					interface.write_error(_("You cannot bet more than another player has!"))
 				
 				elif bet == this_player_must_match:
 					legal_move = True
 					if bet > 0: # if player bet more than 0, tell the user
 						betting = True
-						interface.write("%s matched the bet" %player.name)
+						interface.write(_("%s matched the bet") %player.name)
 						already_bet[index] += bet
 				
 				elif bet > this_player_must_match: #if player is raising
@@ -310,7 +311,7 @@ def betting_round(starting_player=0):
 					already_bet[index] += bet
 					raised_by = bet - this_player_must_match
 					must_match = already_bet[index]
-					interface.write("%s raised the bet by %i" % (player.name, raised_by))
+					interface.write(_("%s raised the bet by %i") % (player.name, raised_by))
 					
 				if betting:
 					hand_pot += bet
@@ -369,7 +370,7 @@ def drawing_round():
 				legal_move = True
 				idle_moves = 0
 				remove_player(player.name)
-				interface.write("%s left the game" %player.name)
+				interface.write(_("%s left the game") %player.name)
 				in_game = False
 				
 			elif move == moves['draw']:
@@ -378,7 +379,7 @@ def drawing_round():
 				card = deal_card()
 				if card:
 					hand.append(card)
-					interface.write("%s drew a card" %player.name)
+					interface.write(_("%s drew a card") %player.name)
 					interface.show_num_cards(len(hand), player.name)
 				
 			elif move == moves['stick']:
@@ -389,7 +390,7 @@ def drawing_round():
 				legal_move = True
 				idle_moves = 0
 				callable = False
-				interface.write("%s called the hand" %player.name)
+				interface.write(_("%s called the hand") %player.name)
 				betting_round(index) # final round of betting
 				called = True
 		
@@ -409,7 +410,7 @@ def deal_card():
 		return deck.pop(0)
 		
 	else: # if deck is empty
-		interface.write_error('Error: The deck is empty!')
+		interface.write_error(_('Error: The deck is empty!'))
 		return False
 
 def end_game(show_all_cards):
@@ -453,7 +454,7 @@ def end_game(show_all_cards):
 				# did player bomb out?
 				if hand_value > 23 or hand_value < -23 or hand_value == 0: 
 					hand_type = hand_types['bomb']
-					interface.write("%s bombed out" %player.name)
+					interface.write(_("%s bombed out") %player.name)
 					
 					# bombing out penalty
 					sabacc_pot += hand_pot
@@ -526,13 +527,13 @@ def end_game(show_all_cards):
 		sudden_demise = game_settings['sudden_demise']
 		
 		if sudden_demise:
-			text="A sudden demise was enacted between "
+			text=_("A sudden demise was enacted between ")
 			for winner_tuple in winners:
 				name = winner_tuple[0]
 				if winner_tuple == winners[0]:
 					text += name
 				elif winner_tuple == winners[-1]:
-					text += " and %s." %name
+					text += _(" and %s.") %name
 				else:
 					text += ", %s" %name
 			interface.write(text)
@@ -570,7 +571,7 @@ def end_game(show_all_cards):
 					
 					if positive_value > 23: # if player bombed out
 						hand_type = hand_types['bomb']
-						interface.write("%s bombed out" %player_name)
+						interface.write(_("%s bombed out") %player_name)
 						
 					elif positive_value > best_score:
 						best_score = positive_value
@@ -665,7 +666,7 @@ def end_game(show_all_cards):
 				if player.name == winner_names[0]:
 					text += player.name
 				elif player.name == winner_names[-1]:
-					text += " and %s." %player.name
+					text += _(" and %s.") %player.name
 				else:
 					text += ", %s" %player.name
 			
@@ -674,14 +675,14 @@ def end_game(show_all_cards):
 	
 	if len(winners) >= 1:
 		if len(winners) == len(loaded) and len(winners) > 1:
-			interface.write("The game was a draw.")
+			interface.write(_("The game was a draw."))
 		else:
-			interface.write("The game was won by %s." %text)
+			interface.write(_("The game was won by %s.") %text)
 	
 	else: # Looks like nobody won. The house wins today.
 		sabacc_pot += hand_pot
 		hand_pot = 0
-		interface.write("No winners found")
+		interface.write(_("No winners found"))
 	
 	# Has anyone actually given up? Get rid of them!
 	index = 0
@@ -699,7 +700,7 @@ def end_game(show_all_cards):
 	# Add all 'out' players back into the game
 	for player, hand, in_play in loaded:
 		if not in_play:
-			interface.write("%s re-entered the game" %player.name)
+			interface.write(_("%s re-entered the game") %player.name)
 			players_in_game += 1
 	
 	# Change the order of players ready for the next round
@@ -745,7 +746,7 @@ def start_shift():
 		num_to_shift = len(cards_in_play)
 	
 	if num_to_shift >= 1:
-		interface.write("A Sabacc Shift occurred!")
+		interface.write(_("A Sabacc Shift occurred!"))
 	
 	for count in range(num_to_shift):
 		# Pick a card to shift
@@ -792,7 +793,7 @@ def reset():
 	'''Resets all game variables to their original settings'''
 	
 	if game_in_progress:
-		sys.stdout.write('Error: A game is currently running!\n')
+		sys.stdout.write(_('Error: A game is currently running!\n'))
 		return False
 	
 	global players_in_game, names, loaded, deck, callable, hand_pot, \

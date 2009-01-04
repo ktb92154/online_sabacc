@@ -16,13 +16,14 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 """
-stats_ctrl.py (partial rewrite of front.wndTrain from 0.6 'Ackbar')
+stats_ctrl.py (taken from Sabacc version 1.0-beta1)
 This module contains the controller for the individual 'agent data' windows.
 """
 
 from gtkmvc import Controller
 from gtkmvc import adapters
 import gtk
+import gettext; _=gettext.gettext # gettext for translations
 
 class StatsCtrl (Controller):
 	'''
@@ -42,7 +43,7 @@ class StatsCtrl (Controller):
 		
 		agent = self.model.agent
 		if agent.interface.new_file:
-			filename = 'N/A'
+			filename = _('N/A')
 		else:
 			filename = agent.filename
 		
@@ -92,7 +93,7 @@ class StatsCtrl (Controller):
 					
 			if name_conflict:
 				Game.interface.write_error(
-					'There is already a player with the name %s. The name has not been changed.' %new_name)
+					_('There is already a player with the name %s. The name has not been changed.') %new_name)
 			else:
 				Game.names[index_to_change] = new_name
 				self.model.agent.name = new_name

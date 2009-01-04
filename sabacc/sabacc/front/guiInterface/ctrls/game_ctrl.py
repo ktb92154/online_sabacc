@@ -16,7 +16,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 """
-game_ctrl.py (rewrite of front.wnd{App,Game} from 0.6 'Ackbar')
+game_ctrl.py (taken from Sabacc version 1.0-beta1)
 This module contains the controller for the main game window.
 """
 
@@ -24,6 +24,7 @@ from gtkmvc import Controller
 from gtkmvc import adapters
 import gtk
 from sabacc.back import Game
+import gettext; _=gettext.gettext # gettext for translations
 
 class GameCtrl (Controller):
 	'''
@@ -72,7 +73,7 @@ class GameCtrl (Controller):
 			new_file = False
 			
 			# Create dialog
-			message = "Please select the agent file"
+			message = _("Please select the agent file")
 			gtk.gdk.threads_enter()
 			d = gtk.FileChooserDialog(title=message, parent=self.view['game_window'],
 			buttons=(gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT,
@@ -83,10 +84,10 @@ class GameCtrl (Controller):
 			# Create filters
 			xmlfilter = gtk.FileFilter()
 			xmlfilter.add_pattern("*.xml")
-			xmlfilter.set_name("XML Files")
+			xmlfilter.set_name(_("XML Files"))
 			anyfilter = gtk.FileFilter()
 			anyfilter.add_pattern("*")
-			anyfilter.set_name("All Files")
+			anyfilter.set_name(_("All Files"))
 			d.add_filter(xmlfilter)
 			d.set_filter(xmlfilter)
 			d.add_filter(anyfilter)
@@ -104,8 +105,8 @@ class GameCtrl (Controller):
 			new_file = True
 			
 			# Set up dialog
-			title = "Create agent"
-			message = "Please enter a name and rule set for the new agent:"
+			title = _("Create agent")
+			message = _("Please enter a name and rule set for the new agent:")
 			gtk.gdk.threads_enter()
 			d = gtk.Dialog(title, self.view['game_window'], gtk.DIALOG_MODAL,
 				(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
@@ -116,9 +117,9 @@ class GameCtrl (Controller):
 			options = gtk.Table(2, 2)
 			
 			# labels
-			name_label = gtk.Label("Name:")
+			name_label = gtk.Label(_("Name:"))
 			options.attach(name_label, 0, 1, 0, 1, xpadding=10, ypadding=5)
-			ruleset_label = gtk.Label("Rule set:")
+			ruleset_label = gtk.Label(_("Rule set:"))
 			options.attach(ruleset_label, 0, 1, 1, 2, xpadding=10, ypadding=5)
 			
 			# name entry
@@ -163,7 +164,7 @@ class GameCtrl (Controller):
 				name = name_entry.get_text()
 				
 				if name == "" or ruleset == None:
-					message_label.set_text("Please fill in all fields!")
+					message_label.set_text(_("Please fill in all fields!"))
 				else:
 					d.destroy()
 					del(self.new_ruleset)
@@ -179,7 +180,7 @@ class GameCtrl (Controller):
 			close(handler)
 			
 			if not xml_tools.create_agent(filename, name, ruleset):
-				Game.interface.write_error("Error creating temporary file!")
+				Game.interface.write_error(_("Error creating temporary file!"))
 				from os import remove
 				remove(filename)
 				return
@@ -204,7 +205,7 @@ class GameCtrl (Controller):
 		'''Handler for 'start game' button'''
 		
 		# Set up dialog
-		message = "Please enter a buy-in price:"
+		message = _("Please enter a buy-in price:")
 		gtk.gdk.threads_enter()
 		d = gtk.MessageDialog(self.view['game_window'], gtk.DIALOG_MODAL,
 		gtk.MESSAGE_QUESTION, gtk.BUTTONS_OK_CANCEL, message)
@@ -277,7 +278,7 @@ class GameCtrl (Controller):
 				self.update_labels()
 				break
 		else:
-			Game.interface.write_error('Error: Player %s not correctly removed!' %name)
+			Game.interface.write_error(_('Error: Player %s not correctly removed!') %name)
 			return False
 		
 		# 2 players minimum!
@@ -289,7 +290,7 @@ class GameCtrl (Controller):
 		
 		if game_status:
 			# print to status bar
-			Game.interface.write("%s left the game" %name)
+			Game.interface.write(_("%s left the game") %name)
 		return True
 	
 	def update_labels(self):
@@ -320,7 +321,7 @@ class GameCtrl (Controller):
 			is_human = True
 			
 			# Set up dialog
-			message = "What is your name?"
+			message = _("What is your name?")
 			
 			gtk.gdk.threads_enter()
 			d = gtk.MessageDialog(self.view['game_window'], gtk.DIALOG_MODAL,
@@ -373,7 +374,7 @@ class GameCtrl (Controller):
 			self.view['start_button'].set_sensitive(True)
 			gtk.gdk.threads_leave()
 	
-		Game.interface.write("%s entered the game" %name)
+		Game.interface.write(_("%s entered the game") %name)
 	
 	def _play_game(self):
 		'''Starts the game. This should be in a separate thread

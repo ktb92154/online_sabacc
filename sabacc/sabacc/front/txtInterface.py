@@ -16,11 +16,12 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 """
-txtInterface.py (rewrite of back.Interfaces.txtInterface from 0.6 'Ackbar')
+txtInterface.py (taken from Sabacc version 1.0-beta1)
 This module contains a text-based interface and application.
 """
 import sys, nullInterface
 from sabacc.constants import card_names, card_values
+import gettext; _=gettext.gettext # gettext for translations
 
 ##'Shift' and self.current_text are still a bit messed up. Sort out later!
 ## Plus, case-insensitive names for win32.
@@ -38,8 +39,8 @@ class gameInterface (nullInterface.gameInterface):
 		from sabacc.back.Game import players_in_game, hand_pot, sabacc_pot
 		
 		print "===Sabacc===\n"
-		print "Players in Game: %(players)s\tHand pot: %(hand)s\tSabacc pot: %(sabacc)s\n" \
-			%{'players': players_in_game, 'hand': hand_pot, 'sabacc': sabacc_pot}
+		print _("Players in Game: %s\tHand pot: %s\tSabacc pot: %s\n") \
+			%(players_in_game, hand_pot, sabacc_pot)
 		
 		# Print out text
 		for text in gameInterface.display:
@@ -78,37 +79,37 @@ class playerInterface (nullInterface.playerInterface):
 		
 		# Method could be used for current player or another
 		if name==None:
-			name_has = "You have"
+			name_has = _("You have")
 		else:
-			name_has = name + " has"
+			name_has = _("%s has") %name
 		
 		if len(user_cards) == 0:
-			what_cards = " no cards"
+			what_cards = _(" no cards")
 		else:
-			what_cards = " cards " + str(user_cards)
+			what_cards = _(" cards ") + str(user_cards)
 		
-		self.cards = name_has + what_cards + ". Total score = " + str(score) + "."
+		self.cards = name_has + what_cards + _(". Total score = ") + str(score) + "."
 	
 	def show_num_cards(self, numcards, name):
 		'''Shows the given number of cards, along with the given name.'''
-		print name + " has " + str(numcards) + " cards."
+		print _("%s has %i cards.") %(name, numcards)
 		
 	def get_move(self, cards):
 		'''Prompts the user for the next move to take.'''
 		
 		self._new_turn()
 		
-		query = "Which move do you want to make?\n"
-		options1 = """
+		query = _("Which move do you want to make?\n")
+		options1 = _("""
 Please choose from the following:
 	stick:	Stick (default)
-	draw:	Draw another card"""
-		calloptions = """
-	call:	Call the hand"""
-		options2 = """
+	draw:	Draw another card""")
+		calloptions = _("""
+	call:	Call the hand""")
+		options2 = _("""
 	exit:	Pull out of the game
 	help:	Show this message
-"""
+""")
 		prompt = "> "
 	
 		validoptions = 'stick draw exit help ?'.split()
@@ -146,16 +147,16 @@ Please choose from the following:
 			else:
 				self.current_text = None
 				if answer in ['stick', '']:
-					print 'Doing nothing...'
+					print _('Doing nothing...')
 					code = 1
 				elif answer == 'draw':
-					print 'Drawing another card...'
+					print _('Drawing another card...')
 					code = 0
 				elif answer == 'call':
-					print 'Calling the hand...'
+					print _('Calling the hand...')
 					code = 2
 				else: # exit
-					print 'Leaving the game...'
+					print _('Leaving the game...')
 					code = -1
 				
 		return code
@@ -165,16 +166,16 @@ Please choose from the following:
 		
 		self._new_turn()
 		
-		query = "Please enter the amount that you wish to bet\n"
-		options1 = """
-You must bet at least """ + str(mustMatch) + """ credits. This is the default option.
-Betting this many credits will end the betting round."""
-		calloptions = """
-Entering 'call' will call the hand."""
-		options2 = """
+		query = _("Please enter the amount that you wish to bet\n")
+		options1 = _("""
+You must bet at least %i credits. This is the default option.
+Betting this many credits will end the betting round.""") % mustMatch
+		calloptions = _("""
+Entering 'call' will call the hand.""")
+		options2 = _("""
 Entering 'exit' will cause you to pull out of the game.
 Entering 'help' will display this message.
-"""
+""")
 		prompt = "> "
 	
 		validoptions = 'exit help ?'.split()
@@ -218,10 +219,10 @@ Entering 'help' will display this message.
 				
 				if type(answer) == int:
 					if answer < mustMatch:
-						fullquery="You must bet at least " + str(mustMatch) + " credits.\n" + prompt
+						fullquery=_("You must bet at least %i credits.\n%s") %(mustMatch, prompt)
 						answer=None
 					else:
-						print "Betting %s credits..." %answer
+						print _("Betting %s credits...") %answer
 						code = answer
 			
 			elif answer in 'help ?'.split():
@@ -230,10 +231,10 @@ Entering 'help' will display this message.
 			else:
 				self.current_text = None
 				if answer == 'call':
-					print 'Calling the hand...'
+					print _('Calling the hand...')
 					code = -2
 				else: # exit
-					print 'Leaving the game...'
+					print _('Leaving the game...')
 					code = -1
 				
 		return code
@@ -243,20 +244,20 @@ Entering 'help' will display this message.
 		self._new_turn(show_cards=False, pause=False)
 		
 		if won: # if player won
-			message="Congratulations. You have won!\n"
+			message=_("Congratulations. You have won!\n")
 		else:
-			message="Sorry. You didn't win this time.\n"
+			message=_("Sorry. You didn't win this time.\n")
 		
 		# Tell user whether won or not, then display cards
 		self.show_cards(cards)
 		
 		if credits != None:
-			credmod = "You now have " + str(credits) + " credits.\n"
+			credmod = _("You now have %i credits.\n") %credits
 		else:
 			credmod = ""
 			
 		# Make sure the user has seen his status
-		continue_text = "Press enter to continue...\n"
+		continue_text = _("Press enter to continue...\n")
 		final_msg = message + self.cards + "\n" + credmod + continue_text
 		self.current_text = final_msg
 		raw_input(final_msg)
@@ -276,18 +277,18 @@ Entering 'help' will display this message.
 		
 		if humans_in_game >= 2:
 			if pause:
-				continue_text = self.name + "'s turn. Press enter to continue...\n"
+				continue_text = _("%s's turn. Press enter to continue...\n") %self.name
 				self.current_text = continue_text
 				raw_input(continue_text)
 				self.current_text = None
 			else:
-				print "Message for " + self.name + ":"
+				print _("Message for %s:") %self.name
 		
 		# Show cards and number of credits
 		if show_cards:
 			agent = self._get_agent()
 			print self.cards
-			print 'You have %s credits.' %agent.credits
+			print _('You have %s credits.') %agent.credits
 		
 		if self.current_text:
 			# Not 'print', as this leaves a gap afterwards
@@ -308,20 +309,20 @@ Entering 'help' will display this message.
 Begin Application
 '''
 humans_in_game = 0
-errorq="Sorry. That is not a valid option. Please try again.\n"
+errorq=_("Sorry. That is not a valid option. Please try again.\n")
 
 def start_app():
 	'''Starts the application and prompts for next move'''
 	clear_screen()
-	header = "===Sabacc Text Interface===\n"
-	query = "Welcome to Sabacc. What do you want to do?\n"
-	options = """
+	header = _("===Sabacc Text Interface===\n")
+	query = _("Welcome to Sabacc. What do you want to do?\n")
+	options = _("""
 Please choose from the following:
 	play:	Play the game
 	agent:	Create or modify a computer agent
 	help:	Display this screen
 	quit:	Quit Sabacc
-"""
+""")
 	prompt = "> "
 	print header
 	
@@ -367,16 +368,16 @@ def clear_screen():
 
 def play_menu():
 	'''Contains menus for adding/removing  players and starting the game.'''
-	query = "Welcome to the Sabacc Game Interface\n"
-	optionslist = ["\nPlease choose from the following:", """
+	query = _("Welcome to the Sabacc Game Interface\n")
+	optionslist = [_("\nPlease choose from the following:"), _("""
 	add_human:	Add a human player to the game
-	add_computer:	Add a computer player to the game""", """
-	remove:		Remove a player from the game""", """
-	start:		Start the game""", """
+	add_computer:	Add a computer player to the game"""), _("""
+	remove:		Remove a player from the game"""), _("""
+	start:		Start the game"""), _("""
 	show:		Show status of game
 	help:		Display this screen
 	quit:		Return to the main menu
-"""]
+""")]
 	# Create correct options list (instructions + add + help/quit)
 	validoptions = 'add_human add_computer show help quit ?'.split()
 	options = optionslist[0] + optionslist[1] + optionslist[4]
@@ -408,10 +409,10 @@ def play_menu():
 					from sabacc.back.Game import players_in_game
 					
 					if players_in_game != 1:
-						player_s = 's'
+						player_s = _('players')
 					else:
-						player_s = ''
-					query = 'Player successfully added. ' + str(players_in_game) + ' player' + player_s + ' now in game.\n'
+						player_s = _('player')
+					query = _('Player successfully added. %i %s now in game.\n') %(players_in_game, player_s)
 					
 					# Add options if necessary
 					if players_in_game == 1:
@@ -423,16 +424,16 @@ def play_menu():
 						# Instructions + add + remove + start + help/quit
 						options = optionslist[0] + optionslist[1] + optionslist[2] + optionslist[3] + optionslist[4]
 				else:
-					query = 'Player not added!\n'
+					query = _('Player not added!\n')
 			elif answer == "remove":
 				if remove_player_menu():
 					from sabacc.back.Game import players_in_game
 					
 					if players_in_game != 1:
-						player_s = 's'
+						player_s = _('players')
 					else:
-						player_s = ''
-					query = 'Player successfully removed. ' + str(players_in_game) + ' player' + player_s + ' now in game.\n'
+						player_s = _('player')
+					query = _('Player successfully removed. %i %s now in game.\n' %(players_in_game, player_s)
 					
 					# Remove options if necessary
 					if players_in_game == 1:
@@ -444,30 +445,30 @@ def play_menu():
 						# Instructions + add + help/quit
 						options = optionslist[0] + optionslist[1] + optionslist[4]
 				else:
-					query = 'Player not removed!\n'
+					query = _('Player not removed!\n')
 			elif answer == "start":
 				if start_game_menu():
-					query = 'Game over! What do you want to do now?\n'
+					query = _('Game over! What do you want to do now?\n')
 				else:
 					query = ''
 			elif answer == "show":
 				from sabacc.back.Game import sabacc_pot, names
 					
 				if len(names) == 0:
-					print 'There are no players in the game.'
+					print _('There are no players in the game.')
 				elif len(names) == 1:
-					print 'Player %s is in the game.' %names[0]
+					print _('Player %s is in the game.') %names[0]
 				else:
-					print 'Players %s are in the game.' %names
+					print _('Players %s are in the game.') %names
 				
-				print 'There are %s credits in the Sabacc pot.' %sabacc_pot
+				print _('There are %s credits in the Sabacc pot.') %sabacc_pot
 				
-				query = 'What do you want to do now?\n'
+				query = _('What do you want to do now?\n')
 			else: # quit
 				from sabacc.back.Game import reset
 				
 				if not reset():
-					raise SystemExit('Error resetting game variables! Quitting...\n')
+					raise SystemExit(_('Error resetting game variables! Quitting...\n'))
 				break
 			fullquery = query+options+prompt
 
@@ -475,7 +476,7 @@ def add_player_menu(is_human):
 	'''Gets player name & details and adds to the game'''
 	
 	if is_human:
-		query = "What is your name? (CTRL-C to abort) "
+		query = _("What is your name? (CTRL-C to abort) ")
 	
 	while True:
 		answer = ''
@@ -511,14 +512,14 @@ def add_player_menu(is_human):
 def remove_player_menu():
 	'''Gets player name and removes from the game'''
 	
-	query = "Please enter the name of the player to remove.\n"
-	query += "Players in game:\n"
+	query = _("Please enter the name of the player to remove.\n")
+	query += _("Players in game:\n")
 	
 	from sabacc.back.Game import names
 	for name in names:
 		query += "\t%s\n" %name
 	
-	query += "\nOr press CTRL-C to abort."
+	query += _("\nOr press CTRL-C to abort.")
 	prompt = "> "
 	print query
 	
@@ -550,11 +551,11 @@ def remove_player_menu():
 				
 				return True
 			else:
-				print "Player %s not removed!" %answer
+				print _("Player %s not removed!") %answer
 def start_game_menu():
 	'''Prompts user for initial ante, then starts the game.'''
 	
-	query = "Please enter initial ante (CTRL-C to abort) "
+	query = _("Please enter initial ante (CTRL-C to abort) ")
 	
 	while True:
 		answer = None
@@ -588,13 +589,13 @@ def start_game_menu():
 def agent_menu():
 	'''Prompts the user whether to create a new agent or view/modify an existing one.'''
 	
-	query = "Welcome to the Sabacc Agent Interface\n"
-	options = """\nPlease choose from the following:
+	query = _("Welcome to the Sabacc Agent Interface\n")
+	options = _("""\nPlease choose from the following:
 	new:	Create a new agent
 	load:	Load an existing agent to view or modify
 	help:	Display this screen
 	quit:	Return to the main menu
-"""
+""")
 	validoptions = 'new load help quit ?'.split()
 	
 	prompt = "> "
@@ -619,9 +620,9 @@ def agent_menu():
 		else:
 			if answer == 'new':
 				if new_agent_menu():
-					query = 'New agent successfully created.\n'
+					query = _('New agent successfully created.\n')
 				else:
-					query = 'Create new agent failed!\n'
+					query = _('Create new agent failed!\n')
 			elif answer == "load":
 				load_agent_menu()
 				query = ''
@@ -639,25 +640,25 @@ def get_filename(save=False):
 	dirs, files = get_dir_contents(current_dir)
 	
 	if save:
-		options = 'Please enter a filename or a directory to save into or press CTRL-C to cancel:\n> '
+		options = _('Please enter a filename or a directory to save into or press CTRL-C to cancel:\n> ')
 	else:
-		options = 'Please choose a file or a directory or press CTRL-C to cancel: '
+		options = _('Please choose a file or a directory or press CTRL-C to cancel: ')
 	update_listing = True
 	
 	while True:
 		if update_listing:
 			update_listing = False
 			if len(dirs) == 1:
-				diry = 'y'
+				diry = _('directory')
 			else:
-				diry = 'ies'
+				diry = _('directories')
 			if len(files) == 1:
-				filey = ''
+				filey = _('file')
 			else:
-				filey = 's'
+				filey = _('files')
 			
-			query = "Current directory is '%(current)s'. %(dir)s director%(diry)s and %(file)s file%(filey)s found:\n\n" \
-				%{'current':relative_dir, 'dir':len(dirs), 'diry':diry, 'file':len(files), 'filey':filey}
+			query = _("Current directory is '%s'. %i %s and %i %s found:\n\n") \
+				%(relative_dir, len(dirs), diry, len(files), filey)
 			
 			dirdisplay = ''
 			if len(dirs) >= 1:
@@ -722,8 +723,8 @@ def get_filename(save=False):
 			from string import lower
 			
 			if lower(answer[-4:]) != '.xml':
-				print "Selected filename does not have the .xml file extension."
-				xmlquery = "Do you want it to be added? (yes/no) "
+				print _("Selected filename does not have the .xml file extension.")
+				xmlquery = _("Do you want it to be added? (yes/no) ")
 				
 				add_xml_extension = None
 				while add_xml_extension == None:
@@ -742,8 +743,8 @@ def get_filename(save=False):
 					answer += '.xml'
 					
 			if answer in files: # if file exists
-				print "Selected file already exists."
-				xmlquery = "Do you want to overwrite? (yes/no) "
+				print _("Selected file already exists.")
+				xmlquery = _("Do you want to overwrite? (yes/no) ")
 				
 				overwrite_file = None
 				while overwrite_file == None:
@@ -793,7 +794,7 @@ def get_dir_contents(directory):
 def new_agent_menu():
 	'''Prompt for name and other details, then save agent in specified location.'''
 	
-	query = "Please enter a name, or press CTRL-C to abort: "
+	query = _("Please enter a name, or press CTRL-C to abort: ")
 	
 	from sabacc.get_settings import rule_sets
 	name = None
@@ -816,12 +817,12 @@ def new_agent_menu():
 		if answer != "":
 			if name == None:
 				name = answer
-				query = '''Please choose a rule set, or press CTRL-C to abort:
-(This may be one of %s) ''' %rule_sets.keys()
+				query = _('''Please choose a rule set, or press CTRL-C to abort:
+(This may be one of %s) ''') %rule_sets.keys()
 			elif answer in rule_sets.keys():
 				ruleset = answer
 			else:
-				sys.stderr.write("Error: '%s' is not a valid option!\n" % answer)
+				sys.stderr.write(_("Error: '%s' is not a valid option!\n") % answer)
 				
 			if ruleset:
 				from tempfile import mkstemp
@@ -832,7 +833,7 @@ def new_agent_menu():
 				close(handler)
 				
 				if not xml_tools.create_agent(filename, name, ruleset):
-					sys.stderr.write("Error creating temporary file!\n")
+					sys.stderr.write(_("Error creating temporary file!\n"))
 					remove(filename)
 					return False
 				
@@ -869,16 +870,16 @@ def modify_agent(agent, new_file=False):
 	
 	stats = agent.stats.copy()
 	
-	options1 = """\nPlease choose from the following:
-	ruleset:	Change agent ruleset"""
-	oprevert = """
-	revert:		Revert to saved version of agent"""
-	opsave = """
-	save:		Save this agent"""
-	options2 = """
+	options1 = _("""\nPlease choose from the following:
+	ruleset:	Change agent ruleset""")
+	oprevert = _("""
+	revert:		Revert to saved version of agent""")
+	opsave = _("""
+	save:		Save this agent""")
+	options2 = _("""
 	help:		Display this screen
 	quit:		Return to the agent menu
-"""
+""")
 	validoptions = 'ruleset help quit ?'.split()
 	
 	if new_file:
@@ -892,12 +893,12 @@ def modify_agent(agent, new_file=False):
 	while True:
 		stats.update(name=agent.name, ruleset=agent.ruleset)
 		
-		query = '''Editing agent '%(name)s'. Agent rule set is '%(ruleset)s'.
+		query = _('''Editing agent '%(name)s'. Agent rule set is '%(ruleset)s'.
 General status of agent %(name)s:
 	Wins: %(wins)i
 	Losses: %(losses)i
 	Pure Sabaccs: %(pure_sabaccs)i
-	Bomb Outs: %(bomb_outs)i\n''' %stats
+	Bomb Outs: %(bomb_outs)i\n''') %stats
 		fullquery = query+options+prompt
 		
 		errors = False
@@ -945,7 +946,7 @@ General status of agent %(name)s:
 								
 								new_file = False
 							except IOError:
-								sys.stderr.write('Error writing file to XML!\n')
+								sys.stderr.write(_('Error writing file to XML!\n'))
 								errors = True
 						
 					if not errors and not agent.save_to_xml():
@@ -961,9 +962,9 @@ General status of agent %(name)s:
 					options = options1 + options2
 					
 					if answer == 'save':
-						print "File saved OK."
+						print _("File saved OK.")
 					else:
-						print "Successfully reverted to previous save."
+						print _("Successfully reverted to previous save.")
 				
 			else: # quit
 				break
@@ -974,9 +975,9 @@ def modify_agent_ruleset(ruleset):
 	'''Prompt for new rule set, then return.'''
 	
 	from sabacc.get_settings import rule_sets
-	query = '''Your current rule set is '%s'.
+	query = _('''Your current rule set is '%s'.
 Please choose a new one or press CTRL-C to abort:
-(This may be one of %s) ''' %(ruleset, rule_sets.keys())
+(This may be one of %s) ''') %(ruleset, rule_sets.keys())
 	
 	while True:
 		answer = None
@@ -996,4 +997,4 @@ Please choose a new one or press CTRL-C to abort:
 			if answer in rule_sets.keys():
 				return answer
 			else:
-				sys.stderr.write("Error: '%s' is not a valid option!\n" % answer)
+				sys.stderr.write(_("Error: '%s' is not a valid option!\n") % answer)

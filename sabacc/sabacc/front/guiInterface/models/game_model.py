@@ -16,7 +16,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 """
-game_model.py (rewrite of front.wndGame from 0.6 'Ackbar')
+game_model.py (taken from Sabacc version 1.0-beta1)
 This module contains the model for the main game window.
 """
 
