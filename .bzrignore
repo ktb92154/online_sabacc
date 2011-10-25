@@ -1,0 +1,11 @@
+MANIFEST
+build
+dist
+glade/*.bak
+locale/en_GB
+locale/sabacc.tar
+locale/template
+sabacc/front/guiInterface/gtkmvc/*.py
+sabacc/front/guiInterface/gtkmvc/adapters
+sabacc/front/guiInterface/gtkmvc/progen
+sabacc/front/guiInterface/gtkmvc/support
