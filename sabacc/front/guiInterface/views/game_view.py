@@ -72,7 +72,7 @@ class GameView (ThreadSafeView):
 		
 		# Make sure screen isn't too wide on Windows dual-display
 		if new_width >= gtk.gdk.screen_height() * 2:
-			newwidth /= 2
+			new_width /= 2
 		
 		new_height = height+100
 		self['game_window'].resize(new_width, new_height)
