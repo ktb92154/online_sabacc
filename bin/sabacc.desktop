@@ -1,9 +1,0 @@
-[Desktop Entry]
-Encoding=UTF-8
-Name=Sabacc
-Comment[en]=An interesting card game similar to Blackjack
-Exec=sabacc
-Terminal=false
-Icon=sabacc.png
-Type=Application
-Categories=Application;Game;CardGame

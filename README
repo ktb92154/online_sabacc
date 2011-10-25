@@ -1,6 +1,10 @@
-Sabacc 1.0Beta1 - an interesting card game similar to Blackjack
+Online Sabacc is a re-implementation of my original Sabacc application, but
+web-based (using Django). Don't be surprised if it doesn't work yet. 
+
+The original application that I forked from can be found at the following
+URLs:
 http://sabacc.sourceforge.net/
-http://sourceforge.net/projects/sabacc/
+http://launchpad.net/sabacc/
 
 About Sabacc
 ============
@@ -15,33 +19,9 @@ rules as adopted in this game is <http://www.pagat.com/invented/sabacc.html>.
 Please note: all of these rules have been adopted in the game, apart from the
 static field. Currently, no card may be made exempt from the Sabacc Shift.
 
-
-Release Notes
-=============
-
-Installation instructions can be found in the INSTALL file. Details of new
-features, bug fixes and other changes can be found in the NEWS file.
-
-Your feedback, bug reports and ideas for new features are especially welcome.
-  - Bug reports: http://bugs.launchpad.net/sabacc
-  - Feature ideas: http://blueprints.launchpad.net/sabacc
-
-If you are a competent (or aspiring!) Python programmer and would like to
-contribute code to Sabacc, then please get in touch with the developers!
-
-
-Known Issues
-============
-  - It is currently not possible to add a computer player to the game 
-    using the GUI interface without using a mouse. If you are unable to
-    use a mouse, you will need to run Sabacc with the --no-gui option.
-  - The text-based interface is currently not very stable and may do 
-    some strange things. If you can, it is best to use the GUI 
-    interface.
-
 Copyright Information
 =====================
 
-Sabacc is released under the GNU General Public License, version 2 or later.
+Online Sabacc is released under the GNU General Public License, version 2 or later.
 A copy of the license is provided in the COPYING file.
 
