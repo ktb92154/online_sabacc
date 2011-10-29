@@ -23,6 +23,8 @@ This module contains code to retrieve settings for the game.
 from lxml import etree # xml parser
 import gettext; _=gettext.gettext # gettext for translations
 
+import sabacc.constants as constants
+
 def get_rule_sets():
 	'''Find the list of rule sets and their data and return it as a dictionary'''
 	
@@ -124,11 +126,42 @@ def get_setting_group(group_name):
 	
 	return final
 	
+	
+def get_local_settings_file():
+	'''Return the filename of the local settings.xml file,
+	creating it if necessary.'''
+	import os.path
+	
+	filename = "settings.xml"
+	
+	if os.path.exists(constants.share_dir):
+		local_settings_file = os.path.join(constants.home_dir, filename)
+		
+		if not os.path.exists(local_settings_file):
+			# Copy the global file here...
+			global_settings_file = os.path.join(constants.share_dir, "sabacc",
+												filename)
+			
+			if not os.path.exists(global_settings_file):
+				import sys
+				sys.exit(_('Error! Could not locate default settings file %s!')
+					% global_settings_file)
+				
+			# Create dir and copy files if necessary
+			print _("Creating local settings file...")
+			from shutil import copyfile
+			copyfile(global_settings_file, local_settings_file)
+	else:
+		local_settings_file = os.path.join(constants.base_dir, filename)
+	
+	return os.path.abspath(local_settings_file)
+
+	
 def load_settings_file():
 	'''Load the settings file into memory, ensuring that it
 	parses correctly and is of the right format'''
 	
-	from constants import local_settings_file
+	local_settings_file = get_local_settings_file()
 	
 	try:
 		# load DOM for file
@@ -152,17 +185,50 @@ def load_settings_file():
 		import sys
 		sys.exit(_("Error: The file '%s' is not a Sabacc file!\n") %filename)
 	
-	from constants import lowest_xml_version
 	from sabacc import __major_version__
 	
-	if xml_version < lowest_xml_version or xml_version > __major_version__:
+	if (xml_version < constants.lowest_xml_version
+			or xml_version > __major_version__):
 		import sys
 		sys.exit(_("Error: The file '%s' was made using an\nincompatible version of Sabacc!\n") %filename)
 	
 	return doc
 
+
+def get_cards_dir():
+	'''Find location of card images for cardset and return'''
+	
+	import os.path
+	global card_set
+	
+	if os.path.exists(constants.share_dir):
+		global_cards_dir = os.path.join(constants.share_dir, 'sabacc',
+									    'cardsets', card_set)
+		
+		# Create dir and copy files if necessary
+		if not os.path.exists(os.path.join(constants.home_dir, 'cardsets')):
+			print _("Creating cardsets directory...")
+			from os import mkdir
+			mkdir(os.path.join(constants.home_dir, 'cardsets'))
+			
+		user_cards_dir = os.path.join(constants.home_dir, 'cardsets', card_set)
+		
+		# Local takes priority
+		if os.path.exists(user_cards_dir):
+			cards_dir = user_cards_dir
+		else:
+			cards_dir = global_cards_dir
+		
+	else:  # Root of source distribution.
+		cards_dir = os.path.join(constants.base_dir, 'cardsets', card_set)
+	
+	if not os.path.exists(cards_dir):
+		import sys
+		sys.stderr.write(_("Warning: Cardset '%s' not found!\n") %card_set)
+	return cards_dir
+
+
 settings_doc = load_settings_file()
-rule_sets = get_rule_sets()
 
 # Setting groups
 agent_betting = get_setting_group('agent_betting')
@@ -172,3 +238,5 @@ sabacc_shift = get_setting_group('sabacc_shift')
 # Individual settings
 initial_credits = get_setting('initial_credits')
 card_set = get_setting('card_set')
+rule_sets = get_rule_sets()
+cards_dir = get_cards_dir()

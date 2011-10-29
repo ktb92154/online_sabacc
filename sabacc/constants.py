@@ -1,22 +1,4 @@
-# Sabacc -- an interesting card game similar to Blackjack.
-# Copyright (C) 2007-2008 Joel Cross.
-#
-# This program is free software; you can redistribute it and/or
-# modify it under the terms of the GNU General Public License
-# as published by the Free Software Foundation; either version 2
-# of the License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
-
 """
-constants.py (taken from Sabacc version 1.0-beta1)
 This module contains all shared constants for the game.
 """
 import gettext; _=gettext.gettext # gettext for translations
@@ -46,29 +28,17 @@ def get_base_share_home_dirs():
 	'''Find base dir, share dir and home dir'''
 	
 	import sys, os.path
-	if hasattr(sys, 'frozen'):  # If py2exe distribution.
-		current_dir = os.path.dirname(sys.executable)
-		base_dir = os.path.abspath(current_dir)
-	else:
-		current_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
-		base_dir = os.path.normpath(os.path.join(current_dir, '..'))
+	current_dir = os.path.dirname(__file__)
+	base_dir = os.path.realpath(os.path.join(current_dir, '..'))
 	
 	share_dir = os.path.join(base_dir, 'share')
 	
 	# Find home dir
 	if sys.platform == 'win32':
-		# PyWin32 is the best way, but we may not have it
-		try:
-			from win32com.shell import shellcon, shell
-			user_home = shell.SHGetFolderPath(0, shellcon.CSIDL_APPDATA, 0, 0)
-		except ImportError:
-			sys.stderr.write(_('Warning: PyWin32 not found - falling back to built-in method...\n'))
-			user_home = os.path.join(os.path.expanduser('~'), 'Application Data')
-		
-		sabacc_home = os.path.join(user_home, 'Sabacc')
+		sabacc_dir = "Sabacc"
 	else:
-		user_home = os.path.expanduser('~')
-		sabacc_home = os.path.join(user_home, '.sabacc')
+		sabacc_dir = ".sabacc"
+	sabacc_home = os.path.join(os.path.expanduser("~"), sabacc_dir)
 		
 	# Create home dir if necessary
 	if os.path.exists(share_dir) and not os.path.exists(sabacc_home):
@@ -154,36 +124,6 @@ def get_card_values():
 	
 	return card_values
 
-def get_cards_dir():
-	'''Find location of card images for cardset and return'''
-	
-	import os.path
-	from sabacc.get_settings import card_set
-	
-	if os.path.exists(share_dir):
-		global_cards_dir = os.path.join(share_dir, 'sabacc', 'cardsets', card_set)
-		
-		# Create dir and copy files if necessary
-		if not os.path.exists(os.path.join(home_dir, 'cardsets')):
-			print _("Creating cardsets directory...")
-			from os import mkdir
-			mkdir(os.path.join(home_dir, 'cardsets'))
-			
-		user_cards_dir = os.path.join(home_dir, 'cardsets', card_set)
-		
-		# Local takes priority
-		if os.path.exists(user_cards_dir):
-			cards_dir = user_cards_dir
-		else:
-			cards_dir = global_cards_dir
-		
-	else:  # Root of source distribution.
-		cards_dir = os.path.join(base_dir, 'cardsets', card_set)
-	
-	if not os.path.exists(cards_dir):
-		import sys
-		sys.stderr.write(_("Warning: Cardset '%s' not found!\n") %card_set)
-	return cards_dir
 
 def get_glade_filename():
 	'''Discover Glade filename and return'''
@@ -215,43 +155,15 @@ def get_icon_filename():
 		
 	return icon_filename
 	
-def get_local_settings_file():
-	'''Return the filename of the local settings.xml file,
-	creating it if necessary.'''
-	import os.path
 	
-	filename = "settings.xml"
-	
-	if os.path.exists(share_dir):
-		local_settings_file = os.path.join(home_dir, filename)
-		
-		if not os.path.exists(local_settings_file):
-			# Copy the global file here...
-			global_settings_file = os.path.join(share_dir, "sabacc", filename)
-			
-			if not os.path.exists(global_settings_file):
-				import sys
-				sys.exit(_('Error! Could not locate default settings file %s!') %global_settings_file)
-				
-			# Create dir and copy files if necessary
-			print _("Creating local settings file...")
-			from shutil import copyfile
-			copyfile(global_settings_file, local_settings_file)
-	else:
-		local_settings_file = os.path.join(base_dir, filename)
-	
-	return os.path.abspath(local_settings_file)
-
 # Important settings must come first!
 base_dir, share_dir, home_dir = get_base_share_home_dirs()
-local_settings_file = get_local_settings_file()
 lowest_xml_version = 1
 
 agent_dir = get_agent_dir()
 card_images = get_card_images()
 card_names = get_card_names()
 card_values = get_card_values()
-cards_dir = get_cards_dir()
 glade_filename = get_glade_filename()
 icon_filename = get_icon_filename()
 moves = dict(draw=0, stick=1, move_call=2, fold=-1, bet_call=-2)
