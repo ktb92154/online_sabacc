@@ -89,6 +89,18 @@ class GameTests(MockableTestCase):
             "The game was won by %s." % winner.name])
         self.assertEqual(game.hand_pot, 0)
         self.assertEqual(game.sabacc_pot, 20)
+        
+    def test_maximum_bet_too_high(self):
+        """Try to bet more than another player has"""
+        rich = self.mocker.CreateMock(agents.HumanAgent, {
+            "name": "Richard", "credits": 1000, "quit_next_turn": False})
+        poor = self.mocker.CreateMock(agents.HumanAgent, {
+            "name": "Pablo", "credits": 20, "quit_next_turn": False})
+        self._put_players_in_game([rich, poor])
+        with self.assertRaises(self.failureException) as context:
+            game.start_game(10)
+        self.assertEqual(context.exception.message,
+                         "You cannot bet more than another player has!")
 
 
 if __name__ == "__main__":
