@@ -136,9 +136,9 @@ def start_game(ante=0):
 	deck = []
 	
 	# reset deck and hands
-	for player_tuple in loaded:
+	for index, player_tuple in enumerate(loaded):
 		player, hand, in_game = player_tuple
-		loaded[loaded.index(player_tuple)] = (player, [], True)
+		loaded[index] = (player, [], True)
 	
 	from sabacc.constants import number_of_cards
 	for card in range(number_of_cards):
@@ -192,7 +192,7 @@ def start_game(ante=0):
 	for player, hand, in_game in loaded:
 		card1 = deal_card()
 		card2 = deal_card()
-		if card1 and card2:
+		if card1 is not None and card2 is not None:
 			hand.append(card1)
 			hand.append(card2)
 		else:
