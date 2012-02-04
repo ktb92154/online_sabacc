@@ -23,7 +23,7 @@ This module contains code to retrieve settings for the game.
 from lxml import etree # xml parser
 import gettext; _=gettext.gettext # gettext for translations
 
-import sabacc.constants as constants
+import old_sabacc.constants as constants
 
 def get_rule_sets():
 	'''Find the list of rule sets and their data and return it as a dictionary'''
@@ -185,7 +185,7 @@ def load_settings_file():
 		import sys
 		sys.exit(_("Error: The file '%s' is not a Sabacc file!\n") %filename)
 	
-	from sabacc import __major_version__
+	from old_sabacc import __major_version__
 	
 	if (xml_version < constants.lowest_xml_version
 			or xml_version > __major_version__):

@@ -31,7 +31,7 @@ def create_agent(filename, agent_name, ruleset):
 	'''Creates a blank agent and saves to the given filename.'''
 	
 	from lxml import etree
-	from sabacc import __major_version__
+	from old_sabacc import __major_version__
 	
 	# Generate template file
 	template_file = '''<?xml version='1.0' encoding='UTF-8'?>
@@ -134,8 +134,8 @@ def load_file(filename):
 			sys.stderr.write(_("Error: The file '%s' is not a Sabacc file!\n") %filename)
 			return False
 		
-		from sabacc.constants import lowest_xml_version
-		from sabacc import __major_version__
+		from old_sabacc.constants import lowest_xml_version
+		from old_sabacc import __major_version__
 		
 		if xml_version < lowest_xml_version or xml_version > __major_version__:
 			sys.stderr.write(_("Error: The file '%s' was made using an\nincompatible version of Sabacc!\n") %filename)

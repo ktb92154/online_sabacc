@@ -33,20 +33,20 @@ class HumanAgent (object):
 		self.name = name
 		
 		if interface == None:
-			from sabacc.front.nullInterface import playerInterface
+			from old_sabacc.front.nullInterface import playerInterface
 			interface = playerInterface(name)
 		
 		self.interface = interface
 		self.quit_next_turn = False # player will leave game at next opportunity
 		
-		from sabacc.get_settings import initial_credits
+		from old_sabacc.get_settings import initial_credits
 		self.credits = initial_credits
 		
 	def move(self, cards):
 		'''Gets a move from the player and returns it.'''
 		
 		if self.quit_next_turn:
-			from sabacc.constants import moves
+			from old_sabacc.constants import moves
 			move = moves['fold']
 		else:
 			move = self.interface.get_move(cards)
@@ -56,7 +56,7 @@ class HumanAgent (object):
 	def bet(self, cards, must_match):
 		'''Gets a bet from the player and returns it.'''
 		if self.quit_next_turn:
-			from sabacc.constants import moves
+			from old_sabacc.constants import moves
 			bet = moves['fold']
 		else:
 			bet = self.interface.get_bet(cards, must_match)
@@ -157,11 +157,11 @@ class RuleBasedAgent (HumanAgent):
 		If there is an error, the move will always be 'fold'.'''
 		
 		if self.quit_next_turn:
-			from sabacc.constants import moves
+			from old_sabacc.constants import moves
 			return moves['fold']
 		
 		self.raised = False
-		from sabacc.constants import card_values
+		from old_sabacc.constants import card_values
 		
 		# Get value of hand
 		score = 0
@@ -169,8 +169,8 @@ class RuleBasedAgent (HumanAgent):
 		for card in cards:
 			score += card_values[card]
 		
-		from sabacc.constants import moves
-		from sabacc.get_settings import rule_sets
+		from old_sabacc.constants import moves
+		from old_sabacc.get_settings import rule_sets
 		
 		if rule_sets.has_key(self.ruleset):
 			threshold = rule_sets[self.ruleset]
@@ -211,10 +211,10 @@ class RuleBasedAgent (HumanAgent):
 		'''Calculates the bet based on  the value of the hand.'''
 		
 		if self.quit_next_turn:
-			from sabacc.constants import moves
+			from old_sabacc.constants import moves
 			return moves['fold']
 		
-		from sabacc.constants import card_values
+		from old_sabacc.constants import card_values
 		
 		# Get value of hand
 		score = 0
@@ -242,8 +242,8 @@ class RuleBasedAgent (HumanAgent):
 			score_type = score_types['out']
 		
 		from random import randint
-		from sabacc.get_settings import agent_betting
-		from sabacc.constants import moves
+		from old_sabacc.get_settings import agent_betting
+		from old_sabacc.constants import moves
 		
 		min_bet = agent_betting['min_bet']
 		max_bet = agent_betting['max_bet']
@@ -294,7 +294,7 @@ class RuleBasedAgent (HumanAgent):
 		'''Updates the player's statistics depending
 		on the outsome of the game,'''
 		
-		from sabacc.constants import card_values
+		from old_sabacc.constants import card_values
 		
 		# Get value of hand
 		score = 0

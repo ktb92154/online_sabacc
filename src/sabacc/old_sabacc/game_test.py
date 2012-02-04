@@ -6,8 +6,8 @@ import unittest
 
 import mox
 
-import sabacc.back.Agents as agents
-import sabacc.back.Game as game
+import old_sabacc.back.Agents as agents
+import old_sabacc.back.Game as game
 
 # TODO: Move this to a common location
 class MockableTestCase(unittest.TestCase):
