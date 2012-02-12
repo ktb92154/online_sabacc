@@ -5,6 +5,8 @@ from django.conf.urls.defaults import patterns, include, url
 # admin.autodiscover()
 
 urlpatterns = patterns('',
+    url(r"^$", "game.views.index"),
+    url(r"^api/", include("api.urls")),
     # Examples:
     # url(r'^$', 'online_sabacc.views.home', name='home'),
     # url(r'^online_sabacc/', include('online_sabacc.foo.urls')),
