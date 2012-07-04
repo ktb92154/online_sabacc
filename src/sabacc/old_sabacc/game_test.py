@@ -11,32 +11,32 @@ import old_sabacc.back.Game as game
 
 # TODO: Move this to a common location
 class MockableTestCase(unittest.TestCase):
-    
+
     def __init__(self, *args, **kwargs):
         super(MockableTestCase, self).__init__(*args, **kwargs)
         self.mocker = mox.Mox()
         self.addCleanup(self.mocker.UnsetStubs)
-        
-        
+
+
 class DummyInterface(object):
-    
+
     def __init__(self, test):
         self._test = test
-        
+
     def write_error(self, msg):
         self._test.fail(msg)
-        
+
     def write(self, msg):
         self._test.messages.append(msg)
-    
+
     def _do_nothing(self, *args, **kwargs):
         pass
-    
+
     show_all_cards = _do_nothing
-        
+
 
 class GameTests(MockableTestCase):
-    
+
     def setUp(self):
         self.messages = []
         game.interface = DummyInterface(self)
@@ -46,7 +46,7 @@ class GameTests(MockableTestCase):
             game.game_in_progress = False
         self.addCleanup(unset_game_things)
         self.mocker.StubOutWithMock(random, "shuffle", lambda thing: thing)
-        
+
     def _put_players_in_game(self, players):
         for player in players:
             game.names.append(player.name)
@@ -73,7 +73,7 @@ class GameTests(MockableTestCase):
             "The game was won by Richard.",
             "Pablo re-entered the game"])
         self.assertEqual((game.hand_pot, game.sabacc_pot), (0, 0))
-        
+
     def test_no_winners(self):
         """If there are no winners, winnings will not stay in the hand pot"""
         winner = self.mocker.CreateMock(agents.HumanAgent, {
@@ -89,7 +89,7 @@ class GameTests(MockableTestCase):
             "The game was won by %s." % winner.name])
         self.assertEqual(game.hand_pot, 0)
         self.assertEqual(game.sabacc_pot, 20)
-        
+
     def test_maximum_bet_too_high(self):
         """Try to bet more than another player has"""
         rich = self.mocker.CreateMock(agents.HumanAgent, {

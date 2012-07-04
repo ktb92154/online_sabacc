@@ -1,5 +1,7 @@
 # Django settings for online_sabacc project.
 
+import os
+
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
@@ -120,6 +122,7 @@ INSTALLED_APPS = (
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
     "old_sabacc",
+    "interfacer",
 )
 
 # A sample logging configuration. The only tangible logging
@@ -144,3 +147,7 @@ LOGGING = {
         },
     }
 }
+
+# TODO: sort these
+LOGIN_URL = "/admin/"
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.pardir, os.path.pardir))

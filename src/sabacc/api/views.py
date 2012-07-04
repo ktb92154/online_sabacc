@@ -1,5 +1,11 @@
+from gettext import gettext as _
+
+from django.shortcuts import redirect
+
 import django.contrib.auth as auth
 from django.contrib.auth.decorators import login_required
+
+from game import models
 
 from .viewhelpers import json_output, make_url
 
@@ -9,10 +15,24 @@ API_VERSION = 0.1
 
 @json_output
 def logout(request):
+    # TODO: The API should have no concept of login/logout.
+    # Use tokens instead
     if not request.user.is_authenticated():
-        return "Not logged in"
+        return _("Not logged in")
     auth.logout(request)
-    return "Successfully logged out"
+    return _("Successfully logged out")
+
+
+def start_game(request):
+    # TODO: convert this into a context manager
+    game = models.Game.load()
+    try:
+        game.add_player_from_user(request.user)
+        game.add_dummy_computer_player()
+        game.start()  # This not only starts, but also finishes the game
+    finally:
+        game.unload()
+    return redirect(index)
 
 
 @login_required
@@ -22,6 +42,7 @@ def index(request):
     return {
         "api_version": API_VERSION,
         "navigation": {
-            "logout": make_url(request, logout),
+            _("Log out"): make_url(request, logout),
+            _("Start game"): make_url(request, start_game),
         },
     }
